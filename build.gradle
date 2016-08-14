@@ -1,0 +1,37 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter()
+    }
+}
+
+sourceCompatibility = 1.8
+version = '0.0.0'
+
+mainClassName = "mark.ict.B065.Main"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'commons-io:commons-io:1.4'
+}
+
+jar {
+    manifest {
+        attributes	'Implementation-Title': 'ChorusInstaller',
+                'Implementation-Version': version,
+                'Main-Class': 'mark.ict.B065.Main'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
