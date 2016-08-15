@@ -1,7 +1,12 @@
 package chorusmc.installer;
 
 import javafx.event.Event;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 
 import java.io.File;
@@ -42,9 +47,9 @@ public class GuiController {
         String str = (String) comboVersions.getValue();
 
         String[] split = str.split("-");
-        if(radioClient.isSelected()){
+        if (radioClient.isSelected()) {
             Optional<String> stringOptional = ClientInstaller.isValidInstallLocation(new File(locationTextBox.getText()), split[0]);
-            if(stringOptional.isPresent()){
+            if (stringOptional.isPresent()) {
                 statusText.setText(stringOptional.get());
                 statusText.setTextFill(Color.RED);
             } else {

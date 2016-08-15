@@ -1,5 +1,6 @@
 package chorusmc.installer;
 
+import chorusmc.installer.utill.VersionInfo;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
@@ -38,22 +39,22 @@ public class Main extends Application {
 
         GuiController controller = fxmlLoader.getController();
 
-        //TODO enable server support later
         controller.radioServer.setDisable(true);
         controller.radioClient.setSelected(true);
 
-        //TODO download from the world wide web
-        controller.comboVersions.setItems(FXCollections.observableArrayList("16w32b-test"));
-        controller.comboVersions.setValue("16w32b-test");
+        VersionInfo.load();
+
+        controller.comboVersions.setItems(FXCollections.observableArrayList(VersionInfo.versions));
+        controller.comboVersions.setValue(VersionInfo.latestVersion);
 
         String home = System.getProperty("user.home", ".");
         String os = System.getProperty("os.name").toLowerCase();
         File mcDefaultInstallLoc;
         File homeDir = new File(home);
 
-        if(os.contains("win") &&  System.getenv("APPDATA") != null){
+        if (os.contains("win") && System.getenv("APPDATA") != null) {
             mcDefaultInstallLoc = new File(System.getenv("APPDATA"), ".minecraft");
-        } else if (os.contains("mac")){
+        } else if (os.contains("mac")) {
 
             mcDefaultInstallLoc = new File(homeDir, "Library" + File.separator + "Application Support" + File.separator + "minecraft");
         } else {
