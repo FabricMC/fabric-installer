@@ -15,7 +15,7 @@ buildscript {
 sourceCompatibility = 1.8
 version = '0.0.0'
 
-mainClassName = "mark.ict.B065.Main"
+mainClassName = "chorusmc.installer.Main"
 
 repositories {
     mavenCentral()
@@ -30,7 +30,7 @@ jar {
     manifest {
         attributes	'Implementation-Title': 'ChorusInstaller',
                 'Implementation-Version': version,
-                'Main-Class': 'mark.ict.B065.Main'
+                'Main-Class': 'chorusmc.installer.Main'
     }
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
