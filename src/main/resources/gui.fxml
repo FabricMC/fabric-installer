@@ -11,11 +11,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="184.0" prefWidth="352.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="chorusmc.installer.GuiController">
+<VBox prefHeight="184.0" prefWidth="352.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.fabricmc.installer.GuiController">
   <children>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="400.0" prefWidth="612.0" VBox.vgrow="ALWAYS">
          <children>
-            <Label layoutX="14.0" layoutY="14.0" text="Chorus Installer" AnchorPane.topAnchor="14.0">
+            <Label layoutX="14.0" layoutY="14.0" text="Fabric Installer" AnchorPane.topAnchor="14.0">
                <font>
                   <Font size="19.0" />
                </font>

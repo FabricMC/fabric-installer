@@ -15,7 +15,7 @@ buildscript {
 sourceCompatibility = 1.8
 version = '0.0.0'
 
-mainClassName = "chorusmc.installer.Main"
+mainClassName = "net.fabricmc.installer.Main"
 
 repositories {
     mavenCentral()
