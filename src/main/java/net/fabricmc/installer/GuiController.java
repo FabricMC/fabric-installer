@@ -1,5 +1,7 @@
 package net.fabricmc.installer;
 
+import cuchaz.enigma.throwables.MappingParseException;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
@@ -24,13 +26,16 @@ public class GuiController {
 	public Label statusText;
 	public Label versionLabel;
 
-	public void openLocationBrowser(Event event) {
+	public GuiController() {
 
 	}
 
-	public void installClicked(Event event) throws IOException {
+	public void openLocationBrowser(Event event) {
+	}
+
+	public void installClicked(Event event) throws IOException, MappingParseException {
 		statusText.setVisible(true);
-		statusText.setText("Preparing to install");
+		setText("Preparing to install");
 		String str = (String) comboVersions.getValue();
 
 		String[] split = str.split("-");
@@ -39,20 +44,32 @@ public class GuiController {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setTitle("Open Custom mod jar for installation");
 				File file = fileChooser.showOpenDialog(Main.stage);
-				if (file != null) {
-					ClientInstaller.install(new File(locationTextBox.getText()), str, file);
+				if (file != null && file.getName().endsWith(".jar")) {
+					new Thread(() -> {
+						try {
+							ClientInstaller.install(new File(locationTextBox.getText()), str, file, this);
+						} catch (IOException | MappingParseException e) {
+							e.printStackTrace();
+							setText(e.getMessage());
+						}
+					}).start();
 				} else {
-					statusText.setText("Select a custom jar for install");
+					setText("Select a custom jar for install");
 				}
 			} else {
 				Optional<String> stringOptional = ClientInstaller.isValidInstallLocation(new File(locationTextBox.getText()), split[0]);
 				if (stringOptional.isPresent()) {
-					statusText.setText(stringOptional.get());
+					setText(stringOptional.get());
 					statusText.setTextFill(Color.RED);
 				} else {
-					//TODO download jar from maven
-					ClientInstaller.install(new File(locationTextBox.getText()), str, null);
-					statusText.setText("Done!");
+					new Thread(() -> {
+						try {
+							ClientInstaller.install(new File(locationTextBox.getText()), str, null, this);
+						} catch (IOException | MappingParseException e) {
+							e.printStackTrace();
+							setText(e.getMessage());
+						}
+					}).start();
 				}
 			}
 
@@ -60,5 +77,14 @@ public class GuiController {
 			//DO things
 		}
 
+	}
+
+	public void setText(String text) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				statusText.setText(text);
+			}
+		});
 	}
 }

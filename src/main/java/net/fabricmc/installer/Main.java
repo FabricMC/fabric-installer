@@ -30,7 +30,7 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		stage = stage;
+		this.stage = stage;
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		URL fxmlUrl = classLoader.getResource("gui.fxml");
 		if (fxmlUrl == null) {
@@ -67,6 +67,11 @@ public class Main extends Application {
 		}
 		controller.locationTextBox.setText(mcDefaultInstallLoc.getAbsolutePath());
 		stage.setTitle("Fabric Installer");
+		stage.setMaxHeight(225);
+		stage.setMinHeight(225);
+
+		stage.setMaxWidth(352);
+		stage.setMinWidth(352);
 
 		stage.getIcons().add(new Image("icon.png"));
 

@@ -19,6 +19,14 @@ mainClassName = "net.fabricmc.installer.Main"
 
 repositories {
     mavenCentral()
+	maven {
+		name = 'fabric'
+		url = 'http://maven.fabricmc.net/'
+	}
+	maven {
+		name = 'cuchaz'
+		url = 'http://maven.cuchazinteractive.com/'
+	}
 }
 
 dependencies {
@@ -26,7 +34,15 @@ dependencies {
     compile 'commons-io:commons-io:2.5'
     compile 'org.apache.maven:maven-artifact:3.3.9'
     compile 'org.apache.maven:maven-repository-metadata:3.3.9'
+	compile 'org.zeroturnaround:zt-zip:1.9'
+	compile 'org.slf4j:slf4j-api:1.7.21'
+	compile 'org.slf4j:slf4j-simple:1.7.21'
 
+	compile 'net.fabricmc:enigma:0.11.+'
+	compile 'org.javassist:javassist:3.+'
+	compile 'org.bitbucket.mstrobel:procyon-decompiler:0.5.28-enigma'
+	compile 'org.javassist:javassist:3.20.0-GA'
+	compile 'de.sciss:syntaxpane:1.1.+'
 }
 
 jar {
