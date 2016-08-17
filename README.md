@@ -1,2 +1,2 @@
-# ChorusInstaller
-An Installer for ChorusMC
+# FabricInstaller
+An Installer for FabricMC
