@@ -74,28 +74,20 @@ public class ClientInstaller {
 		jsonObject.addProperty("minecraftArguments", args + " --tweakClass net.fabricmc.base.launch.FabricClientTweaker");
 
 		JsonArray librarys = jsonObject.getAsJsonArray("libraries");
-		JsonObject object = new JsonObject();
-		object.addProperty("name", "net.minecraft:launchwrapper:1.11");
-		librarys.add(object);
-
-		object = new JsonObject();
-		object.addProperty("name", "org.ow2.asm:asm-all:5.0.3");
-		librarys.add(object);
 
 		addDep("net.fabricmc:fabric-base:" + attributes.getValue("FabricVersion"), "http://maven.fabricmc.net/", librarys);
 
-		addDep("org.spongepowered:mixin:0.5.11-SNAPSHOT", "http://repo.spongepowered.org/maven", librarys);
-
-		object = new JsonObject();
-		object.addProperty("name", "org.spongepowered:mixin:0.5.11-SNAPSHOT");
-		JsonObject downloads = new JsonObject();
-		JsonObject artifact = new JsonObject();
-		artifact.addProperty("url", "https://repo.spongepowered.org/maven/org/spongepowered/mixin/0.5.11-SNAPSHOT/mixin-0.5.11-20160705.154945-3.jar");
-		artifact.addProperty("sha1", "451a47ea3e41b5aa68189761b9343189a969d64f");
-		downloads.add("artifact", artifact);
-		object.add("downloads", downloads);
-
-		librarys.add(object);
+		File depJson = new File(mcVersionFolder, "dependencies.json");
+		ZipUtil.unpack(file, mcVersionFolder, name -> {
+			if (name.startsWith("dependencies.json")) {
+				return name;
+			} else {
+				return null;
+			}
+		});
+		JsonElement depElement = gson.fromJson(new FileReader(depJson), JsonElement.class);
+		JsonObject depObject = depElement.getAsJsonObject();
+		librarys.addAll(depObject.getAsJsonArray("libraries"));
 
 		FileUtils.write(fabricJsonFile, gson.toJson(jsonElement), "UTF-8");
 		controller.progressBar.setProgress(0.4);
