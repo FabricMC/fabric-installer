@@ -69,13 +69,11 @@ public class Main extends Application {
 		stage.setTitle("Fabric Installer");
 		stage.setMaxHeight(225);
 		stage.setMinHeight(225);
-
-		stage.setMaxWidth(352);
-		stage.setMinWidth(352);
+		stage.setMinWidth(500);
 
 		stage.getIcons().add(new Image("icon.png"));
 
-		scene = new Scene(root, 352, 184);
+		scene = new Scene(root, 500, 184);
 		stage.setScene(scene);
 
 		stage.show();

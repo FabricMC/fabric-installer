@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
@@ -11,33 +7,125 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="184.0" prefWidth="352.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.fabricmc.installer.GuiController">
+<VBox prefHeight="184.0" prefWidth="415.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.fabricmc.installer.GuiController">
     <children>
-        <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="400.0" prefWidth="612.0" VBox.vgrow="ALWAYS">
-            <children>
-                <Label layoutX="14.0" layoutY="14.0" text="Fabric Installer" AnchorPane.topAnchor="14.0">
-                    <font>
-                        <Font size="19.0" />
-                    </font>
-                </Label>
-                <RadioButton fx:id="radioClient" layoutX="14.0" layoutY="308.0" mnemonicParsing="false" text="Client" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="14.0">
-                    <toggleGroup>
-                        <ToggleGroup fx:id="tg_side" />
-                    </toggleGroup>
-                </RadioButton>
-                <RadioButton fx:id="radioServer" layoutX="77.0" layoutY="308.0" mnemonicParsing="false" text="Server" toggleGroup="$tg_side" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="75.0" />
-                <ProgressBar fx:id="progressBar" layoutX="11.0" layoutY="368.0" prefHeight="18.0" prefWidth="620.0" progress="0.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="11.0" AnchorPane.rightAnchor="9.0" />
-                <TextField fx:id="locationTextBox" alignment="CENTER_RIGHT" layoutX="146.0" layoutY="304.0" prefHeight="25.0" prefWidth="156.0" AnchorPane.bottomAnchor="75.0" AnchorPane.leftAnchor="140.0" AnchorPane.rightAnchor="56.0" />
-                <Button fx:id="locationBrowseButton" layoutX="309.0" layoutY="304.0" mnemonicParsing="false" onMouseClicked="#openLocationBrowser" text="..." AnchorPane.bottomAnchor="75.0" AnchorPane.rightAnchor="19.0" />
-                <Button fx:id="installButton" alignment="CENTER" layoutX="140.0" layoutY="118.0" mnemonicParsing="false" onMouseClicked="#installClicked" text="Install" />
-                <Label fx:id="versionLabel" layoutX="14.0" layoutY="50.0" text="Choose Version:" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="50.0" />
-                <ChoiceBox fx:id="comboVersions" layoutX="123.0" layoutY="46.0" prefHeight="27.0" prefWidth="209.0" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0" />
-                <Label fx:id="statusText" alignment="CENTER" layoutX="162.0" layoutY="8.0" prefHeight="34.0" prefWidth="175.0" text="Waiting" visible="false" wrapText="true" AnchorPane.leftAnchor="162.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="8.0" />
-            </children>
-        </AnchorPane>
+      <BorderPane prefHeight="200.0" prefWidth="200.0">
+         <center>
+            <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <center>
+                  <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <left>
+                              <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="122.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                        <RadioButton fx:id="radioClient" mnemonicParsing="false" text="Client">
+                                            <toggleGroup>
+                                                <ToggleGroup fx:id="tg_side" />
+                                            </toggleGroup>
+                                        </RadioButton>
+                                    <Pane prefHeight="25.0" prefWidth="7.0" />
+                                        <RadioButton fx:id="radioServer" mnemonicParsing="false" text="Server" toggleGroup="$tg_side" />
+                                 </children>
+                              </HBox>
+                           </left>
+                           <center>
+                              <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                        <TextField fx:id="locationTextBox" prefHeight="25.0" prefWidth="216.0" HBox.hgrow="ALWAYS" />
+                                    <Pane prefHeight="25.0" prefWidth="31.0" />
+                                        <Button fx:id="locationBrowseButton" alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#openLocationBrowser" text="..." />
+                                 </children>
+                              </HBox>
+                           </center>
+                        </BorderPane>
+                        <HBox prefHeight="100.0" prefWidth="200.0" />
+                        <HBox prefHeight="100.0" prefWidth="200.0" />
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                           <bottom>
+                                  <Button fx:id="installButton" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#installClicked" text="Install" BorderPane.alignment="CENTER" />
+                           </bottom>
+                           <top>
+                                  <Label fx:id="versionLabel" text="Choose Version:" BorderPane.alignment="CENTER" />
+                           </top>
+                           <center>
+                              <BorderPane prefHeight="37.0" prefWidth="415.0" BorderPane.alignment="CENTER">
+                                 <center>
+                                    <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                       <left>
+                                          <Pane maxWidth="32.0" prefHeight="25.0" prefWidth="32.0" BorderPane.alignment="CENTER" />
+                                       </left>
+                                       <right>
+                                          <Pane maxWidth="32.0" prefHeight="25.0" prefWidth="32.0" BorderPane.alignment="CENTER" />
+                                       </right>
+                                       <bottom>
+                                          <Pane prefHeight="7.0" prefWidth="415.0" BorderPane.alignment="CENTER" />
+                                       </bottom>
+                                       <center>
+                                          <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                             <center>
+                                                    <ChoiceBox fx:id="comboVersions" prefHeight="27.0" prefWidth="300.0" BorderPane.alignment="CENTER" />
+                                             </center>
+                                          </BorderPane>
+                                       </center>
+                                    </BorderPane>
+                                 </center>
+                              </BorderPane>
+                           </center>
+                        </BorderPane>
+                     </children>
+                  </VBox>
+               </center>
+               <top>
+                  <BorderPane prefHeight="40.0" prefWidth="415.0" BorderPane.alignment="CENTER">
+                     <left>
+                            <Label text="Fabric Installer" BorderPane.alignment="CENTER">
+                                <font>
+                                    <Font size="19.0" />
+                                </font>
+                            </Label>
+                     </left>
+                     <right>
+                            <Label fx:id="statusText" alignment="CENTER" prefHeight="34.0" prefWidth="135.0" text="Waiting" visible="false" wrapText="true" BorderPane.alignment="CENTER" />
+                     </right>
+                     <center>
+                        <ImageView fitHeight="46.0" fitWidth="101.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+                           <image>
+                              <Image url="@icon.png" />
+                           </image>
+                        </ImageView>
+                     </center>
+                  </BorderPane>
+               </top>
+               <bottom>
+                  <BorderPane prefHeight="28.0" prefWidth="415.0" BorderPane.alignment="CENTER">
+                     <center>
+                            <ProgressBar fx:id="progressBar" prefHeight="18.0" prefWidth="90000.0" progress="0.0" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+               </bottom>
+            </BorderPane>
+         </center>
+         <top>
+            <Pane prefHeight="7.0" prefWidth="415.0" BorderPane.alignment="CENTER" />
+         </top>
+         <left>
+            <Pane prefHeight="200.0" prefWidth="7.0" BorderPane.alignment="CENTER" />
+         </left>
+         <right>
+            <Pane prefHeight="200.0" prefWidth="7.0" BorderPane.alignment="CENTER" />
+         </right>
+         <bottom>
+            <Pane prefHeight="7.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+         </bottom>
+      </BorderPane>
     </children>
 </VBox>
