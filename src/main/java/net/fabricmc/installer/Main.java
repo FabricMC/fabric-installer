@@ -78,7 +78,7 @@ public class Main extends Application {
 		webEngine = controller.webView.getEngine();
 		webEngine.setJavaScriptEnabled(true);
 		webEngine.load(classLoader
-			.getResource("./html/index.html")
+			.getResource("html/index.html")
 			.toExternalForm());
 
 		webEngine.getLoadWorker().stateProperty().addListener((observable, oldValue, newValue) -> {
@@ -144,7 +144,7 @@ public class Main extends Application {
 		Platform.runLater(() -> {
 				ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 				webEngine.load(classLoader
-					.getResource("./html/done.html")
+					.getResource("html/done.html")
 					.toExternalForm());
 			}
 		);
@@ -155,7 +155,7 @@ public class Main extends Application {
 		Platform.runLater(() -> {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			webEngine.load(classLoader
-				.getResource("./html/error.html")
+				.getResource("html/error.html")
 				.toExternalForm());
 
 			errorMessage = text;
