@@ -17,9 +17,8 @@ import java.util.jar.JarFile;
 
 public class ClientInstaller {
 
-	public static void install(File mcDir, String version, File file, GuiController controller) throws IOException, MappingParseException {
-		controller.progressBar.setProgress(0);
-		controller.installButton.setDisable(true);
+	public static void install(File mcDir, String version, File file) throws IOException, MappingParseException {
+		Main.setProgress("Installing: " + version, 0);
 		String[] split = version.split("-");
 		if (isValidInstallLocation(mcDir, split[0]).isPresent()) {
 			throw new RuntimeException(isValidInstallLocation(mcDir, split[0]).get());
@@ -31,7 +30,7 @@ public class ClientInstaller {
 				file = fabricJar;
 			}
 			if (file == null) {
-				controller.setText("Downloading fabric...");
+				Main.setProgress("Downloading fabric", 10);
 				FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
 				file = fabricJar;
 			}
@@ -49,15 +48,14 @@ public class ClientInstaller {
 		File mcJsonFile = new File(mcVersionFolder, split[0] + ".json");
 		File mcJarFile = new File(mcVersionFolder, split[0] + ".jar");
 		if (fabricVersionFolder.exists()) {
-			controller.setText("Removing old fabric version");
+			Main.setProgress("Removing old fabric version", 10);
 			FileUtils.deleteDirectory(fabricVersionFolder);
 		}
 		fabricVersionFolder.mkdirs();
 
 		FileUtils.copyFile(mcJsonFile, fabricJsonFile);
-		controller.progressBar.setProgress(0.2);
+		Main.setProgress("Creating version Json File", 20);
 
-		controller.setText("Creating version Json File");
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		JsonElement jsonElement = gson.fromJson(new FileReader(fabricJsonFile), JsonElement.class);
 		JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -90,13 +88,14 @@ public class ClientInstaller {
 		librarys.addAll(depObject.getAsJsonArray("libraries"));
 
 		FileUtils.write(fabricJsonFile, gson.toJson(jsonElement), "UTF-8");
-		controller.progressBar.setProgress(0.4);
-		controller.setText("Creating temporary directory for files");
+
+		Main.setProgress("Creating temporary directory for files", 40);
+
 		File tempWorkDir = new File(fabricVersionFolder, "temp");
 		if (tempWorkDir.exists()) {
 			FileUtils.deleteDirectory(tempWorkDir);
 		}
-		controller.setText("Extracting Mappings");
+		Main.setProgress("Extracting Mappings", 50);
 		ZipUtil.unpack(file, tempWorkDir, name -> {
 			if (name.startsWith("pomf-" + split[0])) {
 				return name;
@@ -107,16 +106,13 @@ public class ClientInstaller {
 
 		File mappingsDir = new File(tempWorkDir, "pomf-" + split[0] + File.separator + "mappings");
 		File tempAssests = new File(tempWorkDir, "assets");
-		controller.progressBar.setProgress(0.6);
-		controller.setText("Deobfuscating minecraft jar file");
+		Main.setProgress("Loading jar file into deobfuscator", 60);
 		Deobfuscator deobfuscator = new Deobfuscator(new JarFile(mcJarFile));
-		controller.progressBar.setProgress(0.65);
+		Main.setProgress("Reading mappings", 65);
 		deobfuscator.setMappings(new MappingsEnigmaReader().read(mappingsDir));
-		controller.progressBar.setProgress(0.7);
+		Main.setProgress("Writing out new jar file", 70);
 		deobfuscator.writeJar(fabricJarFile, new ProgressListener());
-		controller.progressBar.setProgress(0.8);
-		//cleans jar file and copys needed things back in
-		controller.setText("Cleaning minecraft jar file");
+		Main.setProgress("Cleaning minecraft jar file", 80);
 		ZipUtil.unpack(mcJarFile, tempAssests, name -> {
 			if (name.startsWith("assets") || name.startsWith("log4j2.xml")) {
 				return name;
@@ -127,13 +123,11 @@ public class ClientInstaller {
 		ZipUtil.unpack(fabricJarFile, tempAssests);
 		ZipUtil.pack(tempAssests, fabricJarFile);
 
-		controller.progressBar.setProgress(0.9);
-
-		controller.setText("Removing temp directory");
+		Main.setProgress("Removing temp directory", 90);
 		FileUtils.deleteDirectory(tempWorkDir);
-		controller.progressBar.setProgress(1);
-		controller.setText("Done!");
-		controller.installButton.setDisable(false);
+		Main.setProgress("Done!", 100);
+
+		Main.done();
 	}
 
 	public static void addDep(String dep, String maven, JsonArray jsonArray) {
