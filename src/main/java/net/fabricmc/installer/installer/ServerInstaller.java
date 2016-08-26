@@ -129,10 +129,8 @@ public class ServerInstaller {
 		}
 
 		for (File file : files) {
-			System.out.println(file.getAbsoluteFile() + " " + file.exists());
 			libs.add(file);
 		}
-		System.out.println(files);
 		return libs;
 	}
 
