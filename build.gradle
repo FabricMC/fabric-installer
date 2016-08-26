@@ -13,7 +13,7 @@ buildscript {
 }
 
 sourceCompatibility = 1.8
-version = '0.0.1'
+version = '0.0.2'
 
 // Fetch build number from Jenkins
 def ENV = System.getenv()
@@ -47,8 +47,9 @@ dependencies {
 	compile 'org.zeroturnaround:zt-zip:1.9'
 	compile 'org.slf4j:slf4j-api:1.7.21'
 	compile 'org.slf4j:slf4j-simple:1.7.21'
+	compile 'com.intellij:forms_rt:7.0.3'
 
-	compile 'net.fabricmc:enigma:0.11.+'
+	compile 'net.fabricmc:enigma:0.11.0.35'
 	compile 'org.javassist:javassist:3.+'
 	compile 'org.bitbucket.mstrobel:procyon-compilertools:0.5.33.6-enigma'
 	compile 'de.sciss:syntaxpane:1.1.+'
