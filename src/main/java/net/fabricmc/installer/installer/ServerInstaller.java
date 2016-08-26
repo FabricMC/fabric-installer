@@ -96,6 +96,7 @@ public class ServerInstaller {
 		progress.updateProgress("Downloading library's", 70);
 		List<File> libs = new ArrayList<>();
 		libs.addAll(getAndDownloadLibs("net.fabricmc:fabric-base:" + version, true));
+		libs.addAll(getAndDownloadLibs("net.sf.jopt-simple:jopt-simple:5.0.2", true));
 
 		List<String> extracted = new ArrayList<>();
 		for (File lib : libs) {
@@ -114,6 +115,8 @@ public class ServerInstaller {
 		mcJar.delete();
 		ZipUtil.pack(mcExtractedDir, mcJar);
 
+		FileUtils.deleteQuietly(tempDir);
+
 		progress.updateProgress("Done " + version, 100);
 	}
 
@@ -121,10 +124,10 @@ public class ServerInstaller {
 		ArrayList<File> libs = new ArrayList<>();
 		File[] files;
 		if (getDeps) {
-			files = Maven.configureResolver().withRemoteRepo("fabricmc", "http://maven.fabricmc.net/", "default").withRemoteRepo("mojang", "https://libraries.minecraft.net/", "default")
+			files = Maven.configureResolver().withRemoteRepo("fabricmc", "http://maven.fabricmc.net/", "default").withRemoteRepo("mojang", "https://libraries.minecraft.net/", "default").withRemoteRepo("spongepowered", "https://repo.spongepowered.org/maven/", "default")
 				.resolve(name).withTransitivity().asFile();
 		} else {
-			files = Maven.configureResolver().withRemoteRepo("fabricmc", "http://maven.fabricmc.net/", "default").withRemoteRepo("mojang", "https://libraries.minecraft.net/", "default")
+			files = Maven.configureResolver().withRemoteRepo("fabricmc", "http://maven.fabricmc.net/", "default").withRemoteRepo("mojang", "https://libraries.minecraft.net/", "default").withRemoteRepo("spongepowered", "https://repo.spongepowered.org/maven/", "default")
 				.resolve(name).withoutTransitivity().asFile();
 		}
 
