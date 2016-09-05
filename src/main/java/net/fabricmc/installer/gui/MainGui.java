@@ -15,6 +15,8 @@ import org.xml.sax.SAXException;
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -37,8 +39,18 @@ public class MainGui extends JFrame implements IInstallerProgress {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         setIconImage(Toolkit.getDefaultToolkit().getImage(classLoader.getResource("icon.png")));
-        buttonInstall.addActionListener(e -> install());
-        selectFolderButton.addActionListener(e -> selectInstallLocation());
+        buttonInstall.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                install();
+            }
+        });
+        selectFolderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectInstallLocation();
+            }
+        });
         VersionInfo.load();
         for (String str : VersionInfo.versions) {
             versionComboBox.addItem(str);

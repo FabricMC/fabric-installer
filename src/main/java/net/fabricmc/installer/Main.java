@@ -23,6 +23,15 @@ public class Main {
             throws ParserConfigurationException, XmlPullParserException, SAXException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException,
             IllegalAccessException, MappingParseException {
 
+        String[] versionSplit = System.getProperty("java.version").split("\\.");
+        int jVersion = Integer.parseInt(versionSplit[1]);
+        if (jVersion < 8) {
+            System.out.println("You are on an old version of java, fabric will not work! Please update to java 8 or newer to use fabric.");
+            if (args.length == 0 || !args[0].equals("nogui")) {
+                JOptionPane.showMessageDialog(null, "You are using an outdated version of java, fabric will not work! \n Please update to java 8 or newer to use fabric.", "Java Version Warning", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
         Locale locale = new Locale(System.getProperty("user.language"), System.getProperty("user.country"));
         if (!Translator.isValid(locale)) {
             locale = new Locale("en", "US");

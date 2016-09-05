@@ -14,6 +14,7 @@ import javassist.bytecode.InnerClassesAttribute;
 import net.fabricmc.installer.util.IInstallerProgress;
 import net.fabricmc.installer.util.Translator;
 import org.apache.commons.io.FileUtils;
+import org.zeroturnaround.zip.NameMapper;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
@@ -80,11 +81,14 @@ public class ClientInstaller {
         addDep("net.fabricmc:fabric-base:" + attributes.getValue("FabricVersion"), "http://maven.fabricmc.net/", librarys);
 
         File depJson = new File(mcVersionFolder, "dependencies.json");
-        ZipUtil.unpack(fabricJar, mcVersionFolder, name -> {
-            if (name.startsWith("dependencies.json")) {
-                return name;
-            } else {
-                return null;
+        ZipUtil.unpack(fabricJar, mcVersionFolder, new NameMapper() {
+            @Override
+            public String map(String name) {
+                if (name.startsWith("dependencies.json")) {
+                    return name;
+                } else {
+                    return null;
+                }
             }
         });
         JsonElement depElement = gson.fromJson(new FileReader(depJson), JsonElement.class);
@@ -100,11 +104,14 @@ public class ClientInstaller {
             FileUtils.deleteDirectory(tempWorkDir);
         }
         progress.updateProgress(Translator.getString("install.client.extractMappings"), 50);
-        ZipUtil.unpack(fabricJar, tempWorkDir, name -> {
-            if (name.startsWith("pomf-" + split[0])) {
-                return name;
-            } else {
-                return null;
+        ZipUtil.unpack(fabricJar, tempWorkDir, new NameMapper() {
+            @Override
+            public String map(String name) {
+                if (name.startsWith("pomf-" + split[0])) {
+                    return name;
+                } else {
+                    return null;
+                }
             }
         });
 

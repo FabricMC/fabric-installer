@@ -14,6 +14,7 @@ import net.fabricmc.installer.util.IInstallerProgress;
 import net.fabricmc.installer.util.Translator;
 import org.apache.commons.io.FileUtils;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.zeroturnaround.zip.NameMapper;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
@@ -64,11 +65,14 @@ public class ServerInstaller {
         File mcExtractedDir = new File(tempDir, "minecraft_server_extracted");
         File mcCleanedJar = new File(tempDir, "minecraft_server_clean.jar");
 
-        ZipUtil.unpack(mcJar, mcExtractedDir, name -> {
-            if (name.contains("/") && !name.startsWith("net")) {
-                return null;
-            } else {
-                return name;
+        ZipUtil.unpack(mcJar, mcExtractedDir, new NameMapper() {
+            @Override
+            public String map(String name) {
+                if (name.contains("/") && !name.startsWith("net")) {
+                    return null;
+                } else {
+                    return name;
+                }
             }
         });
         ZipUtil.pack(mcExtractedDir, mcCleanedJar);
