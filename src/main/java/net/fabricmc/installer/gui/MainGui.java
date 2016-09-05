@@ -4,10 +4,10 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import cuchaz.enigma.throwables.MappingParseException;
-import net.fabricmc.installer.Main;
 import net.fabricmc.installer.installer.ClientInstaller;
 import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.Translator;
 import net.fabricmc.installer.util.VersionInfo;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.xml.sax.SAXException;
@@ -69,7 +69,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
     public void install() {
         if (clientRadioButton.isSelected()) {
             String version = (String) versionComboBox.getSelectedItem();
-            System.out.println(Main.languageBundle.getString("gui.installing") + ": " + version);
+            System.out.println(Translator.getString("gui.installing") + ": " + version);
             String[] split = version.split("-");
             new Thread(() -> {
                 Optional<String> stringOptional = ClientInstaller.isValidInstallLocation(new File(installLocation.getText()), split[0]);
@@ -77,7 +77,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
                     error(stringOptional.get());
                 } else {
                     try {
-                        updateProgress(Main.languageBundle.getString("gui.installing") + ": " + version, 0);
+                        updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
                         ClientInstaller.install(new File(installLocation.getText()), version, this);
                     } catch (IOException | MappingParseException e) {
                         e.printStackTrace();
@@ -88,10 +88,10 @@ public class MainGui extends JFrame implements IInstallerProgress {
             }).start();
         } else if (serverRadioButton.isSelected()) {
             String version = (String) versionComboBox.getSelectedItem();
-            System.out.println(Main.languageBundle.getString("gui.installing") + ": " + version);
+            System.out.println(Translator.getString("gui.installing") + ": " + version);
             new Thread(() -> {
 
-                updateProgress(Main.languageBundle.getString("gui.installing") + ": " + version, 0);
+                updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
                 try {
                     ServerInstaller.install(new File(installLocation.getText()), version, this);
                 } catch (Exception e) {
@@ -106,7 +106,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
     public void selectInstallLocation() {
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new File(installLocation.getText()));
-        chooser.setDialogTitle(Main.languageBundle.getString("gui.selectInstallLocation"));
+        chooser.setDialogTitle(Translator.getString("gui.selectInstallLocation"));
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
 
@@ -135,7 +135,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         MainGui dialog = new MainGui();
         dialog.pack();
-        dialog.setTitle(Main.languageBundle.getString("fabric.installer.name"));
+        dialog.setTitle(Translator.getString("fabric.installer.name"));
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
@@ -152,25 +152,25 @@ public class MainGui extends JFrame implements IInstallerProgress {
         panel2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonInstall = new JButton();
-        buttonInstall.setText(Main.languageBundle.getString("gui.install"));
+        buttonInstall.setText(Translator.getString("gui.install"));
         panel2.add(buttonInstall, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(4, 4, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
-        label1.setText(Main.languageBundle.getString("fabric.installer.name"));
+        label1.setText(Translator.getString("fabric.installer.name"));
         panel3.add(label1, new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
-        label2.setText(Main.languageBundle.getString("gui.selectSide"));
+        label2.setText(Translator.getString("gui.selectSide"));
         panel3.add(label2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         clientRadioButton = new JRadioButton();
-        clientRadioButton.setText(Main.languageBundle.getString("gui.client"));
+        clientRadioButton.setText(Translator.getString("gui.client"));
         panel3.add(clientRadioButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         serverRadioButton = new JRadioButton();
-        serverRadioButton.setText(Main.languageBundle.getString("gui.server"));
+        serverRadioButton.setText(Translator.getString("gui.server"));
         panel3.add(serverRadioButton, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label3 = new JLabel();
-        label3.setText(Main.languageBundle.getString("gui.selectInstallLocation"));
+        label3.setText(Translator.getString("gui.selectInstallLocation"));
         panel3.add(label3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         installLocation = new JTextField();
         panel3.add(installLocation, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
@@ -178,14 +178,14 @@ public class MainGui extends JFrame implements IInstallerProgress {
         selectFolderButton.setText("...");
         panel3.add(selectFolderButton, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label4 = new JLabel();
-        label4.setText(Main.languageBundle.getString("gui.selectVersion"));
+        label4.setText(Translator.getString("gui.selectVersion"));
         panel3.add(label4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         versionComboBox = new JComboBox();
         panel3.add(versionComboBox, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         progressBar = new JProgressBar();
         contentPane.add(progressBar, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         statusLabel = new JLabel();
-        statusLabel.setText(Main.languageBundle.getString("gui.status.ready"));
+        statusLabel.setText(Translator.getString("gui.status.ready"));
         contentPane.add(statusLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         ButtonGroup buttonGroup;
         buttonGroup = new ButtonGroup();

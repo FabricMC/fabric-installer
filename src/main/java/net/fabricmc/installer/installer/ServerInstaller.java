@@ -10,8 +10,8 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.InnerClassesAttribute;
-import net.fabricmc.installer.Main;
 import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.Translator;
 import org.apache.commons.io.FileUtils;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.zeroturnaround.zip.ZipUtil;
@@ -26,7 +26,7 @@ import java.util.jar.JarFile;
 public class ServerInstaller {
 
     public static void install(File mcDir, String version, IInstallerProgress progress) throws IOException, MappingParseException {
-        progress.updateProgress(Main.languageBundle.getString("gui.installing") + ": " + version, 0);
+        progress.updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
         String[] split = version.split("-");
         String mcVer = split[0];
         String fabricVer = split[1];
@@ -39,12 +39,12 @@ public class ServerInstaller {
         if (mcJar.exists()) {
             mcJar.delete();
         }
-        progress.updateProgress(Main.languageBundle.getString("install.server.downloadFabric"), 5);
+        progress.updateProgress(Translator.getString("install.server.downloadFabric"), 5);
         FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
-        progress.updateProgress(Main.languageBundle.getString("install.server.downloadServer"), 10);
+        progress.updateProgress(Translator.getString("install.server.downloadServer"), 10);
         FileUtils.copyURLToFile(new URL("https://s3.amazonaws.com/Minecraft.Download/versions/" + mcVer + "/minecraft_server." + mcVer + ".jar"), mcJar);
 
-        progress.updateProgress(Main.languageBundle.getString("install.server.createTemp"), 15);
+        progress.updateProgress(Translator.getString("install.server.createTemp"), 15);
         File tempDir = new File(mcDir, "temp");
         if (tempDir.exists()) {
             FileUtils.deleteDirectory(tempDir);
@@ -73,13 +73,13 @@ public class ServerInstaller {
         });
         ZipUtil.pack(mcExtractedDir, mcCleanedJar);
 
-        progress.updateProgress(Main.languageBundle.getString("install.server.loadJar"), 30);
+        progress.updateProgress(Translator.getString("install.server.loadJar"), 30);
         Deobfuscator deobfuscator = new Deobfuscator(new JarFile(mcCleanedJar));
-        progress.updateProgress(Main.languageBundle.getString("install.server.readMappings"), 40);
+        progress.updateProgress(Translator.getString("install.server.readMappings"), 40);
         deobfuscator.setMappings(new MappingsEnigmaReader().read(mappingsDir));
-        progress.updateProgress(Main.languageBundle.getString("install.server.exportMappedJar"), 50);
+        progress.updateProgress(Translator.getString("install.server.exportMappedJar"), 50);
         writeJar(mcMappedJar, new ProgressListener(), deobfuscator);
-        progress.updateProgress(Main.languageBundle.getString("install.server.extractLibs"), 60);
+        progress.updateProgress(Translator.getString("install.server.extractLibs"), 60);
 
         FileUtils.deleteDirectory(mcExtractedDir);
 
@@ -91,7 +91,7 @@ public class ServerInstaller {
             }
         });
         ZipUtil.unpack(mcMappedJar, mcExtractedDir);
-        progress.updateProgress(Main.languageBundle.getString("install.server.downloadLibs"), 70);
+        progress.updateProgress(Translator.getString("install.server.downloadLibs"), 70);
         List<File> libs = new ArrayList<>();
         libs.addAll(getAndDownloadLibs("net.fabricmc:fabric-base:" + version, true));
         libs.addAll(getAndDownloadLibs("net.sf.jopt-simple:jopt-simple:5.0.2", true));
@@ -109,13 +109,13 @@ public class ServerInstaller {
                 });
             }
         }
-        progress.updateProgress(Main.languageBundle.getString("install.server.packJar"), 90);
+        progress.updateProgress(Translator.getString("install.server.packJar"), 90);
         mcJar.delete();
         ZipUtil.pack(mcExtractedDir, mcJar);
 
         FileUtils.deleteQuietly(tempDir);
 
-        progress.updateProgress(Main.languageBundle.getString("install.success"), 100);
+        progress.updateProgress(Translator.getString("install.success"), 100);
     }
 
     public static List<File> getAndDownloadLibs(String name, boolean getDeps) {

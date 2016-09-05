@@ -11,8 +11,8 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.InnerClassesAttribute;
-import net.fabricmc.installer.Main;
 import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.Translator;
 import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -27,7 +27,7 @@ import java.util.jar.JarFile;
 public class ClientInstaller {
 
     public static void install(File mcDir, String version, IInstallerProgress progress) throws IOException, MappingParseException {
-        progress.updateProgress(Main.languageBundle.getString("gui.installing") + ": " + version, 0);
+        progress.updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
         String[] split = version.split("-");
         if (isValidInstallLocation(mcDir, split[0]).isPresent()) {
             throw new RuntimeException(isValidInstallLocation(mcDir, split[0]).get());
@@ -35,7 +35,7 @@ public class ClientInstaller {
         File fabricData = new File(mcDir, "fabricData");
         File fabricJar = new File(fabricData, version + ".jar");
         if (!fabricJar.exists()) {
-            progress.updateProgress(Main.languageBundle.getString("install.client.downloadFabric"), 10);
+            progress.updateProgress(Translator.getString("install.client.downloadFabric"), 10);
             FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
         }
 
@@ -43,7 +43,7 @@ public class ClientInstaller {
         Attributes attributes = jarFile.getManifest().getMainAttributes();
 
         String id = "fabric-" + attributes.getValue("FabricVersion");
-        System.out.println(Main.languageBundle.getString("gui.installing") + " " + id);
+        System.out.println(Translator.getString("gui.installing") + " " + id);
         File versionsFolder = new File(mcDir, "versions");
         File fabricVersionFolder = new File(versionsFolder, id);
         File mcVersionFolder = new File(versionsFolder, split[0]);
@@ -52,13 +52,13 @@ public class ClientInstaller {
         File mcJsonFile = new File(mcVersionFolder, split[0] + ".json");
         File mcJarFile = new File(mcVersionFolder, split[0] + ".jar");
         if (fabricVersionFolder.exists()) {
-            progress.updateProgress(Main.languageBundle.getString("install.client.removeOld"), 10);
+            progress.updateProgress(Translator.getString("install.client.removeOld"), 10);
             FileUtils.deleteDirectory(fabricVersionFolder);
         }
         fabricVersionFolder.mkdirs();
 
         FileUtils.copyFile(mcJsonFile, fabricJsonFile);
-        progress.updateProgress(Main.languageBundle.getString("install.client.createJson"), 20);
+        progress.updateProgress(Translator.getString("install.client.createJson"), 20);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonElement jsonElement = gson.fromJson(new FileReader(fabricJsonFile), JsonElement.class);
@@ -93,13 +93,13 @@ public class ClientInstaller {
 
         FileUtils.write(fabricJsonFile, gson.toJson(jsonElement), "UTF-8");
 
-        progress.updateProgress(Main.languageBundle.getString("install.client.createTempDir"), 40);
+        progress.updateProgress(Translator.getString("install.client.createTempDir"), 40);
 
         File tempWorkDir = new File(fabricVersionFolder, "temp");
         if (tempWorkDir.exists()) {
             FileUtils.deleteDirectory(tempWorkDir);
         }
-        progress.updateProgress(Main.languageBundle.getString("install.client.extractMappings"), 50);
+        progress.updateProgress(Translator.getString("install.client.extractMappings"), 50);
         ZipUtil.unpack(fabricJar, tempWorkDir, name -> {
             if (name.startsWith("pomf-" + split[0])) {
                 return name;
@@ -110,13 +110,13 @@ public class ClientInstaller {
 
         File mappingsDir = new File(tempWorkDir, "pomf-" + split[0] + File.separator + "mappings");
         File tempAssests = new File(tempWorkDir, "assets");
-        progress.updateProgress(Main.languageBundle.getString("install.client.loadJar"), 60);
+        progress.updateProgress(Translator.getString("install.client.loadJar"), 60);
         Deobfuscator deobfuscator = new Deobfuscator(new JarFile(mcJarFile));
-        progress.updateProgress(Main.languageBundle.getString("install.client.readMappings"), 65);
+        progress.updateProgress(Translator.getString("install.client.readMappings"), 65);
         deobfuscator.setMappings(new MappingsEnigmaReader().read(mappingsDir));
-        progress.updateProgress(Main.languageBundle.getString("install.client.exportMappedJar"), 70);
+        progress.updateProgress(Translator.getString("install.client.exportMappedJar"), 70);
         writeJar(fabricJarFile, new ProgressListener(), deobfuscator);
-        progress.updateProgress(Main.languageBundle.getString("install.client.cleanJar"), 80);
+        progress.updateProgress(Translator.getString("install.client.cleanJar"), 80);
         ZipUtil.unpack(mcJarFile, tempAssests, name -> {
             if (name.startsWith("assets") || name.startsWith("log4j2.xml") || name.startsWith("pack.png")) {
                 return name;
@@ -127,9 +127,9 @@ public class ClientInstaller {
         ZipUtil.unpack(fabricJarFile, tempAssests);
         ZipUtil.pack(tempAssests, fabricJarFile);
 
-        progress.updateProgress(Main.languageBundle.getString("install.client.cleanDir"), 90);
+        progress.updateProgress(Translator.getString("install.client.cleanDir"), 90);
         FileUtils.deleteDirectory(tempWorkDir);
-        progress.updateProgress(Main.languageBundle.getString("install.success"), 100);
+        progress.updateProgress(Translator.getString("install.success"), 100);
     }
 
     public static void addDep(String dep, String maven, JsonArray jsonArray) {
@@ -143,21 +143,21 @@ public class ClientInstaller {
 
     public static Optional<String> isValidInstallLocation(File mcDir, String mcVer) {
         if (!mcDir.isDirectory()) {
-            return Optional.of(mcDir.getName() + " " + Main.languageBundle.getString("install.client.error.noDir"));
+            return Optional.of(mcDir.getName() + " " + Translator.getString("install.client.error.noDir"));
         }
         File versionsFolder = new File(mcDir, "versions");
         if (!versionsFolder.exists() || !versionsFolder.isDirectory()) {
-            return Optional.of(Main.languageBundle.getString("install.client.error.noMc") + mcVer);
+            return Optional.of(Translator.getString("install.client.error.noMc") + mcVer);
         }
         File versionFolder = new File(versionsFolder, mcVer);
         if (!versionsFolder.exists() || !versionsFolder.isDirectory()) {
-            return Optional.of(Main.languageBundle.getString("install.client.error.noMc") + mcVer);
+            return Optional.of(Translator.getString("install.client.error.noMc") + mcVer);
         }
 
         File mcJsonFile = new File(versionFolder, mcVer + ".json");
         File mcJarFile = new File(versionFolder, mcVer + ".jar");
         if (!mcJsonFile.exists() || !mcJarFile.exists()) {
-            return Optional.of(Main.languageBundle.getString("install.client.error.noMc") + mcVer);
+            return Optional.of(Translator.getString("install.client.error.noMc") + mcVer);
         }
 
         //All is ok

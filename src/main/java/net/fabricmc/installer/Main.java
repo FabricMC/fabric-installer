@@ -4,6 +4,7 @@ import cuchaz.enigma.throwables.MappingParseException;
 import net.fabricmc.installer.gui.MainGui;
 import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.Translator;
 import net.fabricmc.installer.util.VersionInfo;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.xml.sax.SAXException;
@@ -13,29 +14,24 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.logging.*;
 
 public class Main {
-
-    public static ResourceBundle languageBundle;
 
     public static void main(String[] args)
             throws ParserConfigurationException, XmlPullParserException, SAXException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException,
             IllegalAccessException, MappingParseException {
 
         Locale locale = new Locale(System.getProperty("user.language"), System.getProperty("user.country"));
-        try {
-            languageBundle = ResourceBundle.getBundle("Lang", locale);
-        } catch (MissingResourceException e) {
-            System.out.println("Could not find language file for " + locale.toString() + ", english will be used");
+        if (!Translator.isValid(locale)) {
             locale = new Locale("en", "US");
-            languageBundle = ResourceBundle.getBundle("Lang", locale);
         }
 
-        System.out.println(languageBundle.getString("fabric.installer.load"));
+        Translator.load(locale);
+
+
+        System.out.println(Translator.getString("fabric.installer.load"));
 
         //Used to suppress warning from libs
         setDebugLevel(Level.SEVERE);
@@ -43,9 +39,9 @@ public class Main {
         if (args.length == 0) {
             MainGui.start();
         } else if (args[0].equals("help")) {
-            System.out.println(languageBundle.getString("cli.help.title"));
-            System.out.println(languageBundle.getString("cli.help.noArgs"));
-            System.out.println(languageBundle.getString("cli.help.nogui"));
+            System.out.println(Translator.getString("cli.help.title"));
+            System.out.println(Translator.getString("cli.help.noArgs"));
+            System.out.println(Translator.getString("cli.help.nogui"));
         } else if (args[0].equals("nogui")) {
             System.out.println("Fabric Server cli installer");
             System.out.println("Loading available versions for install");
