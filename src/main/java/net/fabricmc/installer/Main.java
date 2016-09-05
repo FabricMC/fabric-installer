@@ -28,7 +28,7 @@ public class Main {
 
         Locale locale = new Locale(System.getProperty("user.language"), System.getProperty("user.country"));
         try {
-            languageBundle = ResourceBundle.getBundle("lang", locale);
+            languageBundle = ResourceBundle.getBundle("Lang", locale);
         } catch (MissingResourceException e) {
             System.out.println("Could not find language file for " + locale.toString() + ", english will be used");
             locale = new Locale("en", "US");
