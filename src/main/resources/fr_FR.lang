@@ -1,0 +1,56 @@
+#Fabric Installer French Language file
+#Authors - Thog
+
+fabric.installer.name=Installateur de Fabric
+fabric.installer.load=Chargement de l'installateur de Fabric
+
+#Main Gui
+gui.install=Installer
+gui.installing=Installation en cours
+gui.selectSide=Sélectionnez le côté
+gui.client=Client
+gui.server=Serveur
+gui.selectInstallLocation=Selectionnez l'emplacement d'installation
+gui.selectVersion=Selectionnez la version
+
+#Main gui ready text
+gui.status.ready=Prêt à être installé
+
+#Client installer progress
+install.client.downloadFabric=Téléchargement de Fabric
+install.client.removeOld=Supression des anciennes versions de Fabric
+install.client.createJson=Création du fichier json de version
+install.client.createTempDir=Création d'un répertoire temporaire pour les fichiers
+install.client.extractMappings=Extraction des mappings
+install.client.loadJar=Chargement du jar dans le déobfuscateur
+install.client.readMappings=Chargement des mappings
+install.client.exportMappedJar=Exportation du fichier jar mappé
+install.client.cleanJar=Nettoyage du fichier jar de Minecraft
+install.client.cleanDir=Suppression des fichiers inutiles
+
+#Client installer errors
+install.client.error.noDir=n'est pas un répertoire !
+install.client.error.noMc=Please run vanilla Minecraft version
+
+#Server installer progress
+install.server.downloadFabric=Téléchargement de Fabric
+install.server.downloadServer=Téléchargement du fichier serveur Minecraft
+install.server.createTemp=Création d'un répertoire temporaire pour les fichiers
+install.server.loadJar=Chargement du jar dans le déobfuscateur
+install.server.readMappings=Chargement des mappings
+install.server.exportMappedJar=Exportation du fichier jar mappé
+install.server.extractLibs=Extraction des bibliothèques supplémentaire
+install.server.downloadLibs=Téléchargement des bibliothèques supplémentaire
+install.server.packJar=Pack des fichiers dans le jar
+
+#General install Texts
+install.success=Terminé !
+
+#CLI help text
+cli.help.title=Aide de l'installateur Fabric
+cli.help.noArgs=Exécuter avec aucun argument pour un installateur avec interface graphique pour le client et le serveur
+cli.help.nogui=nogui - Permet d'avoir une interface en ligne de commande, utile pour l'installation de la version serveur de Fabric. (En anglais pour le moment)
+
+#CLI server installer text
+
+#TODO
