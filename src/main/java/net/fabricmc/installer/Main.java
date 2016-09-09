@@ -4,6 +4,7 @@ import cuchaz.enigma.throwables.MappingParseException;
 import net.fabricmc.installer.gui.MainGui;
 import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Translator;
 import net.fabricmc.installer.util.VersionInfo;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -40,7 +41,7 @@ public class Main {
         Translator.load(locale);
 
 
-        System.out.println(Translator.getString("fabric.installer.load"));
+        System.out.println(Translator.getString("fabric.installer.load") + ":" + Reference.VERSION);
 
         //Used to suppress warning from libs
         setDebugLevel(Level.SEVERE);

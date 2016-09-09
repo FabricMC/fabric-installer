@@ -18,25 +18,25 @@ version = '0.0.2'
 // Fetch build number from Jenkins
 def ENV = System.getenv()
 if (ENV.BUILD_NUMBER) {
-	version = version + "." + "${System.getenv().BUILD_NUMBER}"
+    version = version + "." + "${System.getenv().BUILD_NUMBER}"
 }
 
 mainClassName = "net.fabricmc.installer.Main"
 
 repositories {
     mavenCentral()
-	maven {
-		name = 'fabric'
-		url = 'http://maven.fabricmc.net/'
-	}
-	maven {
-		name = 'cuchaz'
-		url = 'http://maven.cuchazinteractive.com/'
-	}
-	maven {
-		name "RX14 Repository"
-		url 'http://mvn.rx14.co.uk/local/'
-	}
+    maven {
+        name = 'fabric'
+        url = 'http://maven.fabricmc.net/'
+    }
+    maven {
+        name = 'cuchaz'
+        url = 'http://maven.cuchazinteractive.com/'
+    }
+    maven {
+        name "RX14 Repository"
+        url 'http://mvn.rx14.co.uk/local/'
+    }
 }
 
 dependencies {
@@ -44,22 +44,36 @@ dependencies {
     compile 'commons-io:commons-io:2.5'
     compile 'org.apache.maven:maven-artifact:3.3.9'
     compile 'org.apache.maven:maven-repository-metadata:3.3.9'
-	compile 'org.zeroturnaround:zt-zip:1.9'
-	compile 'org.slf4j:slf4j-api:1.7.21'
-	compile 'org.slf4j:slf4j-simple:1.7.21'
-	compile 'com.intellij:forms_rt:7.0.3'
-	compile 'org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-depchain:2.2.2'
+    compile 'org.zeroturnaround:zt-zip:1.9'
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    compile 'org.slf4j:slf4j-simple:1.7.21'
+    compile 'com.intellij:forms_rt:7.0.3'
+    compile 'org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-depchain:2.2.2'
 
 
-	compile 'net.fabricmc:enigma:0.11.0.35'
-	compile 'org.javassist:javassist:3.+'
-	compile 'org.bitbucket.mstrobel:procyon-compilertools:0.5.33.6-enigma'
-	compile 'de.sciss:syntaxpane:1.1.+'
+    compile 'net.fabricmc:enigma:0.11.0.35'
+    compile 'org.javassist:javassist:3.+'
+    compile 'org.bitbucket.mstrobel:procyon-compilertools:0.5.33.6-enigma'
+    compile 'de.sciss:syntaxpane:1.1.+'
 }
+
+task copyAndReplace(type: Copy) {
+    from(sourceSets.main.java) {
+        include '**/Reference.java'
+        expand 'DEV': project.version
+    }
+    from(sourceSets.main.java) {
+        exclude '**/Reference.java'
+    }
+    into project.getBuildDir().toString() + "/sources/java"
+}
+tasks.compileJava.dependsOn copyAndReplace
+tasks.compileJava.setSource(project.getBuildDir().toString() + '/sources/java')
+
 
 jar {
     manifest {
-        attributes	'Implementation-Title': 'FabricInstaller',
+        attributes 'Implementation-Title': 'FabricInstaller',
                 'Implementation-Version': version,
                 'Main-Class': 'net.fabricmc.installer.Main'
     }
