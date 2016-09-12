@@ -14,13 +14,13 @@ import javassist.bytecode.InnerClassesAttribute;
 import net.fabricmc.installer.util.IInstallerProgress;
 import net.fabricmc.installer.util.Translator;
 import org.apache.commons.io.FileUtils;
-import org.zeroturnaround.zip.NameMapper;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -44,6 +44,11 @@ public class ClientInstaller {
         Attributes attributes = jarFile.getManifest().getMainAttributes();
 
         String id = "fabric-" + attributes.getValue("FabricVersion");
+        Optional<String> pomfVersion = Optional.empty();
+        String ver = attributes.getValue("PomfVersion");
+        if (ver != null && !ver.isEmpty()) {
+            pomfVersion = Optional.of(ver);
+        }
         System.out.println(Translator.getString("gui.installing") + " " + id);
         File versionsFolder = new File(mcDir, "versions");
         File fabricVersionFolder = new File(versionsFolder, id);
@@ -58,11 +63,12 @@ public class ClientInstaller {
         }
         fabricVersionFolder.mkdirs();
 
-        FileUtils.copyFile(mcJsonFile, fabricJsonFile);
         progress.updateProgress(Translator.getString("install.client.createJson"), 20);
 
+        String mcJson = FileUtils.readFileToString(mcJarFile, Charset.defaultCharset());
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonElement jsonElement = gson.fromJson(new FileReader(fabricJsonFile), JsonElement.class);
+        JsonElement jsonElement = gson.fromJson(new FileReader(mcJsonFile), JsonElement.class);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         jsonObject.remove("id");
         jsonObject.addProperty("id", id);
@@ -74,21 +80,19 @@ public class ClientInstaller {
 
         String args = jsonObject.get("minecraftArguments").getAsString();
         jsonObject.remove("minecraftArguments");
-        jsonObject.addProperty("minecraftArguments", args + " --tweakClass net.fabricmc.base.launch.FabricClientTweaker");
+        jsonObject.addProperty("minecraftArguments", args.replace("${version_name}", split[0]) + " --tweakClass net.fabricmc.base.launch.FabricClientTweaker");
 
         JsonArray librarys = jsonObject.getAsJsonArray("libraries");
 
         addDep("net.fabricmc:fabric-base:" + attributes.getValue("FabricVersion"), "http://maven.fabricmc.net/", librarys);
 
-        File depJson = new File(mcVersionFolder, "dependencies.json");
-        ZipUtil.unpack(fabricJar, mcVersionFolder, new NameMapper() {
-            @Override
-            public String map(String name) {
-                if (name.startsWith("dependencies.json")) {
-                    return name;
-                } else {
-                    return null;
-                }
+        File tempWorkDir = new File(fabricVersionFolder, "temp");
+        File depJson = new File(tempWorkDir, "dependencies.json");
+        ZipUtil.unpack(fabricJar, mcVersionFolder, name -> {
+            if (name.startsWith("dependencies.json")) {
+                return name;
+            } else {
+                return null;
             }
         });
         JsonElement depElement = gson.fromJson(new FileReader(depJson), JsonElement.class);
@@ -99,23 +103,29 @@ public class ClientInstaller {
 
         progress.updateProgress(Translator.getString("install.client.createTempDir"), 40);
 
-        File tempWorkDir = new File(fabricVersionFolder, "temp");
+
         if (tempWorkDir.exists()) {
             FileUtils.deleteDirectory(tempWorkDir);
         }
         progress.updateProgress(Translator.getString("install.client.extractMappings"), 50);
-        ZipUtil.unpack(fabricJar, tempWorkDir, new NameMapper() {
-            @Override
-            public String map(String name) {
+
+        File mappingsDir = new File(tempWorkDir, "pomf-" + split[0] + File.separator + "mappings");
+        if (!pomfVersion.isPresent()) {
+            //Resort to old mappings type
+            ZipUtil.unpack(fabricJar, tempWorkDir, name -> {
                 if (name.startsWith("pomf-" + split[0])) {
                     return name;
                 } else {
                     return null;
                 }
-            }
-        });
+            });
+        } else {
+            mappingsDir = new File(tempWorkDir, "pomf-" + split[0] + File.separator + "pomf-enigma-" + pomfVersion);
+            File pomfZip = new File(tempWorkDir, "pomf-enigma-" + pomfVersion + ".zip");
+            FileUtils.copyURLToFile(new URL("http://asie.pl:8080/job/pomf/" + pomfVersion.get() + "/artifact/build/libs/pomf-enigma-" + split[0] + "." + pomfVersion.get() + ".zip"), pomfZip);
+            ZipUtil.unpack(pomfZip, mappingsDir);
+        }
 
-        File mappingsDir = new File(tempWorkDir, "pomf-" + split[0] + File.separator + "mappings");
         File tempAssests = new File(tempWorkDir, "assets");
         progress.updateProgress(Translator.getString("install.client.loadJar"), 60);
         Deobfuscator deobfuscator = new Deobfuscator(new JarFile(mcJarFile));
@@ -136,6 +146,10 @@ public class ClientInstaller {
 
         progress.updateProgress(Translator.getString("install.client.cleanDir"), 90);
         FileUtils.deleteDirectory(tempWorkDir);
+        FileUtils.deleteDirectory(fabricData);
+        if (!mcJsonFile.exists()) { //I noticed the json was being deleted, this adds it back if it doesnt exist
+            FileUtils.write(mcJsonFile, mcJson, Charset.defaultCharset());
+        }
         progress.updateProgress(Translator.getString("install.success"), 100);
     }
 
