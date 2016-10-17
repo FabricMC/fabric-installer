@@ -1,15 +1,6 @@
 package net.fabricmc.installer.installer;
 
-import cuchaz.enigma.Deobfuscator;
-import cuchaz.enigma.TranslatingTypeLoader;
-import cuchaz.enigma.mapping.MappingsEnigmaReader;
-import cuchaz.enigma.mapping.TranslationDirection;
-import cuchaz.enigma.throwables.MappingParseException;
-import javassist.CtBehavior;
-import javassist.CtClass;
-import javassist.CtField;
-import javassist.bytecode.AccessFlag;
-import javassist.bytecode.InnerClassesAttribute;
+
 import net.fabricmc.installer.util.IInstallerProgress;
 import net.fabricmc.installer.util.Translator;
 import org.apache.commons.io.FileUtils;
@@ -26,7 +17,7 @@ import java.util.jar.JarFile;
 
 public class ServerInstaller {
 
-    public static void install(File mcDir, String version, IInstallerProgress progress) throws IOException, MappingParseException {
+    public static void install(File mcDir, String version, IInstallerProgress progress) throws IOException {
         progress.updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
         String[] split = version.split("-");
         String mcVer = split[0];
@@ -60,42 +51,7 @@ public class ServerInstaller {
                 return null;
             }
         });
-        File mappingsDir = new File(tempDir, "pomf-" + split[0] + File.separator + "mappings");
-        File mcMappedJar = new File(tempDir, "minecraft_server.mapped." + mcVer + ".jar");
-        File mcExtractedDir = new File(tempDir, "minecraft_server_extracted");
-        File mcCleanedJar = new File(tempDir, "minecraft_server_clean.jar");
 
-        ZipUtil.unpack(mcJar, mcExtractedDir, new NameMapper() {
-            @Override
-            public String map(String name) {
-                if (name.contains("/") && !name.startsWith("net")) {
-                    return null;
-                } else {
-                    return name;
-                }
-            }
-        });
-        ZipUtil.pack(mcExtractedDir, mcCleanedJar);
-
-        progress.updateProgress(Translator.getString("install.server.loadJar"), 30);
-        Deobfuscator deobfuscator = new Deobfuscator(new JarFile(mcCleanedJar));
-        progress.updateProgress(Translator.getString("install.server.readMappings"), 40);
-        deobfuscator.setMappings(new MappingsEnigmaReader().read(mappingsDir));
-        progress.updateProgress(Translator.getString("install.server.exportMappedJar"), 50);
-        writeJar(mcMappedJar, new ProgressListener(), deobfuscator);
-        progress.updateProgress(Translator.getString("install.server.extractLibs"), 60);
-
-        FileUtils.deleteDirectory(mcExtractedDir);
-
-        ZipUtil.unpack(mcJar, mcExtractedDir, name -> {
-            if (name.contains("/") && !name.startsWith("net") || !name.endsWith(".class")) {
-                return name;
-            } else {
-                return null;
-            }
-        });
-        ZipUtil.unpack(mcMappedJar, mcExtractedDir);
-        progress.updateProgress(Translator.getString("install.server.downloadLibs"), 70);
         List<File> libs = new ArrayList<>();
         libs.addAll(getAndDownloadLibs("net.fabricmc:fabric-base:" + version, true));
         libs.addAll(getAndDownloadLibs("net.sf.jopt-simple:jopt-simple:5.0.2", true));
@@ -104,18 +60,17 @@ public class ServerInstaller {
         for (File lib : libs) {
             if (!extracted.contains(lib.getAbsolutePath()) && !lib.getName().contains("lwjgl") && !lib.getName().contains("fabric-base")) {
                 extracted.add(lib.getAbsolutePath());
-                ZipUtil.unpack(lib, mcExtractedDir, name -> {
-                    if (name.startsWith("META-INF")) {
-                        return null;
-                    } else {
-                        return name;
-                    }
-                });
+//                ZipUtil.unpack(lib, mcExtractedDir, name -> {
+//                    if (name.startsWith("META-INF")) {
+//                        return null;
+//                    } else {
+//                        return name;
+//                    }
+//                });
             }
         }
         progress.updateProgress(Translator.getString("install.server.packJar"), 90);
         mcJar.delete();
-        ZipUtil.pack(mcExtractedDir, mcJar);
 
         FileUtils.deleteQuietly(tempDir);
 
@@ -137,62 +92,5 @@ public class ServerInstaller {
             libs.add(file);
         }
         return libs;
-    }
-
-    public static class ProgressListener implements Deobfuscator.ProgressListener {
-        @Override
-        public void init(int i, String s) {
-
-        }
-
-        @Override
-        public void onProgress(int i, String s) {
-
-        }
-    }
-
-    public static void writeJar(File out, Deobfuscator.ProgressListener progress, Deobfuscator deobfuscator) {
-        TranslatingTypeLoader loader = new TranslatingTypeLoader(deobfuscator.getJar(), deobfuscator.getJarIndex(), deobfuscator.getTranslator(TranslationDirection.Obfuscating), deobfuscator.getTranslator(TranslationDirection.Deobfuscating));
-        deobfuscator.transformJar(out, progress, new CustomClassTransformer(loader));
-    }
-
-    private static class CustomClassTransformer implements Deobfuscator.ClassTransformer {
-
-        TranslatingTypeLoader loader;
-
-        public CustomClassTransformer(TranslatingTypeLoader loader) {
-            this.loader = loader;
-        }
-
-        @Override
-        public CtClass transform(CtClass ctClass) throws Exception {
-            return publify(loader.transformClass(ctClass));
-        }
-    }
-
-    //Taken from enigma, anc changed a little
-    public static CtClass publify(CtClass c) {
-
-        for (CtField field : c.getDeclaredFields()) {
-            field.setModifiers(publify(field.getModifiers()));
-        }
-        for (CtBehavior behavior : c.getDeclaredBehaviors()) {
-            behavior.setModifiers(publify(behavior.getModifiers()));
-        }
-        InnerClassesAttribute attr = (InnerClassesAttribute) c.getClassFile().getAttribute(InnerClassesAttribute.tag);
-        if (attr != null) {
-            for (int i = 0; i < attr.tableLength(); i++) {
-                attr.setAccessFlags(i, publify(attr.accessFlags(i)));
-            }
-        }
-
-        return c;
-    }
-
-    private static int publify(int flags) {
-        if (!AccessFlag.isPublic(flags)) {
-            flags = AccessFlag.setPublic(flags);
-        }
-        return flags;
     }
 }

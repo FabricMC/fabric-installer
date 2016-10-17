@@ -49,12 +49,6 @@ dependencies {
     compile 'org.slf4j:slf4j-simple:1.7.21'
     compile 'com.intellij:forms_rt:7.0.3'
     compile 'org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-depchain:2.2.2'
-
-
-    compile 'net.fabricmc:enigma:0.11.0.35'
-    compile 'org.javassist:javassist:3.+'
-    compile 'org.bitbucket.mstrobel:procyon-compilertools:0.5.33.6-enigma'
-    compile 'de.sciss:syntaxpane:1.1.+'
 }
 
 task copyAndReplace(type: Copy) {

@@ -1,6 +1,5 @@
 package net.fabricmc.installer;
 
-import cuchaz.enigma.throwables.MappingParseException;
 import net.fabricmc.installer.gui.MainGui;
 import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
@@ -22,7 +21,7 @@ public class Main {
 
     public static void main(String[] args)
             throws ParserConfigurationException, XmlPullParserException, SAXException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException,
-            IllegalAccessException, MappingParseException {
+            IllegalAccessException {
 
         String[] versionSplit = System.getProperty("java.version").split("\\.");
         int jVersion = Integer.parseInt(versionSplit[1]);

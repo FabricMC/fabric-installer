@@ -3,7 +3,6 @@ package net.fabricmc.installer.gui;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import cuchaz.enigma.throwables.MappingParseException;
 import net.fabricmc.installer.installer.ClientInstaller;
 import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
@@ -91,7 +90,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
                     try {
                         updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
                         ClientInstaller.install(new File(installLocation.getText()), version, this);
-                    } catch (IOException | MappingParseException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                         error(e.getLocalizedMessage());
                     }
