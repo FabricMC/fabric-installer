@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -56,31 +57,38 @@ public class ClientInstaller {
         JsonElement jsonElement = new JsonObject();
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         jsonObject.addProperty("id", id);
+	    jsonObject.addProperty("type", "release");
+	    jsonObject.addProperty("time", "2016-10-13T15:20:52+01:00");
+	    jsonObject.addProperty("releaseTime", "2016-09-20T13:40:49+01:00");
         jsonObject.addProperty("mainClass", "net.minecraft.launchwrapper.Launch");
 	    String args = "--username ${auth_player_name} --version ${version_name} --gameDir ${game_directory} --assetsDir ${assets_root} --assetIndex ${assets_index_name} --uuid ${auth_uuid} --accessToken ${auth_access_token} --userType ${user_type} --tweakClass net.fabricmc.base.launch.FabricClientTweaker";
         jsonObject.addProperty("minecraftArguments", args);
 	    jsonObject.addProperty("inheritsFrom", split[0]);
 	    jsonObject.addProperty("jar", split[0]);
 
-        JsonArray libraries = jsonObject.getAsJsonArray("libraries");
+        JsonArray libraries = new JsonArray();
 
         addDep("net.fabricmc:fabric-base:" + attributes.getValue("FabricVersion"), "http://maven.fabricmc.net/", libraries);
 
+	    jsonObject.add("libraries", libraries);
+
         File tempWorkDir = new File(fabricVersionFolder, "temp");
         File depJson = new File(tempWorkDir, "dependencies.json");
-        ZipUtil.unpack(fabricJar, mcVersionFolder, name -> {
+        ZipUtil.unpack(fabricJar, tempWorkDir, name -> {
             if (name.startsWith("dependencies.json")) {
                 return name;
             } else {
                 return null;
             }
         });
-        JsonElement depElement = gson.fromJson(new FileReader(depJson), JsonElement.class);
+	    FileReader reader = new FileReader(depJson);
+        JsonElement depElement = gson.fromJson(reader, JsonElement.class);
         JsonObject depObject = depElement.getAsJsonObject();
         libraries.addAll(depObject.getAsJsonArray("libraries"));
 
         FileUtils.write(fabricJsonFile, gson.toJson(jsonElement), "UTF-8");
-
+		reader.close();
+	    jarFile.close();
         progress.updateProgress(Translator.getString("install.client.cleanDir"), 90);
         FileUtils.deleteDirectory(tempWorkDir);
         FileUtils.deleteDirectory(fabricData);
