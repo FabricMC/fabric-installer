@@ -116,6 +116,18 @@ public class MainGui extends JFrame implements IInstallerProgress {
 		} else if (serverRadioButton.isSelected()) {
 			String version = (String) versionComboBox.getSelectedItem();
 			System.out.println(Translator.getString("gui.installing") + ": " + version);
+			if (version.equals(LOCAL_VERSION_STRING)) {
+				new Thread(() -> {
+					try {
+						LocalVersionInstaller.installServer(new File(installLocation.getText()), this);
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						error(e.getLocalizedMessage());
+					}
+				}).start();
+				return;
+			}
 			new Thread(() -> {
 
 				updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
