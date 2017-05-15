@@ -5,6 +5,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import net.fabricmc.installer.installer.ClientInstaller;
 import net.fabricmc.installer.installer.LocalVersionInstaller;
+import net.fabricmc.installer.installer.MultiMCInstaller;
 import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
 import net.fabricmc.installer.util.Translator;
@@ -26,6 +27,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
 	private JButton buttonInstall;
 	private JComboBox versionComboBox;
 	private JRadioButton clientRadioButton;
+	private JRadioButton multimcRadioButton;
 	private JRadioButton serverRadioButton;
 	private JTextField installLocation;
 	private JButton selectFolderButton;
@@ -84,6 +86,10 @@ public class MainGui extends JFrame implements IInstallerProgress {
 			String version = (String) versionComboBox.getSelectedItem();
 			System.out.println(Translator.getString("gui.installing") + ": " + version);
 			if (version.equals(LOCAL_VERSION_STRING)) {
+				if(multimcRadioButton.isSelected()){
+					error(Translator.getString("install.multimc.local"));
+					return;
+				}
 				new Thread(() -> {
 					try {
 						LocalVersionInstaller.install(new File(installLocation.getText()), this);
@@ -124,6 +130,18 @@ public class MainGui extends JFrame implements IInstallerProgress {
 					error(e.getMessage());
 				}
 
+			}).start();
+		} else if(multimcRadioButton.isSelected()){
+			String version = (String) versionComboBox.getSelectedItem();
+			System.out.println(Translator.getString("gui.installing") + ": " + version);
+			new Thread(() -> {
+				updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
+				try {
+					MultiMCInstaller.install(new File(installLocation.getText()), version, this);
+				} catch (Exception e) {
+					e.printStackTrace();
+					error(e.getMessage());
+				}
 			}).start();
 		}
 	}
@@ -193,7 +211,10 @@ public class MainGui extends JFrame implements IInstallerProgress {
 		panel3.add(clientRadioButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		serverRadioButton = new JRadioButton();
 		serverRadioButton.setText(Translator.getString("gui.server"));
-		panel3.add(serverRadioButton, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel3.add(serverRadioButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 1, false));
+		multimcRadioButton = new JRadioButton();
+		multimcRadioButton.setText(Translator.getString("gui.multimc"));
+		panel3.add(multimcRadioButton, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JLabel label3 = new JLabel();
 		label3.setText(Translator.getString("gui.selectInstallLocation"));
 		panel3.add(label3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -216,6 +237,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(clientRadioButton);
 		buttonGroup.add(serverRadioButton);
+		buttonGroup.add(multimcRadioButton);
 	}
 
 }

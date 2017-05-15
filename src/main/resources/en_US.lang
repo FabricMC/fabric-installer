@@ -10,6 +10,7 @@ gui.installing=Installing
 gui.selectSide=Select Side
 gui.client=Client
 gui.server=Server
+gui.multimc=Multi MC
 gui.selectInstallLocation=Select Install Location
 gui.selectVersion=Select Version
 
@@ -43,6 +44,8 @@ install.server.exportMappedJar=Exporting Mapped Jar file
 install.server.extractLibs=Extracting Library's
 install.server.downloadLibs=Downloading Library's
 install.server.packJar=Packing Jar Files
+
+install.multimc.local=Cannot install local file into Multi MC
 
 #General install Texts
 install.success=Done!
