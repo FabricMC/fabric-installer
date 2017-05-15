@@ -19,7 +19,7 @@ public class LocalVersionInstaller {
 		fc.setDialogTitle(Translator.getString("install.client.selectCustomJar"));
 		fc.setFileFilter(new FileNameExtensionFilter(
 			"Jar Files", "jar"));
-		if(fc.showOpenDialog(null) ==  JFileChooser.APPROVE_OPTION){
+		if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			File inputFile = fc.getSelectedFile();
 
 			JarFile jarFile = new JarFile(inputFile);

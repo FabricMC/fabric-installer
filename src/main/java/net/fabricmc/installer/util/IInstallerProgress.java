@@ -2,8 +2,8 @@ package net.fabricmc.installer.util;
 
 public interface IInstallerProgress {
 
-    void updateProgress(String text, int percentage);
+	void updateProgress(String text, int percentage);
 
-    void error(String error);
+	void error(String error);
 
 }

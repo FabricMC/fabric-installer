@@ -15,15 +15,15 @@ import java.util.List;
 
 public class VersionInfo {
 
-    public static String latestVersion = "";
-    public static List<String> versions;
+	public static String latestVersion = "";
+	public static List<String> versions;
 
-    public static void load() throws IOException, ParserConfigurationException, SAXException, XmlPullParserException {
-        String baseMavenMeta = IOUtils.toString(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/maven-metadata.xml"), "UTF-8");
-        Metadata metadata = new MetadataXpp3Reader().read(new StringReader(baseMavenMeta));
-        latestVersion = metadata.getVersioning().getRelease();
-        versions = metadata.getVersioning().getVersions();
-        Collections.reverse(versions);
-    }
+	public static void load() throws IOException, ParserConfigurationException, SAXException, XmlPullParserException {
+		String baseMavenMeta = IOUtils.toString(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/maven-metadata.xml"), "UTF-8");
+		Metadata metadata = new MetadataXpp3Reader().read(new StringReader(baseMavenMeta));
+		latestVersion = metadata.getVersioning().getRelease();
+		versions = metadata.getVersioning().getVersions();
+		Collections.reverse(versions);
+	}
 
 }

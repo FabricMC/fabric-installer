@@ -2,6 +2,6 @@ package net.fabricmc.installer.util;
 
 public class Reference {
 
-    public static String VERSION = "${DEV}";
+	public static String VERSION = "${DEV}";
 
 }
