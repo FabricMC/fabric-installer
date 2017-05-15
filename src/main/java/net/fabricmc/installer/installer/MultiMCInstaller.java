@@ -28,9 +28,9 @@ public class MultiMCInstaller {
 	public static void install(File mcDir, String version, IInstallerProgress progress) throws Exception {
 		File instancesDir = new File(mcDir, "instances");
 		if (!instancesDir.exists()) {
-			throw new FileNotFoundException("instances directory not found! is this a multimc install directory?");
+			throw new FileNotFoundException(Translator.getString("install.multimc.notFound"));
 		}
-		progress.updateProgress("Scanning for valid instances", 10);
+		progress.updateProgress(Translator.getString("install.multimc.findInstances"), 10);
 		String mcVer = version.split("-")[0];
 		List<File> validInstances = new ArrayList<>();
 		for (File instanceDir : instancesDir.listFiles()) {
@@ -41,21 +41,21 @@ public class MultiMCInstaller {
 			}
 		}
 		if (validInstances.isEmpty()) {
-			throw new Exception("No instances found using " + mcVer);
+			throw new Exception(Translator.getString("install.multimc.noInstances").replace("[MCVER]", mcVer));
 		}
 		List<String> instanceNames = new ArrayList<>();
 		for (File instance : validInstances) {
 			instanceNames.add(instance.getName());
 		}
-		String instanceName = (String) JOptionPane.showInputDialog(null, "Select instance to install to",
-			"Select instance to install to", JOptionPane.QUESTION_MESSAGE, null,
+		String instanceName = (String) JOptionPane.showInputDialog(null, Translator.getString("install.multimc.selectInstance"),
+			Translator.getString("install.multimc.selectInstance"), JOptionPane.QUESTION_MESSAGE, null,
 			instanceNames.toArray(),
 			instanceNames.get(0));
 		if (instanceName == null) {
-			progress.updateProgress("Canceled!", 100);
+			progress.updateProgress(Translator.getString("install.multimc.canceled"), 100);
 			return;
 		}
-		progress.updateProgress("Installing into " + instanceName, 25);
+		progress.updateProgress(Translator.getString("install.multimc.installingInto").replace("[NAME]", instanceName), 25);
 		File instnaceDir = null;
 		for (File instance : validInstances) {
 			if (instance.getName().equals(instanceName)) {
@@ -74,7 +74,7 @@ public class MultiMCInstaller {
 			progress.updateProgress(Translator.getString("install.client.downloadFabric"), 30);
 			FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
 		}
-		progress.updateProgress("Creating patches.json", 70);
+		progress.updateProgress(Translator.getString("install.multimc.createJson"), 70);
 		File fabricJson = new File(patchesDir, "fabric.json");
 		if (fabricJson.exists()) {
 			fabricJson.delete();
@@ -88,7 +88,7 @@ public class MultiMCInstaller {
 		json = json.replace("%DEPS%", stripDepsJson(fabricDeps.replace("\n", "")));
 		FileUtils.writeStringToFile(fabricJson, json, Charset.defaultCharset());
 		fabricZip.close();
-		progress.updateProgress("Done!", 100);
+		progress.updateProgress(Translator.getString("install.success"), 100);
 	}
 
 	private static boolean isValidInstance(File instanceDir, String requiredVersion) throws IOException {

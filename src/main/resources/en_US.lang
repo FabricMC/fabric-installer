@@ -10,7 +10,7 @@ gui.installing=Installing
 gui.selectSide=Select Side
 gui.client=Client
 gui.server=Server
-gui.multimc=Multi MC
+gui.multimc=MultiMC
 gui.selectInstallLocation=Select Install Location
 gui.selectVersion=Select Version
 
@@ -45,7 +45,15 @@ install.server.extractLibs=Extracting Library's
 install.server.downloadLibs=Downloading Library's
 install.server.packJar=Packing Jar Files
 
-install.multimc.local=Cannot install local file into Multi MC
+#MultiMC installer progress
+install.multimc.local=Installing a local file into MultiMC isn't supported.
+install.multimc.notFound=MultiMC instances directory not found! Is this a multimc install directory?
+install.multimc.findInstances=Searching for valid instances
+install.multimc.noInstances=No valid instances using [MCVER] found.
+install.multimc.selectInstance=Select instance to install fabric into
+install.multimc.canceled=Canceled by user
+install.multimc.installingInto=Installing fabric into [NAME]
+install.multimc.createJson=Creating patches.json
 
 #General install Texts
 install.success=Done!

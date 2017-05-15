@@ -86,10 +86,6 @@ public class MainGui extends JFrame implements IInstallerProgress {
 			String version = (String) versionComboBox.getSelectedItem();
 			System.out.println(Translator.getString("gui.installing") + ": " + version);
 			if (version.equals(LOCAL_VERSION_STRING)) {
-				if(multimcRadioButton.isSelected()){
-					error(Translator.getString("install.multimc.local"));
-					return;
-				}
 				new Thread(() -> {
 					try {
 						LocalVersionInstaller.install(new File(installLocation.getText()), this);
@@ -133,6 +129,10 @@ public class MainGui extends JFrame implements IInstallerProgress {
 			}).start();
 		} else if(multimcRadioButton.isSelected()){
 			String version = (String) versionComboBox.getSelectedItem();
+			if(version.equals(LOCAL_VERSION_STRING)){
+				error(Translator.getString("install.multimc.local"));
+				return;
+			}
 			System.out.println(Translator.getString("gui.installing") + ": " + version);
 			new Thread(() -> {
 				updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
