@@ -27,6 +27,7 @@ install.client.readMappings=Read mappings
 install.client.exportMappedJar=Exporting Mapped Jar file
 install.client.cleanJar=Cleaning Minecraft Jar file
 install.client.cleanDir=Removing unneeded files
+install.client.selectCustomJar=Select Custom jar
 
 #Client installer errors
 install.client.error.noDir=is not a directory

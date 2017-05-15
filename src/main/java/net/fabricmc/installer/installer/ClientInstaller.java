@@ -11,26 +11,30 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.Date;
 import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
 public class ClientInstaller {
 
-    public static void install(File mcDir, String version, IInstallerProgress progress) throws IOException {
-        progress.updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
-        String[] split = version.split("-");
-        if (isValidInstallLocation(mcDir, split[0]).isPresent()) {
-            throw new RuntimeException(isValidInstallLocation(mcDir, split[0]).get());
-        }
-        File fabricData = new File(mcDir, "fabricData");
-        File fabricJar = new File(fabricData, version + ".jar");
-        if (!fabricJar.exists()) {
-            progress.updateProgress(Translator.getString("install.client.downloadFabric"), 10);
-            FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
-        }
+	public static void install(File mcDir, String version, IInstallerProgress progress) throws IOException {
+		String[] split = version.split("-");
+		if (isValidInstallLocation(mcDir, split[0]).isPresent()) {
+			throw new RuntimeException(isValidInstallLocation(mcDir, split[0]).get());
+		}
+		File fabricData = new File(mcDir, "fabricData");
+		File fabricJar = new File(fabricData, version + ".jar");
+		if (!fabricJar.exists()) {
+			progress.updateProgress(Translator.getString("install.client.downloadFabric"), 10);
+			FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
+		}
+		install(mcDir, version, progress, fabricJar);
+		FileUtils.deleteDirectory(fabricData);
+	}
 
+
+    public static void install(File mcDir, String version, IInstallerProgress progress, File fabricJar) throws IOException {
+	    progress.updateProgress(Translator.getString("gui.installing") + ": " + version, 0);
         JarFile jarFile = new JarFile(fabricJar);
         Attributes attributes = jarFile.getManifest().getMainAttributes();
 
@@ -39,10 +43,10 @@ public class ClientInstaller {
         System.out.println(Translator.getString("gui.installing") + " " + id);
         File versionsFolder = new File(mcDir, "versions");
         File fabricVersionFolder = new File(versionsFolder, id);
-        File mcVersionFolder = new File(versionsFolder, split[0]);
+        File mcVersionFolder = new File(versionsFolder, version);
         File fabricJsonFile = new File(fabricVersionFolder, id + ".json");
 
-        File mcJarFile = new File(mcVersionFolder, split[0] + ".jar");
+        File mcJarFile = new File(mcVersionFolder, version + ".jar");
         if (fabricVersionFolder.exists()) {
             progress.updateProgress(Translator.getString("install.client.removeOld"), 10);
             FileUtils.deleteDirectory(fabricVersionFolder);
@@ -63,8 +67,8 @@ public class ClientInstaller {
         jsonObject.addProperty("mainClass", "net.minecraft.launchwrapper.Launch");
 	    String args = "--username ${auth_player_name} --version ${version_name} --gameDir ${game_directory} --assetsDir ${assets_root} --assetIndex ${assets_index_name} --uuid ${auth_uuid} --accessToken ${auth_access_token} --userType ${user_type} --tweakClass net.fabricmc.base.launch.FabricClientTweaker";
         jsonObject.addProperty("minecraftArguments", args);
-	    jsonObject.addProperty("inheritsFrom", split[0]);
-	    jsonObject.addProperty("jar", split[0]);
+	    jsonObject.addProperty("inheritsFrom", version);
+	    jsonObject.addProperty("jar", version);
 
         JsonArray libraries = new JsonArray();
 
@@ -91,7 +95,7 @@ public class ClientInstaller {
 	    jarFile.close();
         progress.updateProgress(Translator.getString("install.client.cleanDir"), 90);
         FileUtils.deleteDirectory(tempWorkDir);
-        FileUtils.deleteDirectory(fabricData);
+
 
         progress.updateProgress(Translator.getString("install.success"), 100);
     }
