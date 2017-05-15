@@ -26,6 +26,7 @@ public class LocalVersionInstaller {
 			Attributes attributes = jarFile.getManifest().getMainAttributes();
 			String mcVersion = attributes.getValue("MinecraftVersion");
 			Optional<String> stringOptional = ClientInstaller.isValidInstallLocation(mcDir, mcVersion);
+			jarFile.close();
 			if (stringOptional.isPresent()) {
 				throw new Exception(stringOptional.get());
 			}
