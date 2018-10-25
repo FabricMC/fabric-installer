@@ -72,7 +72,7 @@ public class MultiMCInstaller {
 		File fabricJar = new File(patchesDir, "Fabric-" + version + ".jar");
 		if (!fabricJar.exists()) {
 			progress.updateProgress(Translator.getString("install.client.downloadFabric"), 30);
-			FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
+			FileUtils.copyURLToFile(new URL("http://maven.modmuss50.me/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
 		}
 		progress.updateProgress(Translator.getString("install.multimc.createJson"), 70);
 		File fabricJson = new File(patchesDir, "fabric.json");

@@ -2,7 +2,7 @@
   "+libraries": [
     {
       "name": "net.fabricmc:fabric-base:%VERSION%",
-      "url": "http://maven.fabricmc.net/"
+      "url": "http://maven.modmuss50.me/"
     },
     %DEPS%
   ],

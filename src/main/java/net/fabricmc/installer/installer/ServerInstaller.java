@@ -23,7 +23,7 @@ public class ServerInstaller {
 		}
 
 		progress.updateProgress(Translator.getString("install.server.downloadFabric"), 5);
-		FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
+		FileUtils.copyURLToFile(new URL("http://maven.modmuss50.me/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
 		install(mcDir, version, progress, fabricJar);
 	}
 

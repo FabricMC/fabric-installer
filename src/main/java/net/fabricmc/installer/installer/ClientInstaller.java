@@ -26,7 +26,7 @@ public class ClientInstaller {
 		File fabricJar = new File(fabricData, version + ".jar");
 		if (!fabricJar.exists()) {
 			progress.updateProgress(Translator.getString("install.client.downloadFabric"), 10);
-			FileUtils.copyURLToFile(new URL("http://maven.fabricmc.net/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
+			FileUtils.copyURLToFile(new URL("http://maven.modmuss50.me/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
 		}
 		install(mcDir, version, progress, fabricJar);
 		FileUtils.deleteDirectory(fabricData);
@@ -71,7 +71,7 @@ public class ClientInstaller {
 
 		JsonArray libraries = new JsonArray();
 
-		addDep("net.fabricmc:fabric-base:" + attributes.getValue("FabricVersion"), "http://maven.fabricmc.net/", libraries);
+		addDep("net.fabricmc:fabric-base:" + attributes.getValue("FabricVersion"), "http://maven.modmuss50.me/", libraries);
 
 		jsonObject.add("libraries", libraries);
 
