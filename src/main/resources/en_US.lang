@@ -32,11 +32,13 @@ install.client.selectCustomJar=Select Custom jar
 
 #Client installer errors
 install.client.error.noDir=is not a directory
-install.client.error.noMc=Please run vanilla Minecraft version
+install.client.error.noLauncher=Please run vanilla Minecraft launcher
 
 #Server installer progress
 install.server.downloadFabric=Downloading Fabric
-install.server.downloadServer=Downloading Minecraft Server File
+install.server.downloadVersionList=Downloading Minecraft version list
+install.server.downloadServerInfo=Downloading server version information
+install.server.downloadServer=Downloading Minecraft server JAR
 install.server.createTemp=Creating a temporary directory for files
 install.server.loadJar=Loading jar file into deobfuscator
 install.server.readMappings=Read mappings
@@ -44,6 +46,9 @@ install.server.exportMappedJar=Exporting Mapped Jar file
 install.server.extractLibs=Extracting Library's
 install.server.downloadLibs=Downloading Library's
 install.server.packJar=Packing Jar Files
+
+#Server installer errors
+install.server.error.noVersion=Minecraft version not found
 
 #MultiMC installer progress
 install.multimc.local=Installing a local file into MultiMC isn't supported.
