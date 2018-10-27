@@ -17,7 +17,12 @@
 package net.fabricmc.installer.util;
 
 public class Reference {
+	public static final String VERSION = "${DEV}";
 
-	public static String VERSION = "${DEV}";
+	public static final String INSTALLER_METADATA_FILENAME = "fabric-installer.json";
 
+	public static final String MAVEN_DEFAULT_LIBRARY_URL = "https://libraries.minecraft.net/";
+	public static final String MAVEN_SERVER_URL = "http://maven.modmuss50.me";
+	public static final String PACKAGE_FABRIC = "net.fabricmc";
+	public static final String NAME_FABRIC_LOADER = "fabric-base";
 }

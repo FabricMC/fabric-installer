@@ -21,7 +21,7 @@ import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Translator;
-import net.fabricmc.installer.util.VersionInfo;
+import net.fabricmc.installer.util.MavenHandler;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.xml.sax.SAXException;
 
@@ -29,6 +29,7 @@ import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Ref;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.logging.*;
@@ -39,21 +40,24 @@ public class Main {
 		throws ParserConfigurationException, XmlPullParserException, SAXException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException,
 		IllegalAccessException {
 
-		String[] versionSplit = System.getProperty("java.version").split("\\.");
-		int jVersion = Integer.parseInt(versionSplit[1]);
-		if (jVersion < 8) {
-			System.out.println("You are on an old version of java, fabric will not work! Please update to java 8 or newer to use fabric.");
-			if (args.length == 0 || !args[0].equals("nogui")) {
-				JOptionPane.showMessageDialog(null, "You are using an outdated version of java, fabric will not work! \n Please update to java 8 or newer to use fabric.", "Java Version Warning", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-
 		Locale locale = new Locale(System.getProperty("user.language"), System.getProperty("user.country"));
 		if (!Translator.isValid(locale)) {
 			locale = new Locale("en", "US");
 		}
 
 		Translator.load(locale);
+
+		String[] versionSplit = System.getProperty("java.version").split("\\.");
+		int javaVersionMajor = Integer.parseInt(versionSplit[0]);
+		int javaVersionMinor = Integer.parseInt(versionSplit[1]);
+		if (javaVersionMinor < 8 && javaVersionMajor <= 1) {
+			String outdatedVersion = Translator.getString("error.outdatedJava");
+
+			System.out.println(outdatedVersion);
+			if (args.length == 0 || !args[0].equals("nogui")) {
+				JOptionPane.showMessageDialog(null, outdatedVersion, "Java Version Warning", JOptionPane.ERROR_MESSAGE);
+			}
+		}
 
 		System.out.println(Translator.getString("fabric.installer.load") + ":" + Reference.VERSION);
 
@@ -69,7 +73,7 @@ public class Main {
 		} else if (args[0].equals("nogui")) {
 			System.out.println("Fabric Server cli installer");
 			System.out.println("Loading available versions for install");
-			VersionInfo.load();
+			MavenHandler.load(Reference.MAVEN_SERVER_URL, Reference.PACKAGE_FABRIC, Reference.NAME_FABRIC_LOADER);
 			File runDir = new File(".");
 			System.out.println("Current directory: " + runDir.getAbsolutePath());
 			if (getUserInput("Is this the directory you want to install the server into? (Y/n)").equals("Y")) {
@@ -87,20 +91,20 @@ public class Main {
 				}
 			}
 
-			System.out.println("The latest version available to install is " + VersionInfo.latestVersion);
-			String version = VersionInfo.latestVersion;
+			System.out.println("The latest version available to install is " + MavenHandler.latestVersion);
+			String version = MavenHandler.latestVersion;
 			if (getUserInput("Would you like to install this version or pick another one? (Y/n)").equals("Y")) {
 
 			} else {
-				for (String str : VersionInfo.versions) {
-					System.out.println(VersionInfo.versions.indexOf(str) + " - " + str);
+				for (String str : MavenHandler.versions) {
+					System.out.println(MavenHandler.versions.indexOf(str) + " - " + str);
 				}
 				int value = Integer.parseInt(getUserInput("Please enter the number corresponding to the version to wish to install"));
-				if (value < 0 || value > VersionInfo.versions.size()) {
+				if (value < 0 || value > MavenHandler.versions.size()) {
 					System.out.println("That isn't a valid version!");
 					return;
 				}
-				version = VersionInfo.versions.get(value);
+				version = MavenHandler.versions.get(value);
 			}
 			ServerInstaller.install(runDir, version, new IInstallerProgress() {
 				@Override

@@ -24,8 +24,9 @@ import net.fabricmc.installer.installer.LocalVersionInstaller;
 import net.fabricmc.installer.installer.MultiMCInstaller;
 import net.fabricmc.installer.installer.ServerInstaller;
 import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Translator;
-import net.fabricmc.installer.util.VersionInfo;
+import net.fabricmc.installer.util.MavenHandler;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.xml.sax.SAXException;
 
@@ -49,7 +50,7 @@ public class MainGui extends JFrame implements IInstallerProgress {
 	private JButton selectFolderButton;
 	private JProgressBar progressBar;
 	private JLabel statusLabel;
-	public static String LOCAL_VERSION_STRING = "Local Jar file";
+	public static String LOCAL_VERSION_STRING = "Local JAR file";
 
 	public MainGui() throws ParserConfigurationException, XmlPullParserException, SAXException, IOException {
 		initComponents();
@@ -70,9 +71,9 @@ public class MainGui extends JFrame implements IInstallerProgress {
 				selectInstallLocation();
 			}
 		});
-		VersionInfo.load();
-		VersionInfo.versions.add(LOCAL_VERSION_STRING);
-		for (String str : VersionInfo.versions) {
+		MavenHandler.load(Reference.MAVEN_SERVER_URL, Reference.PACKAGE_FABRIC, Reference.NAME_FABRIC_LOADER);
+		MavenHandler.versions.add(LOCAL_VERSION_STRING);
+		for (String str : MavenHandler.versions) {
 			versionComboBox.addItem(str);
 		}
 		versionComboBox.setSelectedIndex(0);

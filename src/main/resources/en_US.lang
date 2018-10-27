@@ -4,6 +4,8 @@
 fabric.installer.name=Fabric Installer
 fabric.installer.load=Loading Fabric Installer
 
+error.outdatedJava=You are using an outdated version of Java, Fabric will not work! Please update to Java 8 or newer to use Fabric.
+
 #Main Gui
 gui.install=Install
 gui.installing=Installing

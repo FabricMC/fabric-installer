@@ -17,9 +17,7 @@
 package net.fabricmc.installer.installer;
 
 import com.google.gson.*;
-import net.fabricmc.installer.util.IInstallerProgress;
-import net.fabricmc.installer.util.Translator;
-import net.fabricmc.installer.util.Utils;
+import net.fabricmc.installer.util.*;
 import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -28,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -43,7 +42,7 @@ public class ClientInstaller {
 		File fabricJar = new File(fabricData, version + ".jar");
 		if (!fabricJar.exists()) {
 			progress.updateProgress(Translator.getString("install.client.downloadFabric"), 10);
-			FileUtils.copyURLToFile(new URL("http://maven.modmuss50.me/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
+			FileUtils.copyURLToFile(new URL(MavenHandler.getPath(Reference.MAVEN_SERVER_URL, Reference.PACKAGE_FABRIC, Reference.NAME_FABRIC_LOADER, version)), fabricJar);
 		}
 		JarFile jarFile = new JarFile(fabricJar);
 		Attributes attributes = jarFile.getManifest().getMainAttributes();
@@ -65,6 +64,16 @@ public class ClientInstaller {
 		File mcVersionFolder = new File(versionsFolder, version);
 		File fabricJsonFile = new File(fabricVersionFolder, id + ".json");
 
+		File tempWorkDir = new File(fabricVersionFolder, "temp");
+		ZipUtil.unpack(fabricJar, tempWorkDir, name -> {
+			if (name.startsWith(Reference.INSTALLER_METADATA_FILENAME)) {
+				return name;
+			} else {
+				return null;
+			}
+		});
+		InstallerMetadata metadata = new InstallerMetadata(tempWorkDir);
+
 		File mcJarFile = new File(mcVersionFolder, version + ".jar");
 		if (fabricVersionFolder.exists()) {
 			progress.updateProgress(Translator.getString("install.client.removeOld"), 10);
@@ -82,40 +91,35 @@ public class ClientInstaller {
 		versionJson.addProperty("type", "release");
 		versionJson.addProperty("time", Utils.ISO_8601.format(fabricJar.lastModified()));
 		versionJson.addProperty("releaseTime", Utils.ISO_8601.format(fabricJar.lastModified()));
-		versionJson.addProperty("mainClass", "net.minecraft.launchwrapper.Launch");
+		versionJson.addProperty("mainClass", metadata.getMainClass());
 		versionJson.addProperty("inheritsFrom", version);
 
 		JsonArray gameArgs = new JsonArray();
 		JsonObject arguments = new JsonObject();
 
+		List<String> metadataTweakers = metadata.getTweakers("client", "common");
+		if (metadataTweakers.size() > 1) {
+			throw new RuntimeException("Not supporting > 1 tweaker yet!");
+		}
+
+		metadata.getArguments("client", "common").forEach(gameArgs::add);
 		gameArgs.add("--tweakClass");
-		gameArgs.add("net.fabricmc.base.launch.FabricClientTweaker");
+		gameArgs.add(metadataTweakers.get(0));
 
 		arguments.add("game", gameArgs);
 		versionJson.add("arguments", arguments);
 
 		JsonArray libraries = new JsonArray();
 
-		addDep("net.fabricmc:fabric-base:" + attributes.getValue("FabricVersion"), "http://maven.modmuss50.me/", libraries);
+		addDep(Reference.PACKAGE_FABRIC + ":" + Reference.NAME_FABRIC_LOADER + ":" + attributes.getValue("FabricVersion"), "http://maven.modmuss50.me/", libraries);
+
+		for (InstallerMetadata.LibraryEntry entry : metadata.getLibraries("client", "common")) {
+			libraries.add(entry.toVanillaEntry());
+		}
 
 		versionJson.add("libraries", libraries);
 
-		File tempWorkDir = new File(fabricVersionFolder, "temp");
-		File depJson = new File(tempWorkDir, "dependencies.json");
-		ZipUtil.unpack(fabricJar, tempWorkDir, name -> {
-			if (name.startsWith("dependencies.json")) {
-				return name;
-			} else {
-				return null;
-			}
-		});
-		FileReader reader = new FileReader(depJson);
-		JsonElement depElement = gson.fromJson(reader, JsonElement.class);
-		JsonObject depObject = depElement.getAsJsonObject();
-		libraries.addAll(depObject.getAsJsonArray("libraries"));
-
 		FileUtils.write(fabricJsonFile, gson.toJson(versionJson), "UTF-8");
-		reader.close();
 		jarFile.close();
 		progress.updateProgress(Translator.getString("install.client.cleanDir"), 90);
 		FileUtils.deleteDirectory(tempWorkDir);

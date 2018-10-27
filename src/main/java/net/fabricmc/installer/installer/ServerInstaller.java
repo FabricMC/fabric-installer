@@ -18,14 +18,13 @@ package net.fabricmc.installer.installer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fabricmc.installer.util.IInstallerProgress;
-import net.fabricmc.installer.util.Translator;
-import net.fabricmc.installer.util.Utils;
+import net.fabricmc.installer.util.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -36,13 +35,13 @@ public class ServerInstaller {
 
 
 	public static void install(File mcDir, String version, IInstallerProgress progress) throws IOException {
-		File fabricJar = new File(mcDir, "fabric-" + version + ".jar");
+		File fabricJar = new File(mcDir, Reference.NAME_FABRIC_LOADER + "-" + version + ".jar");
 		if (fabricJar.exists()) {
 			fabricJar.delete();
 		}
 
 		progress.updateProgress(Translator.getString("install.server.downloadFabric"), 5);
-		FileUtils.copyURLToFile(new URL("http://maven.modmuss50.me/net/fabricmc/fabric-base/" + version + "/fabric-base-" + version + ".jar"), fabricJar);
+		FileUtils.copyURLToFile(new URL(MavenHandler.getPath(Reference.MAVEN_SERVER_URL, Reference.PACKAGE_FABRIC, Reference.NAME_FABRIC_LOADER, version)), fabricJar);
 		install(mcDir, version, progress, fabricJar);
 	}
 
@@ -82,17 +81,20 @@ public class ServerInstaller {
 		File libs = new File(mcDir, "libs");
 
 		ZipFile fabricZip = new ZipFile(fabricJar);
-		ZipEntry dependenciesEntry = fabricZip.getEntry("dependencies_server.txt");
-		List<String> fabricDeps = IOUtils.readLines(fabricZip.getInputStream(dependenciesEntry), Charset.defaultCharset());
+		InstallerMetadata metadata;
+		try (InputStream inputStream = fabricZip.getInputStream(fabricZip.getEntry(Reference.INSTALLER_METADATA_FILENAME))) {
+			metadata = new InstallerMetadata(inputStream);
+		}
+
+		List<InstallerMetadata.LibraryEntry> fabricDeps = metadata.getLibraries("server", "common");
 		for (int i = 0; i < fabricDeps.size(); i++) {
-			String dep = fabricDeps.get(i);
-			String[] depSplit = dep.split("/");
-			File depFile = new File(libs, depSplit[depSplit.length -1]);
-			if(depFile.exists()){
+			InstallerMetadata.LibraryEntry dep = fabricDeps.get(i);
+			File depFile = new File(libs, dep.getFilename());
+			if (depFile.exists()) {
 				depFile.delete();
 			}
-			progress.updateProgress("Downloading " + depFile.getName(), 20 + (i * 70 / fabricDeps.size()));
-			FileUtils.copyURLToFile(new URL(dep), depFile);
+			progress.updateProgress("Downloading " + dep.getFilename(), 20 + (i * 70 / fabricDeps.size()));
+			FileUtils.copyURLToFile(new URL(dep.getFullURL()), depFile);
 		}
 		
 		progress.updateProgress(Translator.getString("install.success"), 100);

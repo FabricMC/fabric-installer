@@ -29,13 +29,21 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
-public class VersionInfo {
+public class MavenHandler {
 
 	public static String latestVersion = "";
 	public static List<String> versions;
 
-	public static void load() throws IOException, ParserConfigurationException, SAXException, XmlPullParserException {
-		String baseMavenMeta = IOUtils.toString(new URL("http://maven.modmuss50.me/net/fabricmc/fabric-base/maven-metadata.xml"), "UTF-8");
+	public static String getPath(String mavenServerURL, String packageName, String jarName, String version) {
+		if (mavenServerURL.endsWith("/")) {
+			mavenServerURL = mavenServerURL.substring(0, mavenServerURL.length() - 1);
+		}
+
+		return mavenServerURL + "/" + packageName.replace('.', '/') + "/" + jarName + "/" + version + "/" + jarName + "-" + version + ".jar";
+	}
+
+	public static void load(String mavenServerURL, String packageName, String jarName) throws IOException, ParserConfigurationException, SAXException, XmlPullParserException {
+		String baseMavenMeta = IOUtils.toString(new URL(mavenServerURL + "/" + packageName.replace('.', '/') + "/" + jarName + "/maven-metadata.xml"), "UTF-8");
 		Metadata metadata = new MetadataXpp3Reader().read(new StringReader(baseMavenMeta));
 		latestVersion = metadata.getVersioning().getRelease();
 		versions = metadata.getVersioning().getVersions();
