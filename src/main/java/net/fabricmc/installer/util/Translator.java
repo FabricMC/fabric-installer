@@ -16,7 +16,7 @@
 
 package net.fabricmc.installer.util;
 
-import com.google.common.io.Resources;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +38,7 @@ public class Translator {
 		if (!isValid(locale)) {
 			return;
 		}
-		String string = Resources.toString(classLoader.getResource(locale.getLanguage() + "_" + locale.getCountry() + ".lang"), StandardCharsets.UTF_8);
+		String string = IOUtils.toString(classLoader.getResource(locale.getLanguage() + "_" + locale.getCountry() + ".lang"), StandardCharsets.UTF_8);
 		String[] lines = string.split(System.getProperty("line.separator"));
 		for (String line : lines) {
 			if (!line.startsWith("#") && line.contains("=")) {

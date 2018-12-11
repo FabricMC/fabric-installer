@@ -9,67 +9,14 @@ error.outdatedJava=You are using an outdated version of Java, Fabric will not wo
 #Main Gui
 gui.install=Install
 gui.installing=Installing
-gui.selectSide=Select Side
 gui.client=Client
-gui.server=Server
-gui.multimc=MultiMC
 gui.selectInstallLocation=Select Install Location
-gui.selectVersion=Select Version
-
-#Main gui ready text
-gui.status.ready=Ready to install
-
-#Client installer progress
-install.client.downloadFabric=Downloading fabric
-install.client.removeOld=Removing Old Fabric Version
-install.client.createJson=Creating version Json File
-install.client.createTempDir=Creating temporary directory for files
-install.client.extractMappings=Extracting mappings
-install.client.loadJar=Loading jar file into deobfuscator
-install.client.readMappings=Read mappings
-install.client.exportMappedJar=Exporting Mapped Jar file
-install.client.cleanJar=Cleaning Minecraft Jar file
-install.client.cleanDir=Removing unneeded files
-install.client.selectCustomJar=Select Custom jar
+gui.version.mappings=Mappings version:
+gui.version.loader=Loader Version:
 
 #Client installer errors
-install.client.error.noDir=is not a directory
-install.client.error.noLauncher=Please run vanilla Minecraft launcher
+install.client.error.noLauncher=No launcher directory found
 
-#Server installer progress
-install.server.downloadFabric=Downloading Fabric
-install.server.downloadVersionList=Downloading Minecraft version list
-install.server.downloadServerInfo=Downloading server version information
-install.server.downloadServer=Downloading Minecraft server JAR
-install.server.createTemp=Creating a temporary directory for files
-install.server.loadJar=Loading jar file into deobfuscator
-install.server.readMappings=Read mappings
-install.server.exportMappedJar=Exporting Mapped Jar file
-install.server.extractLibs=Extracting Library's
-install.server.downloadLibs=Downloading Library's
-install.server.packJar=Packing Jar Files
-
-#Server installer errors
-install.server.error.noVersion=Minecraft version not found
-
-#MultiMC installer progress
-install.multimc.local=Installing a local file into MultiMC isn't supported.
-install.multimc.notFound=MultiMC instances directory not found! Is this a multimc install directory?
-install.multimc.findInstances=Searching for valid instances
-install.multimc.noInstances=No valid instances using [MCVER] found.
-install.multimc.selectInstance=Select instance to install fabric into
-install.multimc.canceled=Canceled by user
-install.multimc.installingInto=Installing fabric into [NAME]
-install.multimc.createJson=Creating patches.json
 
 #General install Texts
 install.success=Done!
-
-#CLI help text
-cli.help.title=Fabric installer help
-cli.help.noArgs=Run with no args for a gui installer for the client and server
-cli.help.nogui=nogui - Run to get a cli to aid with installing the server version of fabric (English only atm)
-
-#CLI server installer text
-
-#TODO

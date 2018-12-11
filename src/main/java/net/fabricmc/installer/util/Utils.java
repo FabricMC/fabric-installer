@@ -17,20 +17,29 @@
 package net.fabricmc.installer.util;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.GsonBuilder;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class Utils {
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-	private static final Gson GSON = new Gson();
+	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	public static JsonObject loadRemoteJSON(final URL source) throws IOException {
-		return GSON.fromJson(new InputStreamReader(source.openStream()), JsonObject.class);
+	public static File findDefaultInstallDir() {
+		String home = System.getProperty("user.home", ".");
+		String os = System.getProperty("os.name").toLowerCase();
+		File dir;
+		File homeDir = new File(home);
+
+		if (os.contains("win") && System.getenv("APPDATA") != null) {
+			dir = new File(System.getenv("APPDATA"), ".minecraft");
+		} else if (os.contains("mac")) {
+			dir = new File(homeDir, "Library" + File.separator + "Application Support" + File.separator + "minecraft");
+		} else {
+			dir = new File(homeDir, ".minecraft");
+		}
+		return dir;
 	}
 }

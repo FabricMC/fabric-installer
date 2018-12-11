@@ -20,9 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.repository.metadata.Metadata;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
@@ -31,19 +29,11 @@ import java.util.List;
 
 public class MavenHandler {
 
-	public static String latestVersion = "";
-	public static List<String> versions;
+	public String latestVersion = "";
+	public List<String> versions;
 
-	public static String getPath(String mavenServerURL, String packageName, String jarName, String version) {
-		if (mavenServerURL.endsWith("/")) {
-			mavenServerURL = mavenServerURL.substring(0, mavenServerURL.length() - 1);
-		}
-
-		return mavenServerURL + "/" + packageName.replace('.', '/') + "/" + jarName + "/" + version + "/" + jarName + "-" + version + ".jar";
-	}
-
-	public static void load(String mavenServerURL, String packageName, String jarName) throws IOException, ParserConfigurationException, SAXException, XmlPullParserException {
-		String baseMavenMeta = IOUtils.toString(new URL(mavenServerURL + "/" + packageName.replace('.', '/') + "/" + jarName + "/maven-metadata.xml"), "UTF-8");
+	public void load(String mavenServerURL, String packageName, String jarName) throws IOException, XmlPullParserException {
+		String baseMavenMeta = IOUtils.toString(new URL(mavenServerURL + packageName + "/" + jarName + "/maven-metadata.xml"), "UTF-8");
 		Metadata metadata = new MetadataXpp3Reader().read(new StringReader(baseMavenMeta));
 		latestVersion = metadata.getVersioning().getRelease();
 		versions = metadata.getVersioning().getVersions();
