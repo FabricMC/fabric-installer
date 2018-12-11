@@ -46,21 +46,6 @@ shadowJar {
 build.dependsOn shadowJar
 
 
-task copyAndReplace(type: Copy) {
-	outputs.upToDateWhen {return false}
-    from(sourceSets.main.java) {
-        include '**/Reference.java'
-        expand 'DEV': project.version
-    }
-    from(sourceSets.main.java) {
-        exclude '**/Reference.java'
-    }
-    into project.getBuildDir().toString() + "/sources/java"
-}
-tasks.compileJava.dependsOn copyAndReplace
-tasks.compileJava.setSource(project.getBuildDir().toString() + '/sources/java')
-
-
 jar {
     manifest {
         attributes 'Implementation-Title': 'FabricInstaller',

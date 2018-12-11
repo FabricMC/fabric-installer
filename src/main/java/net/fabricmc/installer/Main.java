@@ -17,7 +17,6 @@
 package net.fabricmc.installer;
 
 import net.fabricmc.installer.util.IInstallerProgress;
-import net.fabricmc.installer.util.Reference;
 
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
@@ -40,7 +39,7 @@ public class Main {
 			return;
 		}
 
-		System.out.println("Loading Fabric Installer:" + Reference.VERSION);
+		System.out.println("Loading Fabric Installer: " + Main.class.getPackage().getImplementationVersion());
 
 		//Used to suppress warning from libs
 		setDebugLevel(Level.SEVERE);
