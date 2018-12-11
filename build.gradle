@@ -1,7 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'application'
 
 buildscript {
     repositories {
@@ -21,8 +20,6 @@ def ENV = System.getenv()
 if (ENV.BUILD_NUMBER) {
     version = version + "." + "${System.getenv().BUILD_NUMBER}"
 }
-
-mainClassName = "net.fabricmc.installer.Main"
 
 repositories {
     mavenCentral()
