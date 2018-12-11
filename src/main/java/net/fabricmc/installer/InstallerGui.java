@@ -126,7 +126,7 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 		});
 
 		addRow(jPanel -> {
-			jPanel.add(new JLabel("gui.version.loader"));
+			jPanel.add(new JLabel(Translator.getString("gui.version.loader")));
 			jPanel.add(loaderVersionComboBox = new JComboBox<>());
 		});
 
