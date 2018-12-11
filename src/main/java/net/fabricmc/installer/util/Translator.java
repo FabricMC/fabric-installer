@@ -50,7 +50,7 @@ public class Translator {
 	}
 
 	public static boolean isValid(Locale locale) {
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		ClassLoader classLoader = Translator.class.getClassLoader();
 		return classLoader.getResource(locale.getLanguage() + "_" + locale.getCountry() + ".lang") != null;
 	}
 
