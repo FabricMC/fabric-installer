@@ -16,11 +16,14 @@
 
 package net.fabricmc.installer;
 
-import net.fabricmc.installer.util.*;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.MavenHandler;
+import net.fabricmc.installer.util.Reference;
+import net.fabricmc.installer.util.Utils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -33,10 +36,10 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 	private JComboBox<String> loaderVersionComboBox;
 	private JTextField installLocation;
 	private JButton selectFolderButton;
-	private JProgressBar progressBar;
 	private JLabel statusLabel;
+	private JCheckBox createProfile;
 
-	public InstallerGui() throws XmlPullParserException, IOException {
+	public InstallerGui() throws IOException, XMLStreamException {
 		initComponents();
 		setContentPane(contentPane);
 		setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
@@ -57,20 +60,25 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 			mappingVersionComboBox.addItem(str);
 		}
 		mappingVersionComboBox.setSelectedIndex(0);
+
+		statusLabel.setText("Ready to install");
 	}
 
 	public void install() {
 		String mappingsVersion = (String) mappingVersionComboBox.getSelectedItem();
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
-		System.out.println(Translator.INSTANCE.getString("gui.installing"));
+		System.out.println("Installing");
 		new Thread(() -> {
 			try {
-				updateProgress(Translator.INSTANCE.getString("gui.installing") + ": " + loaderVersion, 0);
+				updateProgress("Installing : " + loaderVersion);
 				File mcPath = new File(installLocation.getText());
 				if (!mcPath.exists()) {
-					throw new RuntimeException(Translator.INSTANCE.getString("install.client.error.noLauncher"));
+					throw new RuntimeException("No launcher directory found");
 				}
-				ClientInstaller.install(mcPath, mappingsVersion, loaderVersion, this);
+				String profileName = ClientInstaller.install(mcPath, mappingsVersion, loaderVersion, this);
+				if (createProfile.isSelected()) {
+					ProfileInstaller.setupProfile(mcPath, profileName, mappingsVersion.split("\\.")[0]);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				error(e.getLocalizedMessage());
@@ -81,7 +89,7 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 	public void selectInstallLocation() {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(installLocation.getText()));
-		chooser.setDialogTitle(Translator.INSTANCE.getString("gui.selectInstallLocation"));
+		chooser.setDialogTitle("Select Install Location");
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setAcceptAllFileFilterUsed(false);
 
@@ -91,10 +99,9 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 	}
 
 	@Override
-	public void updateProgress(String text, int percentage) {
+	public void updateProgress(String text) {
 		statusLabel.setText(text);
 		statusLabel.setForeground(Color.BLACK);
-		progressBar.setValue(percentage);
 	}
 
 	@Override
@@ -104,13 +111,13 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 	}
 
 	public static void start()
-		throws XmlPullParserException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException,
-		IllegalAccessException {
+		throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException,
+		IllegalAccessException, XMLStreamException {
 		//This will make people happy
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		InstallerGui dialog = new InstallerGui();
 		dialog.pack();
-		dialog.setTitle(Translator.INSTANCE.getString("fabric.installer.name"));
+		dialog.setTitle("Fabric Installer");
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
 	}
@@ -120,17 +127,17 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 		contentPane.setBorder(new EmptyBorder(5, 10, 5, 10));
 
 		addRow(jPanel -> {
-			jPanel.add(new JLabel(Translator.INSTANCE.getString("gui.version.mappings")));
+			jPanel.add(new JLabel("Mappings version:"));
 			jPanel.add(mappingVersionComboBox = new JComboBox<>());
 		});
 
 		addRow(jPanel -> {
-			jPanel.add(new JLabel(Translator.INSTANCE.getString("gui.version.loader")));
+			jPanel.add(new JLabel("Loader Version:"));
 			jPanel.add(loaderVersionComboBox = new JComboBox<>());
 		});
 
 		addRow(jPanel -> {
-			jPanel.add(new JLabel(Translator.INSTANCE.getString("gui.selectInstallLocation")));
+			jPanel.add(new JLabel("Select Install Location"));
 			jPanel.add(installLocation = new JTextField());
 			jPanel.add(selectFolderButton = new JButton());
 
@@ -139,17 +146,15 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 			installLocation.setText(Utils.findDefaultInstallDir().getAbsolutePath());
 		});
 
+		addRow(jPanel -> jPanel.add(createProfile = new JCheckBox("Create profile", true)));
+
 		addRow(jPanel -> {
 			jPanel.add(statusLabel = new JLabel());
-			jPanel.add(progressBar = new JProgressBar());
-			progressBar.setMaximum(100);
-
-			//Forces the progress bar to expand to fit the width
-			jPanel.setLayout(new GridLayout(0, 1));
+			statusLabel.setText("Loading versions");
 		});
 
 		addRow(jPanel -> {
-			jPanel.add(buttonInstall = new JButton(Translator.INSTANCE.getString("gui.install")));
+			jPanel.add(buttonInstall = new JButton("Install"));
 			buttonInstall.addActionListener(e -> install());
 			getRootPane().setDefaultButton(buttonInstall);
 		});

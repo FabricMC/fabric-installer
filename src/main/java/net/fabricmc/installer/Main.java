@@ -16,43 +16,62 @@
 
 package net.fabricmc.installer;
 
+import net.fabricmc.installer.util.IInstallerProgress;
 import net.fabricmc.installer.util.Reference;
-import net.fabricmc.installer.util.Translator;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import javax.swing.*;
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.logging.*;
 
 public class Main {
 
-	public static void main(String[] args) throws XmlPullParserException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-		Locale locale = new Locale(System.getProperty("user.language"), System.getProperty("user.country"));
-		if (!Translator.INSTANCE.isValid(locale)) {
-			locale = new Locale("en", "US");
-		}
-
-		Translator.INSTANCE.load(locale);
-
+	public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, XMLStreamException {
 		String[] versionSplit = System.getProperty("java.version").split("\\.");
 		int javaVersionMajor = Integer.parseInt(versionSplit[0]);
 		int javaVersionMinor = Integer.parseInt(versionSplit[1]);
 		if (javaVersionMinor < 8 && javaVersionMajor <= 1) {
-			String outdatedVersion = Translator.INSTANCE.getString("error.outdatedJava");
-
-			System.out.println(outdatedVersion);
+			System.out.println("You are using an outdated version of Java, Fabric will not work! Please update to Java 8 or newer to use Fabric.");
 			if (args.length == 0 || !args[0].equals("nogui")) {
-				JOptionPane.showMessageDialog(null, outdatedVersion, "Java Version Warning", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "You are using an outdated version of Java, Fabric will not work! Please update to Java 8 or newer to use Fabric.", "Java Version Warning", JOptionPane.ERROR_MESSAGE);
 			}
+			return;
 		}
 
-		System.out.println(Translator.INSTANCE.getString("fabric.installer.load") + ":" + Reference.VERSION);
+		System.out.println("Loading Fabric Installer:" + Reference.VERSION);
 
 		//Used to suppress warning from libs
 		setDebugLevel(Level.SEVERE);
 
-		InstallerGui.start();
+		if (args.length == 0) {
+			InstallerGui.start();
+		} else if (args[0].equals("help") || args.length != 4) {
+			System.out.println("installer.jar help - this");
+			System.out.println("installer.jar nogui <launcher dir> <mappings version> <loader version>");
+			System.out.println("Mappings example: 18w49a.11 ,Loader example: 0.2.0.62");
+		} else if (args[0].equals("nogui")) {
+			File file = new File(args[1]);
+			if (!file.exists()) {
+				throw new FileNotFoundException("Launcher directory not found");
+			}
+			String mappingsVersion = args[2];
+			String loaderVersion = args[3];
+			String name = ClientInstaller.install(file, mappingsVersion, loaderVersion, new IInstallerProgress() {
+				@Override
+				public void updateProgress(String text) {
+					System.out.println(text);
+				}
+
+				@Override
+				public void error(String error) {
+					throw new RuntimeException(error);
+				}
+			});
+			ProfileInstaller.setupProfile(file, name, mappingsVersion.split("\\.")[0]);
+		}
+
 	}
 
 	public static void setDebugLevel(Level newLvl) {

@@ -19,12 +19,16 @@ package net.fabricmc.installer.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.File;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.stream.Collectors;
 
 public class Utils {
-	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	public static File findDefaultInstallDir() {
@@ -41,5 +45,22 @@ public class Utils {
 			dir = new File(homeDir, ".minecraft");
 		}
 		return dir;
+	}
+
+	public static String getUrl(URL url) throws IOException {
+		URLConnection connection = url.openConnection();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+			return reader.lines().collect(Collectors.joining("\n"));
+		}
+	}
+
+	public static void writeToFile(File file, String string) throws FileNotFoundException {
+		try (PrintStream printStream = new PrintStream(new FileOutputStream(file))) {
+			printStream.print(string);
+		}
+	}
+
+	public static String readFile(File file) throws IOException {
+		return new String(Files.readAllBytes(file.toPath()));
 	}
 }

@@ -1,18 +1,22 @@
+buildscript {
+	repositories {
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
+	}
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        jcenter()
-    }
-}
+apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = 1.8
-version = '0.1.0'
+version = '0.2.0'
 archivesBaseName = "fabric-installer"
 
 // Fetch build number from Jenkins
@@ -30,12 +34,20 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.code.gson:gson:2.8.5'
-    compile 'commons-io:commons-io:2.6'
-    compile 'org.apache.maven:maven-repository-metadata:3.5.4'
+	compile 'com.google.code.gson:gson:2.8.5'
 }
 
+shadowJar {
+	relocate 'com.google', 'net.fabricmc.installer.repackage.com.google'
+	minimize()
+	classifier = null
+}
+
+build.dependsOn shadowJar
+
+
 task copyAndReplace(type: Copy) {
+	outputs.upToDateWhen {return false}
     from(sourceSets.main.java) {
         include '**/Reference.java'
         expand 'DEV': project.version
@@ -55,7 +67,7 @@ jar {
                 'Implementation-Version': version,
                 'Main-Class': 'net.fabricmc.installer.Main'
     }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	enabled = false
 }
 
 apply from: 'https://github.com/FabricMC/fabric-docs/raw/master/gradle/license.gradle'

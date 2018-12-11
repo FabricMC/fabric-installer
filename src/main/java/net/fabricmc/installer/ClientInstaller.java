@@ -17,25 +17,25 @@
 package net.fabricmc.installer;
 
 import com.google.gson.JsonObject;
-import net.fabricmc.installer.util.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.MinecraftLaunchJson;
+import net.fabricmc.installer.util.Reference;
+import net.fabricmc.installer.util.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 public class ClientInstaller {
 
-	public static void install(File mcDir, String mappingsVersion, String loaderVersion, IInstallerProgress progress) throws IOException {
+	public static String install(File mcDir, String mappingsVersion, String loaderVersion, IInstallerProgress progress) throws IOException {
 		System.out.println("Installing " + mappingsVersion + " with fabric " + loaderVersion);
 		String[] split = mappingsVersion.split("\\.");
 
 		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, mappingsVersion);
 
 		String url = String.format("%s/%s/%s/%s/%3$s-%4$s.json", Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME, loaderVersion);
-		String fabricInstallMeta = IOUtils.toString(new URL(url), "UTF-8");
+		String fabricInstallMeta = Utils.getUrl(new URL(url));
 		JsonObject installMeta = Utils.GSON.fromJson(fabricInstallMeta, JsonObject.class);
 
 		MinecraftLaunchJson launchJson = new MinecraftLaunchJson(installMeta);
@@ -63,10 +63,12 @@ public class ClientInstaller {
 
 		 */
 		File dummyJar = new File(profileDir, profileName + ".jar");
-		FileUtils.touch(dummyJar);
+		dummyJar.createNewFile();
 
-		FileUtils.writeStringToFile(profileJson, Utils.GSON.toJson(launchJson), StandardCharsets.UTF_8);
+		Utils.writeToFile(profileJson, Utils.GSON.toJson(launchJson));
 
-		progress.updateProgress(Translator.INSTANCE.getString("install.success"), 100);
+		progress.updateProgress("Done");
+
+		return profileName;
 	}
 }

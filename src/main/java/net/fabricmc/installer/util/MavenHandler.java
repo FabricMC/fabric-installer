@@ -16,28 +16,35 @@
 
 package net.fabricmc.installer.util;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.maven.artifact.repository.metadata.Metadata;
-import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class MavenHandler {
 
 	public String latestVersion = "";
-	public List<String> versions;
+	public List<String> versions = new ArrayList<>();
 
-	public void load(String mavenServerURL, String packageName, String jarName) throws IOException, XmlPullParserException {
-		String baseMavenMeta = IOUtils.toString(new URL(mavenServerURL + packageName + "/" + jarName + "/maven-metadata.xml"), "UTF-8");
-		Metadata metadata = new MetadataXpp3Reader().read(new StringReader(baseMavenMeta));
-		latestVersion = metadata.getVersioning().getRelease();
-		versions = metadata.getVersioning().getVersions();
+	public void load(String mavenServerURL, String packageName, String jarName) throws IOException, XMLStreamException {
+
+		URL url = new URL(mavenServerURL + packageName + "/" + jarName + "/maven-metadata.xml");
+		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(url.openStream());
+
+		while (reader.hasNext()) {
+			if (reader.next() == XMLStreamConstants.START_ELEMENT && reader.getLocalName().equals("version")) {
+				String text = reader.getElementText();
+				versions.add(text);
+			}
+		}
+
 		Collections.reverse(versions);
+		latestVersion = versions.get(0);
 	}
 
 }
