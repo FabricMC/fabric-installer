@@ -42,8 +42,7 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 		setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		setIconImage(Toolkit.getDefaultToolkit().getImage(classLoader.getResource("icon.png")));
+		setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
 
 		MavenHandler loaderMaven = new MavenHandler();
 		loaderMaven.load(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME);
@@ -63,13 +62,13 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 	public void install() {
 		String mappingsVersion = (String) mappingVersionComboBox.getSelectedItem();
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
-		System.out.println(Translator.getString("gui.installing"));
+		System.out.println(Translator.INSTANCE.getString("gui.installing"));
 		new Thread(() -> {
 			try {
-				updateProgress(Translator.getString("gui.installing") + ": " + loaderVersion, 0);
+				updateProgress(Translator.INSTANCE.getString("gui.installing") + ": " + loaderVersion, 0);
 				File mcPath = new File(installLocation.getText());
 				if (!mcPath.exists()) {
-					throw new RuntimeException(Translator.getString("install.client.error.noLauncher"));
+					throw new RuntimeException(Translator.INSTANCE.getString("install.client.error.noLauncher"));
 				}
 				ClientInstaller.install(mcPath, mappingsVersion, loaderVersion, this);
 			} catch (Exception e) {
@@ -82,7 +81,7 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 	public void selectInstallLocation() {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(installLocation.getText()));
-		chooser.setDialogTitle(Translator.getString("gui.selectInstallLocation"));
+		chooser.setDialogTitle(Translator.INSTANCE.getString("gui.selectInstallLocation"));
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setAcceptAllFileFilterUsed(false);
 
@@ -111,7 +110,7 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		InstallerGui dialog = new InstallerGui();
 		dialog.pack();
-		dialog.setTitle(Translator.getString("fabric.installer.name"));
+		dialog.setTitle(Translator.INSTANCE.getString("fabric.installer.name"));
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
 	}
@@ -121,17 +120,17 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 		contentPane.setBorder(new EmptyBorder(5, 10, 5, 10));
 
 		addRow(jPanel -> {
-			jPanel.add(new JLabel(Translator.getString("gui.version.mappings")));
+			jPanel.add(new JLabel(Translator.INSTANCE.getString("gui.version.mappings")));
 			jPanel.add(mappingVersionComboBox = new JComboBox<>());
 		});
 
 		addRow(jPanel -> {
-			jPanel.add(new JLabel(Translator.getString("gui.version.loader")));
+			jPanel.add(new JLabel(Translator.INSTANCE.getString("gui.version.loader")));
 			jPanel.add(loaderVersionComboBox = new JComboBox<>());
 		});
 
 		addRow(jPanel -> {
-			jPanel.add(new JLabel(Translator.getString("gui.selectInstallLocation")));
+			jPanel.add(new JLabel(Translator.INSTANCE.getString("gui.selectInstallLocation")));
 			jPanel.add(installLocation = new JTextField());
 			jPanel.add(selectFolderButton = new JButton());
 
@@ -150,7 +149,7 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 		});
 
 		addRow(jPanel -> {
-			jPanel.add(buttonInstall = new JButton(Translator.getString("gui.install")));
+			jPanel.add(buttonInstall = new JButton(Translator.INSTANCE.getString("gui.install")));
 			buttonInstall.addActionListener(e -> install());
 			getRootPane().setDefaultButton(buttonInstall);
 		});

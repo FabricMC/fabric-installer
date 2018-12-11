@@ -25,20 +25,21 @@ import java.util.Locale;
 
 public class Translator {
 
-	private static HashMap<String, String> lang = new HashMap<>();
-	private static HashMap<String, String> defaultLang = new HashMap<>();
+	public static final Translator INSTANCE = new Translator();
 
-	public static void load(Locale locale) throws IOException {
+	private HashMap<String, String> lang = new HashMap<>();
+	private HashMap<String, String> defaultLang = new HashMap<>();
+
+	public void load(Locale locale) throws IOException {
 		load(locale, lang);
 		load(new Locale("en", "US"), defaultLang);
 	}
 
-	public static void load(Locale locale, HashMap<String, String> map) throws IOException {
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	public void load(Locale locale, HashMap<String, String> map) throws IOException {
 		if (!isValid(locale)) {
 			return;
 		}
-		String string = IOUtils.toString(classLoader.getResource(locale.getLanguage() + "_" + locale.getCountry() + ".lang"), StandardCharsets.UTF_8);
+		String string = IOUtils.toString(ClassLoader.getSystemClassLoader().getResource(locale.getLanguage() + "_" + locale.getCountry() + ".lang"), StandardCharsets.UTF_8);
 		String[] lines = string.split(System.getProperty("line.separator"));
 		for (String line : lines) {
 			if (!line.startsWith("#") && line.contains("=")) {
@@ -49,12 +50,11 @@ public class Translator {
 
 	}
 
-	public static boolean isValid(Locale locale) {
-		ClassLoader classLoader = Translator.class.getClassLoader();
-		return classLoader.getResource(locale.getLanguage() + "_" + locale.getCountry() + ".lang") != null;
+	public boolean isValid(Locale locale) {
+		return ClassLoader.getSystemClassLoader().getResource(locale.getLanguage() + "_" + locale.getCountry() + ".lang") != null;
 	}
 
-	public static String getString(String key) {
+	public String getString(String key) {
 		if (lang.containsKey(key)) {
 			return lang.get(key);
 		}

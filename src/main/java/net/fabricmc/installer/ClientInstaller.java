@@ -67,6 +67,6 @@ public class ClientInstaller {
 
 		FileUtils.writeStringToFile(profileJson, Utils.GSON.toJson(launchJson), StandardCharsets.UTF_8);
 
-		progress.updateProgress(Translator.getString("install.success"), 100);
+		progress.updateProgress(Translator.INSTANCE.getString("install.success"), 100);
 	}
 }

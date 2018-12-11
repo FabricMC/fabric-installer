@@ -29,17 +29,17 @@ public class Main {
 
 	public static void main(String[] args) throws XmlPullParserException, IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
 		Locale locale = new Locale(System.getProperty("user.language"), System.getProperty("user.country"));
-		if (!Translator.isValid(locale)) {
+		if (!Translator.INSTANCE.isValid(locale)) {
 			locale = new Locale("en", "US");
 		}
 
-		Translator.load(locale);
+		Translator.INSTANCE.load(locale);
 
 		String[] versionSplit = System.getProperty("java.version").split("\\.");
 		int javaVersionMajor = Integer.parseInt(versionSplit[0]);
 		int javaVersionMinor = Integer.parseInt(versionSplit[1]);
 		if (javaVersionMinor < 8 && javaVersionMajor <= 1) {
-			String outdatedVersion = Translator.getString("error.outdatedJava");
+			String outdatedVersion = Translator.INSTANCE.getString("error.outdatedJava");
 
 			System.out.println(outdatedVersion);
 			if (args.length == 0 || !args[0].equals("nogui")) {
@@ -47,7 +47,7 @@ public class Main {
 			}
 		}
 
-		System.out.println(Translator.getString("fabric.installer.load") + ":" + Reference.VERSION);
+		System.out.println(Translator.INSTANCE.getString("fabric.installer.load") + ":" + Reference.VERSION);
 
 		//Used to suppress warning from libs
 		setDebugLevel(Level.SEVERE);
