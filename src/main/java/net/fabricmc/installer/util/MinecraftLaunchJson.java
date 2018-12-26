@@ -37,14 +37,23 @@ public class MinecraftLaunchJson {
 
 	//Used for reading the fabric-launch.json and populating the minecraft format
 	public MinecraftLaunchJson(JsonObject jsonObject) {
-		mainClass = jsonObject.get("mainClass").getAsString();
 
-		String clientTweaker = jsonObject.get("launchwrapper").getAsJsonObject()
-			.get("tweakers").getAsJsonObject()
-			.get("client").getAsJsonArray().get(0).getAsString();
+		if(!jsonObject.get("mainClass").isJsonObject()){
+			mainClass = jsonObject.get("mainClass").getAsString();
+		} else {
+			mainClass = jsonObject.get("mainClass").getAsJsonObject().get("client").getAsString();
+		}
 
-		arguments.game.add("--tweakClass");
-		arguments.game.add(clientTweaker);
+
+
+		if(jsonObject.has("launchwrapper")){
+			String clientTweaker = jsonObject.get("launchwrapper").getAsJsonObject()
+				.get("tweakers").getAsJsonObject()
+				.get("client").getAsJsonArray().get(0).getAsString();
+
+			arguments.game.add("--tweakClass");
+			arguments.game.add(clientTweaker);
+		}
 
 		String[] validSides = new String[] { "common", "server" };
 		JsonObject librariesObject = jsonObject.getAsJsonObject("libraries");
