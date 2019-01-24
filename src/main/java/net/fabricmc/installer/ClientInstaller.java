@@ -17,10 +17,7 @@
 package net.fabricmc.installer;
 
 import com.google.gson.JsonObject;
-import net.fabricmc.installer.util.IInstallerProgress;
-import net.fabricmc.installer.util.MinecraftLaunchJson;
-import net.fabricmc.installer.util.Reference;
-import net.fabricmc.installer.util.Utils;
+import net.fabricmc.installer.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,11 +25,10 @@ import java.net.URL;
 
 public class ClientInstaller {
 
-	public static String install(File mcDir, String mappingsVersion, String loaderVersion, IInstallerProgress progress) throws IOException {
-		System.out.println("Installing " + mappingsVersion + " with fabric " + loaderVersion);
-		String[] split = mappingsVersion.split("\\.");
+	public static String install(File mcDir, Version version, String loaderVersion, IInstallerProgress progress) throws IOException {
+		System.out.println("Installing " + version + " with fabric " + loaderVersion);
 
-		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, mappingsVersion);
+		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, version);
 
 		String url = String.format("%s/%s/%s/%s/%3$s-%4$s.json", Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME, loaderVersion);
 		String fabricInstallMeta = Utils.getUrl(new URL(url));
@@ -40,10 +36,10 @@ public class ClientInstaller {
 
 		MinecraftLaunchJson launchJson = new MinecraftLaunchJson(installMeta);
 		launchJson.id = profileName;
-		launchJson.inheritsFrom = split[0];
+		launchJson.inheritsFrom = version.getMinecraftVersion();
 
 		//Adds loader and the mappings
-		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + mappingsVersion, Reference.MAVEN_SERVER_URL));
+		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + version.toString(), Reference.MAVEN_SERVER_URL));
 		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.LOADER_NAME + ":" + loaderVersion, Reference.MAVEN_SERVER_URL));
 
 		File versionsDir = new File(mcDir, "versions");

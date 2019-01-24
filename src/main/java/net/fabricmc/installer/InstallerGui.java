@@ -16,10 +16,7 @@
 
 package net.fabricmc.installer;
 
-import net.fabricmc.installer.util.IInstallerProgress;
-import net.fabricmc.installer.util.MavenHandler;
-import net.fabricmc.installer.util.Reference;
-import net.fabricmc.installer.util.Utils;
+import net.fabricmc.installer.util.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -65,8 +62,9 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 	}
 
 	public void install() {
-		String mappingsVersion = (String) mappingVersionComboBox.getSelectedItem();
+		String versionStr = (String) mappingVersionComboBox.getSelectedItem();
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
+		Version version = new Version(versionStr);
 		System.out.println("Installing");
 		new Thread(() -> {
 			try {
@@ -75,9 +73,9 @@ public class InstallerGui extends JFrame implements IInstallerProgress {
 				if (!mcPath.exists()) {
 					throw new RuntimeException("No launcher directory found");
 				}
-				String profileName = ClientInstaller.install(mcPath, mappingsVersion, loaderVersion, this);
+				String profileName = ClientInstaller.install(mcPath, version, loaderVersion, this);
 				if (createProfile.isSelected()) {
-					ProfileInstaller.setupProfile(mcPath, profileName, mappingsVersion.split("\\.")[0]);
+					ProfileInstaller.setupProfile(mcPath, profileName, version);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

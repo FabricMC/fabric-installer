@@ -17,6 +17,7 @@
 package net.fabricmc.installer;
 
 import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
@@ -55,9 +56,9 @@ public class Main {
 			if (!file.exists()) {
 				throw new FileNotFoundException("Launcher directory not found");
 			}
-			String mappingsVersion = args[2];
+			Version version = new Version(args[2]);
 			String loaderVersion = args[3];
-			String name = ClientInstaller.install(file, mappingsVersion, loaderVersion, new IInstallerProgress() {
+			String profileName = ClientInstaller.install(file, version, loaderVersion, new IInstallerProgress() {
 				@Override
 				public void updateProgress(String text) {
 					System.out.println(text);
@@ -68,7 +69,7 @@ public class Main {
 					throw new RuntimeException(error);
 				}
 			});
-			ProfileInstaller.setupProfile(file, name, mappingsVersion.split("\\.")[0]);
+			ProfileInstaller.setupProfile(file, profileName, version);
 		}
 
 	}
