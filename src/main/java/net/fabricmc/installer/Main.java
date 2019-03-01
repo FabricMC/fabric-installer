@@ -30,14 +30,16 @@ public class Main {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, XMLStreamException {
 		String[] versionSplit = System.getProperty("java.version").split("\\.");
-		int javaVersionMajor = Integer.parseInt(versionSplit[0]);
-		int javaVersionMinor = Integer.parseInt(versionSplit[1]);
-		if (javaVersionMinor < 8 && javaVersionMajor <= 1) {
-			System.out.println("You are using an outdated version of Java, Fabric will not work! Please update to Java 8 or newer to use Fabric.");
-			if (args.length == 0 || !args[0].equals("nogui")) {
-				JOptionPane.showMessageDialog(null, "You are using an outdated version of Java, Fabric will not work! Please update to Java 8 or newer to use Fabric.", "Java Version Warning", JOptionPane.ERROR_MESSAGE);
+		if(versionSplit.length == 2){ //Only check 1.x versions of java, new versions are formatted liked 12
+			int javaVersionMajor = Integer.parseInt(versionSplit[0]);
+			int javaVersionMinor = Integer.parseInt(versionSplit[1]);
+			if (javaVersionMinor < 8 && javaVersionMajor <= 1) {
+				System.out.println("You are using an outdated version of Java, Fabric will not work! Please update to Java 8 or newer to use Fabric.");
+				if (args.length == 0 || !args[0].equals("nogui")) {
+					JOptionPane.showMessageDialog(null, "You are using an outdated version of Java, Fabric will not work! Please update to Java 8 or newer to use Fabric.", "Java Version Warning", JOptionPane.ERROR_MESSAGE);
+				}
+				return;
 			}
-			return;
 		}
 
 		System.out.println("Loading Fabric Installer: " + Main.class.getPackage().getImplementationVersion());

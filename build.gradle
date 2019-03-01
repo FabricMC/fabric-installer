@@ -6,8 +6,9 @@ buildscript {
 		jcenter()
 	}
 	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
+		classpath 'com.github.jengelman.gradle.plugins:shadow:5.0.0'
 		classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+		classpath "com.github.ben-manes:gradle-versions-plugin:0.21.0"
 	}
 }
 
@@ -18,9 +19,10 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'edu.sc.seis.launch4j'
+apply plugin: "com.github.ben-manes.versions"
 
 sourceCompatibility = 1.8
-version = '0.2.2'
+version = '0.2.3'
 archivesBaseName = "fabric-installer"
 
 // Fetch build number from Jenkins
@@ -64,6 +66,8 @@ launch4j {
     icon = "${projectDir}/src/main/resources/icon.ico"
 	outfile = "${archivesBaseName}-${project.version}.exe"
 	productName = 'Fabric installer'
+	companyName = "Fabric Team"
+	copyright = "Apache License Version 2.0"
 	manifest = "${projectDir}/l4j-manifest.xml" // https://docs.microsoft.com/en-us/windows/desktop/sbscs/application-manifests This helps with
 }
 
