@@ -26,9 +26,15 @@ public class Version {
 	public Version(String version) {
 		this.version = version;
 
-		char verSep = version.contains("-") ? '-' : '.';
-		this.minecraftVersion = version.substring(0, version.lastIndexOf(verSep));
-		this.mappingsVersion = version.substring(version.lastIndexOf(verSep) + 1);
+		if(version.contains("+build.")){
+			this.minecraftVersion = version.substring(0, version.lastIndexOf('+'));
+			this.mappingsVersion = version.substring(version.lastIndexOf('.') + 1);
+		} else {
+			//TODO legacy remove when no longer needed
+			char verSep = version.contains("-") ? '-' : '.';
+			this.minecraftVersion = version.substring(0, version.lastIndexOf(verSep));
+			this.mappingsVersion = version.substring(version.lastIndexOf(verSep) + 1);
+		}
 	}
 
 	public String getMappingsVersion() {
