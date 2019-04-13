@@ -24,9 +24,10 @@ import net.fabricmc.installer.util.InstallerProgress;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidParameterException;
 
 public class ServerHandler extends Handler {
+
+	public JTextField serverJarName;
 
 	@Override
 	public String name() {
@@ -38,7 +39,7 @@ public class ServerHandler extends Handler {
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
 		new Thread(() -> {
 			try {
-				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, this);
+				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, serverJarName.getText(), this);
 			} catch (IOException e) {
 				e.printStackTrace();
 				error(e.getLocalizedMessage());
@@ -56,7 +57,7 @@ public class ServerHandler extends Handler {
 		} else {
 			loaderVersion = args[1];
 		}
-		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, InstallerProgress.CONSOLE);
+		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, "minecraft-server.jar", InstallerProgress.CONSOLE);
 	}
 
 	@Override
@@ -66,7 +67,10 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
-
+		addRow(pane, jPanel -> {
+			jPanel.add(new JLabel("MC Server jar"));
+			jPanel.add(serverJarName = new JTextField("minecraft-server.jar"));
+		});
 	}
 
 	@Override

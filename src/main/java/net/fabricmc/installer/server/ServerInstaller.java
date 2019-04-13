@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ import java.util.zip.ZipOutputStream;
 
 public class ServerInstaller {
 
-	public static void install(File dir, String loaderVersion, InstallerProgress progress) throws IOException {
+	public static void install(File dir, String loaderVersion, String serverJarName, InstallerProgress progress) throws IOException {
 		progress.updateProgress(String.format("Installing fabric server %s", loaderVersion));
 		File libsDir = new File(dir, "libraries");
 		progress.updateProgress("Downloading required files");
@@ -49,15 +50,19 @@ public class ServerInstaller {
 
 		progress.updateProgress("Generating server launch jar");
 		File launchJar = new File(dir, "fabric-server-launch.jar");
-		makeLaunchJar(launchJar, meta);
+		makeLaunchJar(launchJar, serverJarName, meta);
 
 		progress.updateProgress("Done, start server by running " + launchJar.getName());
 	}
 
-	private static void makeLaunchJar(File file, MinecraftLaunchJson meta) throws IOException {
+	private static void makeLaunchJar(File file, String serverJarName, MinecraftLaunchJson meta) throws IOException {
 		if (file.exists()) {
 			file.delete();
 		}
+
+		List<String> classPath = meta.libraries.stream().map(library -> "libraries/" + library.getFileName().replaceAll("\\\\", "/")).collect(Collectors.toList());
+		classPath.add(serverJarName);
+
 		FileOutputStream outputStream = new FileOutputStream(file);
 		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 
@@ -67,7 +72,7 @@ public class ServerInstaller {
 			Manifest manifest = new Manifest();
 			manifest.getMainAttributes().put(new Attributes.Name("Manifest-Version"), "1.0");
 			manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), meta.mainClassServer);
-			manifest.getMainAttributes().put(new Attributes.Name("Class-Path"), meta.libraries.stream().map(library -> "libraries/" + library.getFileName().replaceAll("\\\\", "/")).collect(Collectors.joining(" ")));
+			manifest.getMainAttributes().put(new Attributes.Name("Class-Path"), String.join(" ", classPath));
 			manifest.write(zipOutputStream);
 
 			zipOutputStream.closeEntry();
