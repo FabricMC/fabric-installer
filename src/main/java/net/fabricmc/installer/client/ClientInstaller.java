@@ -16,7 +16,6 @@
 
 package net.fabricmc.installer.client;
 
-import net.fabricmc.installer.LoaderUtils;
 import net.fabricmc.installer.util.*;
 
 import java.io.File;
@@ -29,7 +28,7 @@ public class ClientInstaller {
 
 		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, version);
 
-		MinecraftLaunchJson launchJson = LoaderUtils.getLaunchMeta(loaderVersion);
+		MinecraftLaunchJson launchJson = Utils.getLaunchMeta(loaderVersion);
 		launchJson.id = profileName;
 		launchJson.inheritsFrom = version.getMinecraftVersion();
 

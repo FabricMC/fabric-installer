@@ -16,19 +16,28 @@
 
 package net.fabricmc.installer;
 
-import net.fabricmc.installer.client.ClientInstaller;
-import net.fabricmc.installer.client.ProfileInstaller;
-import net.fabricmc.installer.util.InstallerProgress;
-import net.fabricmc.installer.util.Version;
+import net.fabricmc.installer.client.ClientHandler;
+import net.fabricmc.installer.server.ServerHandler;
+import net.fabricmc.installer.util.MavenHandler;
+import net.fabricmc.installer.util.Reference;
 
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class Main {
+
+	public static final MavenHandler MAPPINGS_MAVEN = new MavenHandler(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.MAPPINGS_NAME);
+	public static final MavenHandler LOADER_MAVEN = new MavenHandler(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME);
+
+	//TODO is gui the best name for this?
+	public static final List<Handler> HANDLERS = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, XMLStreamException {
 		String[] versionSplit = System.getProperty("java.version").split("\\.");
@@ -46,43 +55,44 @@ public class Main {
 
 		System.out.println("Loading Fabric Installer: " + Main.class.getPackage().getImplementationVersion());
 
+		HANDLERS.add(new ClientHandler());
+		HANDLERS.add(new ServerHandler());
+
 		//Used to suppress warning from libs
 		setDebugLevel(Level.SEVERE);
 
 		if (args.length == 0) {
 			InstallerGui.start();
-		} else if (args[0].equals("help") || args.length != 4) {
-			System.out.println("installer.jar help - this");
-			System.out.println("installer.jar client <launcher dir> <mappings version> <loader version>");
-			System.out.println("Mappings example: 18w49a.11 ,Loader example: 0.2.0.62");
-		} else if (args[0].equals("client")) {
-			File file = new File(args[1]);
-			if (!file.exists()) {
-				throw new FileNotFoundException("Launcher directory not found");
-			}
-			Version version = new Version(args[2]);
-			String loaderVersion = args[3];
-			String profileName = ClientInstaller.install(file, version, loaderVersion, new InstallerProgress() {
-				@Override
-				public void updateProgress(String text) {
-					System.out.println(text);
-				}
+		} else if (args[0].equals("help")) {
+			System.out.println("help - Opens this menu");
+			HANDLERS.forEach(handler -> System.out.printf("%s %s\n", handler.name().toLowerCase(), handler.cliHelp()));
 
-				@Override
-				public void error(String error) {
-					throw new RuntimeException(error);
+			LOADER_MAVEN.load();
+			MAPPINGS_MAVEN.load();
+
+			System.out.printf("Latest Mappings: %s\nLatest Loader: %s\n", MAPPINGS_MAVEN.latestVersion, LOADER_MAVEN.latestVersion);
+		} else {
+			for (Handler handler : HANDLERS) {
+				if (args[0].equalsIgnoreCase(handler.name())) {
+					try {
+						handler.installCli(args);
+					} catch (Exception e) {
+						throw new RuntimeException("Failed to install " + handler.name(), e);
+					}
+					break;
 				}
-			});
-			ProfileInstaller.setupProfile(file, profileName, version);
+			}
+			//Only reached if a handler is not found
+			System.out.println("No handler found for " + args[0] + " see help");
 		}
 
 	}
 
 	public static void setDebugLevel(Level newLvl) {
 		Logger rootLogger = LogManager.getLogManager().getLogger("");
-		Handler[] handlers = rootLogger.getHandlers();
+		java.util.logging.Handler[] handlers = rootLogger.getHandlers();
 		rootLogger.setLevel(newLvl);
-		for (Handler h : handlers) {
+		for (java.util.logging.Handler h : handlers) {
 			if (h instanceof FileHandler)
 				h.setLevel(newLvl);
 		}

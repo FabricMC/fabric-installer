@@ -16,18 +16,27 @@
 
 package net.fabricmc.installer.client;
 
-import net.fabricmc.installer.BaseGui;
+import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
+import net.fabricmc.installer.Main;
+import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Utils;
 import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.security.InvalidParameterException;
 
-public class ClientGui extends BaseGui {
+public class ClientHandler extends Handler {
 
 	public JComboBox<String> mappingVersionComboBox;
 	private JCheckBox createProfile;
+
+	@Override
+	public String name() {
+		return "Client";
+	}
 
 	@Override
 	public void install() {
@@ -54,13 +63,33 @@ public class ClientGui extends BaseGui {
 	}
 
 	@Override
+	public void installCli(String[] args) throws Exception {
+		if (args.length < 2) {
+			throw new InvalidParameterException("A minecraft launcher directory must be provided");
+		}
+		File file = new File(args[1]);
+		if (!file.exists()) {
+			throw new FileNotFoundException("Launcher directory not found");
+		}
+		Version version = new Version(args[2]);
+		String loaderVersion = args[3];
+		String profileName = ClientInstaller.install(file, version, loaderVersion, InstallerProgress.CONSOLE);
+		ProfileInstaller.setupProfile(file, profileName, version);
+	}
+
+	@Override
+	public String cliHelp() {
+		return "*launcher_dir* <mappings version> <loader version> - Installs the client profile into the minecraft directory located at the provided location";
+	}
+
+	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
 		addRow(pane, jPanel -> {
 			jPanel.add(new JLabel("Mappings version:"));
 			jPanel.add(mappingVersionComboBox = new JComboBox<>());
 		});
 
-		installerGui.mappingsMaven.onComplete(versions -> {
+		Main.MAPPINGS_MAVEN.onComplete(versions -> {
 			for (String str : versions) {
 				mappingVersionComboBox.addItem(str);
 			}

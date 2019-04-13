@@ -22,7 +22,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
-public abstract class BaseGui implements InstallerProgress {
+public abstract class Handler implements InstallerProgress {
 
 	public JButton buttonInstall;
 
@@ -31,7 +31,13 @@ public abstract class BaseGui implements InstallerProgress {
 	public JButton selectFolderButton;
 	public JLabel statusLabel;
 
+	public abstract String name();
+
 	public abstract void install();
+
+	public abstract void installCli(String[] args) throws Exception;
+
+	public abstract String cliHelp();
 
 	//this isnt great, but works
 	public abstract void setupPane1(JPanel pane, InstallerGui installerGui);
@@ -70,7 +76,7 @@ public abstract class BaseGui implements InstallerProgress {
 			buttonInstall.addActionListener(e -> install());
 		});
 
-		installerGui.loaderMaven.onComplete(versions -> {
+		Main.LOADER_MAVEN.onComplete(versions -> {
 			for (String str : versions) {
 				loaderVersionComboBox.addItem(str);
 			}

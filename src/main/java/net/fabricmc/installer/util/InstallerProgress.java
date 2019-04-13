@@ -18,6 +18,18 @@ package net.fabricmc.installer.util;
 
 public interface InstallerProgress {
 
+	InstallerProgress CONSOLE = new InstallerProgress() {
+		@Override
+		public void updateProgress(String text) {
+			System.out.println(text);
+		}
+
+		@Override
+		public void error(String error) {
+			throw new RuntimeException(error);
+		}
+	};
+
 	void updateProgress(String text);
 
 	void error(String error);

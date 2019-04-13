@@ -29,12 +29,22 @@ import java.util.function.Consumer;
 
 public class MavenHandler {
 
+	private final String mavenServerURL;
+	private final String packageName;
+	private final String jarName;
+
 	public String latestVersion = "";
 	public List<String> versions = new ArrayList<>();
 
+	public MavenHandler(String mavenServerURL, String packageName, String jarName) {
+		this.mavenServerURL = mavenServerURL;
+		this.packageName = packageName;
+		this.jarName = jarName;
+	}
+
 	private List<Consumer<List<String>>> completeConsumers = new ArrayList<>();
 
-	public void load(String mavenServerURL, String packageName, String jarName) throws IOException, XMLStreamException {
+	public void load() throws IOException, XMLStreamException {
 
 		URL url = new URL(mavenServerURL + packageName + "/" + jarName + "/maven-metadata.xml");
 		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(url.openStream());
@@ -45,6 +55,8 @@ public class MavenHandler {
 				versions.add(text);
 			}
 		}
+
+		reader.close();
 
 		Collections.reverse(versions);
 		latestVersion = versions.get(0);

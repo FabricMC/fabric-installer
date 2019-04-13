@@ -16,11 +16,6 @@
 
 package net.fabricmc.installer;
 
-import net.fabricmc.installer.client.ClientGui;
-import net.fabricmc.installer.server.ServerGui;
-import net.fabricmc.installer.util.MavenHandler;
-import net.fabricmc.installer.util.Reference;
-
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
@@ -33,24 +28,15 @@ public class InstallerGui extends JFrame {
 
 	private JTabbedPane contentPane;
 
-	private BaseGui clientGui;
-	private BaseGui serverGui;
-
-	public final MavenHandler loaderMaven = new MavenHandler();
-	public final MavenHandler mappingsMaven = new MavenHandler();
-
 	public InstallerGui() throws IOException, XMLStreamException {
-		clientGui = new ClientGui();
-		serverGui = new ServerGui();
-
 		initComponents();
 		setContentPane(contentPane);
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
 
-		mappingsMaven.load(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.MAPPINGS_NAME);
-		loaderMaven.load(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME);
+		Main.MAPPINGS_MAVEN.load();
+		Main.LOADER_MAVEN.load();
 	}
 
 	public static void selectInstallLocation(Supplier<String> initalDir, Consumer<String> selectedDir) {
@@ -77,9 +63,7 @@ public class InstallerGui extends JFrame {
 
 	private void initComponents() {
 		contentPane = new JTabbedPane(JTabbedPane.TOP);
-
-		contentPane.addTab("Client", clientGui.makePanel(this));
-		contentPane.addTab("Server", serverGui.makePanel(this));
+		Main.HANDLERS.forEach(handler -> contentPane.addTab(handler.name(), handler.makePanel(this)));
 	}
 
 	private void addRow(Container parent, Consumer<JPanel> consumer) {

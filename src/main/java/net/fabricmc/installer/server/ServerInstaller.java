@@ -16,7 +16,6 @@
 
 package net.fabricmc.installer.server;
 
-import net.fabricmc.installer.LoaderUtils;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.MinecraftLaunchJson;
 import net.fabricmc.installer.util.Utils;
@@ -25,9 +24,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
-import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -37,9 +33,10 @@ import java.util.zip.ZipOutputStream;
 public class ServerInstaller {
 
 	public static void install(File dir, String loaderVersion, InstallerProgress progress) throws IOException {
+		progress.updateProgress(String.format("Installing fabric server %s", loaderVersion));
 		File libsDir = new File(dir, "libraries");
 		progress.updateProgress("Downloading required files");
-		MinecraftLaunchJson meta = LoaderUtils.getLaunchMeta(loaderVersion);
+		MinecraftLaunchJson meta = Utils.getLaunchMeta(loaderVersion);
 
 		//We add fabric-loader as a lib so it can be downloaded and loaded in the same way as the other libs
 		meta.libraries.add(new MinecraftLaunchJson.Library("net.fabricmc:fabric-loader:" + loaderVersion, "https://maven.fabricmc.net/"));

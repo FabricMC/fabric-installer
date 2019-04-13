@@ -16,14 +16,22 @@
 
 package net.fabricmc.installer.server;
 
-import net.fabricmc.installer.BaseGui;
+import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
+import net.fabricmc.installer.Main;
+import net.fabricmc.installer.util.InstallerProgress;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 
-public class ServerGui extends BaseGui {
+public class ServerHandler extends Handler {
+
+	@Override
+	public String name() {
+		return "Server";
+	}
 
 	@Override
 	public void install() {
@@ -36,6 +44,24 @@ public class ServerGui extends BaseGui {
 				error(e.getLocalizedMessage());
 			}
 		}).start();
+	}
+
+	@Override
+	public void installCli(String[] args) throws Exception {
+		String loaderVersion = null;
+		if (args.length != 2) {
+			System.out.println("Using latest loader version");
+			Main.LOADER_MAVEN.load();
+			loaderVersion = Main.LOADER_MAVEN.latestVersion;
+		} else {
+			loaderVersion = args[1];
+		}
+		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, InstallerProgress.CONSOLE);
+	}
+
+	@Override
+	public String cliHelp() {
+		return "<loader_version> - installs a fabric server in the current working directory";
 	}
 
 	@Override

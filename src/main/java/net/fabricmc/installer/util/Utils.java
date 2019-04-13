@@ -18,6 +18,7 @@ package net.fabricmc.installer.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.net.URL;
@@ -72,4 +73,12 @@ public class Utils {
 			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
+
+	public static MinecraftLaunchJson getLaunchMeta(String loaderVersion) throws IOException {
+		String url = String.format("%s/%s/%s/%s/%3$s-%4$s.json", Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME, loaderVersion);
+		String fabricInstallMeta = Utils.getUrl(new URL(url));
+		JsonObject installMeta = Utils.GSON.fromJson(fabricInstallMeta, JsonObject.class);
+		return new MinecraftLaunchJson(installMeta);
+	}
+
 }
