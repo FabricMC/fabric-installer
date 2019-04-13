@@ -23,11 +23,13 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
 
 public class Utils {
+
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -62,5 +64,12 @@ public class Utils {
 
 	public static String readFile(File file) throws IOException {
 		return new String(Files.readAllBytes(file.toPath()));
+	}
+
+	public static void downloadFile(URL url, File file) throws IOException {
+		file.mkdirs();
+		try (InputStream in = url.openStream()) {
+			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 }

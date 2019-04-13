@@ -16,7 +16,7 @@
 
 package net.fabricmc.installer.util;
 
-public interface IInstallerProgress {
+public interface InstallerProgress {
 
 	void updateProgress(String text);
 

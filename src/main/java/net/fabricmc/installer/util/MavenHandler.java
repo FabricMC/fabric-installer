@@ -25,11 +25,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MavenHandler {
 
 	public String latestVersion = "";
 	public List<String> versions = new ArrayList<>();
+
+	private List<Consumer<List<String>>> completeConsumers = new ArrayList<>();
 
 	public void load(String mavenServerURL, String packageName, String jarName) throws IOException, XMLStreamException {
 
@@ -45,6 +48,12 @@ public class MavenHandler {
 
 		Collections.reverse(versions);
 		latestVersion = versions.get(0);
+
+		completeConsumers.forEach(listConsumer -> listConsumer.accept(versions));
+	}
+
+	public void onComplete(Consumer<List<String>> completeConsumer) {
+		completeConsumers.add(completeConsumer);
 	}
 
 }

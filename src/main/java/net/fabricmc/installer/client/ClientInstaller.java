@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package net.fabricmc.installer;
+package net.fabricmc.installer.client;
 
-import com.google.gson.JsonObject;
+import net.fabricmc.installer.LoaderUtils;
 import net.fabricmc.installer.util.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 public class ClientInstaller {
 
-	public static String install(File mcDir, Version version, String loaderVersion, IInstallerProgress progress) throws IOException {
+	public static String install(File mcDir, Version version, String loaderVersion, InstallerProgress progress) throws IOException {
 		System.out.println("Installing " + version + " with fabric " + loaderVersion);
 
 		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, version);
 
-		String url = String.format("%s/%s/%s/%s/%3$s-%4$s.json", Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME, loaderVersion);
-		String fabricInstallMeta = Utils.getUrl(new URL(url));
-		JsonObject installMeta = Utils.GSON.fromJson(fabricInstallMeta, JsonObject.class);
-
-		MinecraftLaunchJson launchJson = new MinecraftLaunchJson(installMeta);
+		MinecraftLaunchJson launchJson = LoaderUtils.getLaunchMeta(loaderVersion);
 		launchJson.id = profileName;
 		launchJson.inheritsFrom = version.getMinecraftVersion();
 

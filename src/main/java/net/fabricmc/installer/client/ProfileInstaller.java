@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.fabricmc.installer;
+package net.fabricmc.installer.client;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.installer.util.Reference;

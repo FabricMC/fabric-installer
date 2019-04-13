@@ -16,7 +16,9 @@
 
 package net.fabricmc.installer;
 
-import net.fabricmc.installer.util.IInstallerProgress;
+import net.fabricmc.installer.client.ClientInstaller;
+import net.fabricmc.installer.client.ProfileInstaller;
+import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
@@ -30,7 +32,7 @@ public class Main {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, XMLStreamException {
 		String[] versionSplit = System.getProperty("java.version").split("\\.");
-		if(versionSplit.length == 2){ //Only check 1.x versions of java, new versions are formatted liked 12
+		if (versionSplit.length == 2) { //Only check 1.x versions of java, new versions are formatted liked 12
 			int javaVersionMajor = Integer.parseInt(versionSplit[0]);
 			int javaVersionMinor = Integer.parseInt(versionSplit[1]);
 			if (javaVersionMinor < 8 && javaVersionMajor <= 1) {
@@ -51,16 +53,16 @@ public class Main {
 			InstallerGui.start();
 		} else if (args[0].equals("help") || args.length != 4) {
 			System.out.println("installer.jar help - this");
-			System.out.println("installer.jar nogui <launcher dir> <mappings version> <loader version>");
+			System.out.println("installer.jar client <launcher dir> <mappings version> <loader version>");
 			System.out.println("Mappings example: 18w49a.11 ,Loader example: 0.2.0.62");
-		} else if (args[0].equals("nogui")) {
+		} else if (args[0].equals("client")) {
 			File file = new File(args[1]);
 			if (!file.exists()) {
 				throw new FileNotFoundException("Launcher directory not found");
 			}
 			Version version = new Version(args[2]);
 			String loaderVersion = args[3];
-			String profileName = ClientInstaller.install(file, version, loaderVersion, new IInstallerProgress() {
+			String profileName = ClientInstaller.install(file, version, loaderVersion, new InstallerProgress() {
 				@Override
 				public void updateProgress(String text) {
 					System.out.println(text);

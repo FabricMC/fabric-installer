@@ -13,3 +13,4 @@
 *.iws
 /out
 /classes
+/test
