@@ -20,6 +20,7 @@ import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.Main;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import java.io.File;
@@ -27,6 +28,7 @@ import java.io.IOException;
 
 public class ServerHandler extends Handler {
 
+	public JComboBox<String> mappingVersionComboBox;
 	public JTextField serverJarName;
 
 	@Override
@@ -36,10 +38,12 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public void install() {
+		String versionStr = (String) mappingVersionComboBox.getSelectedItem();
+		Version version = new Version(versionStr);
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
 		new Thread(() -> {
 			try {
-				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, serverJarName.getText(), this);
+				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, serverJarName.getText(), version, this);
 			} catch (IOException e) {
 				e.printStackTrace();
 				error(e.getLocalizedMessage());
@@ -57,7 +61,9 @@ public class ServerHandler extends Handler {
 		} else {
 			loaderVersion = args[1];
 		}
-		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, "minecraft-server.jar", InstallerProgress.CONSOLE);
+		Main.MAPPINGS_MAVEN.load();
+		Version version = new Version(Main.MAPPINGS_MAVEN.latestVersion);
+		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, "minecraft-server.jar", version, InstallerProgress.CONSOLE);
 	}
 
 	@Override
@@ -70,6 +76,18 @@ public class ServerHandler extends Handler {
 		addRow(pane, jPanel -> {
 			jPanel.add(new JLabel("MC Server jar"));
 			jPanel.add(serverJarName = new JTextField("minecraft-server.jar"));
+		});
+
+		addRow(pane, jPanel -> {
+			jPanel.add(new JLabel("Mappings version:"));
+			jPanel.add(mappingVersionComboBox = new JComboBox<>());
+		});
+
+		Main.MAPPINGS_MAVEN.onComplete(versions -> {
+			for (String str : versions) {
+				mappingVersionComboBox.addItem(str);
+			}
+			mappingVersionComboBox.setSelectedIndex(0);
 		});
 	}
 

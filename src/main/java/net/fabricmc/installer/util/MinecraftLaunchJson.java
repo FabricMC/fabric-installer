@@ -90,7 +90,8 @@ public class MinecraftLaunchJson {
 
 		public String getPath() {
 			String[] parts = this.name.split(":", 3);
-			return parts[0].replace(".", File.separator) + File.separator + parts[1] + File.separator + parts[2] + File.separator + parts[1] + "-" + parts[2] + ".jar";
+			String path = parts[0].replace(".", File.separator) + File.separator + parts[1] + File.separator + parts[2] + File.separator + parts[1] + "-" + parts[2] + ".jar";
+			return path.replaceAll(" ", "_");
 		}
 
 		public File getFile(File baseDir) {
