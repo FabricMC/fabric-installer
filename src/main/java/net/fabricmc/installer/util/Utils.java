@@ -34,6 +34,22 @@ public class Utils {
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+	public static File findDefaultUserDir() {
+		String home = System.getProperty("user.home", ".");
+		String os = System.getProperty("os.name").toLowerCase();
+		File dir;
+		File homeDir = new File(home);
+
+		if (os.contains("win") && System.getenv("APPDATA") != null) {
+			dir = new File(System.getenv("APPDATA"));
+		} else if (os.contains("mac")) {
+			dir = new File(homeDir, "Library" + File.separator + "Application Support");
+		} else {
+			dir = homeDir;
+		}
+		return dir;
+	}
+
 	public static File findDefaultInstallDir() {
 		String home = System.getProperty("user.home", ".");
 		String os = System.getProperty("os.name").toLowerCase();

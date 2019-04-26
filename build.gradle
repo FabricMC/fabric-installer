@@ -15,14 +15,13 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'edu.sc.seis.launch4j'
 apply plugin: "com.github.ben-manes.versions"
 
 sourceCompatibility = 1.8
-version = '0.3.0'
+version = '0.4.0'
 archivesBaseName = "fabric-installer"
 
 // Fetch build number from Jenkins

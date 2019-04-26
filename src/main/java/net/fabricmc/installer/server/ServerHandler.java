@@ -29,7 +29,6 @@ import java.io.IOException;
 public class ServerHandler extends Handler {
 
 	public JComboBox<String> mappingVersionComboBox;
-	public JTextField serverJarName;
 
 	@Override
 	public String name() {
@@ -43,7 +42,7 @@ public class ServerHandler extends Handler {
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
 		new Thread(() -> {
 			try {
-				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, serverJarName.getText(), version, this);
+				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, version, this);
 			} catch (IOException e) {
 				e.printStackTrace();
 				error(e.getLocalizedMessage());
@@ -63,7 +62,7 @@ public class ServerHandler extends Handler {
 		}
 		Main.MAPPINGS_MAVEN.load();
 		Version version = new Version(Main.MAPPINGS_MAVEN.latestVersion);
-		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, "minecraft-server.jar", version, InstallerProgress.CONSOLE);
+		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, version, InstallerProgress.CONSOLE);
 	}
 
 	@Override
@@ -73,11 +72,6 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
-		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("MC Server jar"));
-			jPanel.add(serverJarName = new JTextField("minecraft-server.jar"));
-		});
-
 		addRow(pane, jPanel -> {
 			jPanel.add(new JLabel("Mappings version:"));
 			jPanel.add(mappingVersionComboBox = new JComboBox<>());
