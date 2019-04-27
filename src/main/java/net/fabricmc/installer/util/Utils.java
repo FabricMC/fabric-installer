@@ -66,9 +66,8 @@ public class Utils {
 		return dir;
 	}
 
-	public static String getUrl(URL url) throws IOException {
-		URLConnection connection = url.openConnection();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+	public static String readTextFile(URL url) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
 			return reader.lines().collect(Collectors.joining("\n"));
 		}
 	}
@@ -84,7 +83,10 @@ public class Utils {
 	}
 
 	public static void downloadFile(URL url, File file) throws IOException {
-		file.mkdirs();
+		if (!file.mkdirs()) {
+			throw new IOException("Could not create directory for " + file.getAbsolutePath() + "!");
+		}
+
 		try (InputStream in = url.openStream()) {
 			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
@@ -92,7 +94,7 @@ public class Utils {
 
 	public static MinecraftLaunchJson getLaunchMeta(String loaderVersion) throws IOException {
 		String url = String.format("%s/%s/%s/%s/%3$s-%4$s.json", Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME, loaderVersion);
-		String fabricInstallMeta = Utils.getUrl(new URL(url));
+		String fabricInstallMeta = Utils.readTextFile(new URL(url));
 		JsonObject installMeta = Utils.GSON.fromJson(fabricInstallMeta, JsonObject.class);
 		return new MinecraftLaunchJson(installMeta);
 	}

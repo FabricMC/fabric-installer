@@ -56,8 +56,7 @@ public class ClientHandler extends Handler {
 					ProfileInstaller.setupProfile(mcPath, profileName, version);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
-				error(e.getLocalizedMessage());
+				error(e);
 			}
 		}).start();
 	}

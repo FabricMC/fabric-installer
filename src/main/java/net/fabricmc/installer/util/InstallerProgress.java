@@ -25,13 +25,13 @@ public interface InstallerProgress {
 		}
 
 		@Override
-		public void error(String error) {
+		public void error(Exception error) {
 			throw new RuntimeException(error);
 		}
 	};
 
 	void updateProgress(String text);
 
-	void error(String error);
+	void error(Exception error);
 
 }

@@ -43,9 +43,8 @@ public class ServerHandler extends Handler {
 		new Thread(() -> {
 			try {
 				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, version, this);
-			} catch (IOException e) {
-				e.printStackTrace();
-				error(e.getLocalizedMessage());
+			} catch (Exception e) {
+				error(e);
 			}
 		}).start();
 	}

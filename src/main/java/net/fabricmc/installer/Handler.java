@@ -20,6 +20,7 @@ import net.fabricmc.installer.util.InstallerProgress;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public abstract class Handler implements InstallerProgress {
@@ -30,6 +31,8 @@ public abstract class Handler implements InstallerProgress {
 	public JTextField installLocation;
 	public JButton selectFolderButton;
 	public JLabel statusLabel;
+
+	private JPanel pane;
 
 	public abstract String name();
 
@@ -45,7 +48,7 @@ public abstract class Handler implements InstallerProgress {
 	public abstract void setupPane2(JPanel pane, InstallerGui installerGui);
 
 	public JPanel makePanel(InstallerGui installerGui) {
-		JPanel pane = new JPanel();
+		pane = new JPanel();
 		pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
 
 		setupPane1(pane, installerGui);
@@ -93,9 +96,38 @@ public abstract class Handler implements InstallerProgress {
 		statusLabel.setForeground(Color.BLACK);
 	}
 
+	private void appendException(StringBuilder errorMessage, String prefix, String name, Throwable e) {
+		String prefixAppend = "  ";
+
+		errorMessage.append(prefix).append(name).append(": ").append(e.getLocalizedMessage()).append('\n');
+		for (StackTraceElement traceElement : e.getStackTrace()) {
+			errorMessage.append(prefix).append("- ").append(traceElement).append('\n');
+		}
+
+		if (e.getCause() != null) {
+			appendException(errorMessage, prefix + prefixAppend, "Caused by", e.getCause());
+		}
+
+		for (Throwable ec : e.getSuppressed()) {
+			appendException(errorMessage, prefix + prefixAppend, "Suppressed", ec);
+		}
+	}
+
 	@Override
-	public void error(String error) {
-		statusLabel.setText(error);
+	public void error(Exception e) {
+		StringBuilder errorMessage = new StringBuilder();
+		appendException(errorMessage, "", "Exception", e);
+
+		System.err.println(errorMessage);
+
+		JOptionPane.showMessageDialog(
+				pane,
+				errorMessage,
+				"Exception occured!",
+				JOptionPane.ERROR_MESSAGE
+		);
+
+		statusLabel.setText(e.getLocalizedMessage());
 		statusLabel.setForeground(Color.RED);
 	}
 
