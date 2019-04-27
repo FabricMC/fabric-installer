@@ -83,8 +83,10 @@ public class Utils {
 	}
 
 	public static void downloadFile(URL url, File file) throws IOException {
-		if (!file.mkdirs()) {
-			throw new IOException("Could not create directory for " + file.getAbsolutePath() + "!");
+		if (!file.getParentFile().isDirectory()) {
+			if (!file.mkdirs()) {
+				throw new IOException("Could not create directory for " + file.getAbsolutePath() + "!");
+			}
 		}
 
 		try (InputStream in = url.openStream()) {
