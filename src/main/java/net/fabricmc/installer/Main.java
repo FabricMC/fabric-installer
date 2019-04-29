@@ -18,6 +18,7 @@ package net.fabricmc.installer;
 
 import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
+import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.MavenHandler;
 import net.fabricmc.installer.util.Reference;
 
@@ -58,24 +59,27 @@ public class Main {
 		HANDLERS.add(new ClientHandler());
 		HANDLERS.add(new ServerHandler());
 
+		ArgumentParser argumentParser = ArgumentParser.create(args);
+		String command = argumentParser.getCommand().orElse(null);
+
 		//Used to suppress warning from libs
 		setDebugLevel(Level.SEVERE);
 
-		if (args.length == 0) {
+		if (command == null) {
 			InstallerGui.start();
-		} else if (args[0].equals("help")) {
+		} else if (command.equals("help")) {
 			System.out.println("help - Opens this menu");
 			HANDLERS.forEach(handler -> System.out.printf("%s %s\n", handler.name().toLowerCase(), handler.cliHelp()));
 
 			LOADER_MAVEN.load();
 			MAPPINGS_MAVEN.load();
 
-			System.out.printf("Latest Mappings: %s\nLatest Loader: %s\n", MAPPINGS_MAVEN.latestVersion, LOADER_MAVEN.latestVersion);
+			System.out.printf("\nLatest Mappings: %s\nLatest Loader: %s\n", MAPPINGS_MAVEN.latestVersion, LOADER_MAVEN.latestVersion);
 		} else {
 			for (Handler handler : HANDLERS) {
-				if (args[0].equalsIgnoreCase(handler.name())) {
+				if (command.equalsIgnoreCase(handler.name())) {
 					try {
-						handler.installCli(args);
+						handler.installCli(argumentParser);
 					} catch (Exception e) {
 						throw new RuntimeException("Failed to install " + handler.name(), e);
 					}

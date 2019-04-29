@@ -19,12 +19,13 @@ package net.fabricmc.installer.server;
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.Main;
+import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 
 public class ServerHandler extends Handler {
 
@@ -51,23 +52,19 @@ public class ServerHandler extends Handler {
 	}
 
 	@Override
-	public void installCli(String[] args) throws Exception {
-		String loaderVersion = null;
-		if (args.length != 2) {
-			System.out.println("Using latest loader version");
-			Main.LOADER_MAVEN.load();
-			loaderVersion = Main.LOADER_MAVEN.latestVersion;
-		} else {
-			loaderVersion = args[1];
+	public void installCli(ArgumentParser args) throws Exception {
+		File file = new File(args.getOrDefault("dir", () -> "."));
+		if (!file.exists()) {
+			throw new FileNotFoundException("Server directory not found at " + file.getAbsolutePath());
 		}
-		Main.MAPPINGS_MAVEN.load();
-		Version version = new Version(Main.MAPPINGS_MAVEN.latestVersion);
-		ServerInstaller.install(new File("").getAbsoluteFile(), loaderVersion, version, InstallerProgress.CONSOLE);
+		String loaderVersion = getLoaderVersion(args);
+		Version version = getMappingsVersion(args);
+		ServerInstaller.install(file.getAbsoluteFile(), loaderVersion, version, InstallerProgress.CONSOLE);
 	}
 
 	@Override
 	public String cliHelp() {
-		return "<loader_version> - installs a fabric server in the current working directory";
+		return "-dir <install dir, default current dir> -mappings <mappings version, default latest> -loader <loader version, default latest>";
 	}
 
 	@Override

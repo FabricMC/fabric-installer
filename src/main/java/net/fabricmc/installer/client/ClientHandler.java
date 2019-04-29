@@ -19,6 +19,7 @@ package net.fabricmc.installer.client;
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.Main;
+import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Utils;
 import net.fabricmc.installer.util.Version;
@@ -26,7 +27,6 @@ import net.fabricmc.installer.util.Version;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.security.InvalidParameterException;
 
 public class ClientHandler extends Handler {
 
@@ -63,23 +63,22 @@ public class ClientHandler extends Handler {
 	}
 
 	@Override
-	public void installCli(String[] args) throws Exception {
-		if (args.length < 2) {
-			throw new InvalidParameterException("A minecraft launcher directory must be provided");
-		}
-		File file = new File(args[1]);
+	public void installCli(ArgumentParser args) throws Exception {
+		File file = new File(args.get("dir"));
 		if (!file.exists()) {
-			throw new FileNotFoundException("Launcher directory not found");
+			throw new FileNotFoundException("Launcher directory not found at " + file.getAbsolutePath());
 		}
-		Version version = new Version(args[2]);
-		String loaderVersion = args[3];
-		String profileName = ClientInstaller.install(file, version, loaderVersion, InstallerProgress.CONSOLE);
-		ProfileInstaller.setupProfile(file, profileName, version);
+
+		Version mappingsVersion = getMappingsVersion(args);
+		String loaderVersion = getLoaderVersion(args);
+
+		String profileName = ClientInstaller.install(file, mappingsVersion, loaderVersion, InstallerProgress.CONSOLE);
+		ProfileInstaller.setupProfile(file, profileName, mappingsVersion);
 	}
 
 	@Override
 	public String cliHelp() {
-		return "*launcher_dir* <mappings version> <loader version> - Installs the client profile into the minecraft directory located at the provided location";
+		return "-dir <install dir, required> -mappings <mappings version, default latest> -loader <loader version, default latest>";
 	}
 
 	@Override

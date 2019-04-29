@@ -16,10 +16,14 @@
 
 package net.fabricmc.installer;
 
+import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
+import javax.xml.stream.XMLStreamException;
 import java.awt.*;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -38,7 +42,7 @@ public abstract class Handler implements InstallerProgress {
 
 	public abstract void install();
 
-	public abstract void installCli(String[] args) throws Exception;
+	public abstract void installCli(ArgumentParser args) throws Exception;
 
 	public abstract String cliHelp();
 
@@ -138,6 +142,30 @@ public abstract class Handler implements InstallerProgress {
 		JPanel panel = new JPanel(new FlowLayout());
 		consumer.accept(panel);
 		parent.add(panel);
+	}
+
+	protected Version getMappingsVersion(ArgumentParser args){
+		return new Version(args.getOrDefault("mappings", () -> {
+			System.out.println("Using latest mapping version");
+			try {
+				Main.MAPPINGS_MAVEN.load();
+			} catch (IOException | XMLStreamException e) {
+				throw new RuntimeException("Failed to load latest versions", e);
+			}
+			return Main.MAPPINGS_MAVEN.latestVersion;
+		}));
+	}
+
+	protected String getLoaderVersion(ArgumentParser args){
+		return args.getOrDefault("loader", () -> {
+			System.out.println("Using latest loader version");
+			try {
+				Main.LOADER_MAVEN.load();
+			} catch (IOException | XMLStreamException e) {
+				throw new RuntimeException("Failed to load latest versions", e);
+			}
+			return Main.LOADER_MAVEN.latestVersion;
+		});
 	}
 
 }
