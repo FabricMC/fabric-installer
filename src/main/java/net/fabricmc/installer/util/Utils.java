@@ -19,12 +19,11 @@ package net.fabricmc.installer.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
@@ -89,9 +88,7 @@ public class Utils {
 			}
 		}
 
-		try (InputStream in = url.openStream()) {
-			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		}
+		FileUtils.copyURLToFile(url, file);
 	}
 
 	public static MinecraftLaunchJson getLaunchMeta(String loaderVersion) throws IOException {
