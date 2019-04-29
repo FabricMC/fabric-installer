@@ -58,6 +58,7 @@ public class ClientHandler extends Handler {
 			} catch (Exception e) {
 				error(e);
 			}
+			buttonInstall.setEnabled(true);
 		}).start();
 	}
 

@@ -46,6 +46,7 @@ public class ServerHandler extends Handler {
 			} catch (Exception e) {
 				error(e);
 			}
+			buttonInstall.setEnabled(true);
 		}).start();
 	}
 

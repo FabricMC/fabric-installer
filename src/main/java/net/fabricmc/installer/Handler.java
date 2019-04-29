@@ -76,7 +76,10 @@ public abstract class Handler implements InstallerProgress {
 
 		addRow(pane, jPanel -> {
 			jPanel.add(buttonInstall = new JButton("Install"));
-			buttonInstall.addActionListener(e -> install());
+			buttonInstall.addActionListener(e -> {
+				buttonInstall.setEnabled(false);
+				install();
+			});
 		});
 
 		Main.LOADER_MAVEN.onComplete(versions -> {
