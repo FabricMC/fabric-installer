@@ -30,7 +30,6 @@ import java.io.FileNotFoundException;
 
 public class ClientHandler extends Handler {
 
-	public JComboBox<String> mappingVersionComboBox;
 	private JCheckBox createProfile;
 
 	@Override
@@ -83,17 +82,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
-		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Mappings version:"));
-			jPanel.add(mappingVersionComboBox = new JComboBox<>());
-		});
 
-		Main.MAPPINGS_MAVEN.onComplete(versions -> {
-			for (String str : versions) {
-				mappingVersionComboBox.addItem(str);
-			}
-			mappingVersionComboBox.setSelectedIndex(0);
-		});
 	}
 
 	@Override

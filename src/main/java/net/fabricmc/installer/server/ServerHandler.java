@@ -18,7 +18,6 @@ package net.fabricmc.installer.server;
 
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
-import net.fabricmc.installer.Main;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Version;
@@ -28,8 +27,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class ServerHandler extends Handler {
-
-	public JComboBox<String> mappingVersionComboBox;
 
 	@Override
 	public String name() {
@@ -69,17 +66,7 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
-		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Mappings version:"));
-			jPanel.add(mappingVersionComboBox = new JComboBox<>());
-		});
 
-		Main.MAPPINGS_MAVEN.onComplete(versions -> {
-			for (String str : versions) {
-				mappingVersionComboBox.addItem(str);
-			}
-			mappingVersionComboBox.setSelectedIndex(0);
-		});
 	}
 
 	@Override

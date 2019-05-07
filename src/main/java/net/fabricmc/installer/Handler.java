@@ -24,17 +24,19 @@ import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 public abstract class Handler implements InstallerProgress {
 
 	public JButton buttonInstall;
 
+	public JComboBox<String> mappingVersionComboBox;
 	public JComboBox<String> loaderVersionComboBox;
 	public JTextField installLocation;
 	public JButton selectFolderButton;
 	public JLabel statusLabel;
+
+	public JCheckBox snapshotCheckBox;
 
 	private JPanel pane;
 
@@ -56,6 +58,22 @@ public abstract class Handler implements InstallerProgress {
 		pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
 
 		setupPane1(pane, installerGui);
+
+		addRow(pane, jPanel -> {
+			jPanel.add(new JLabel("Mappings version:"));
+			jPanel.add(mappingVersionComboBox = new JComboBox<>());
+			jPanel.add(snapshotCheckBox = new JCheckBox("Show snapshots"));
+			snapshotCheckBox.setSelected(false);
+			snapshotCheckBox.addActionListener(e -> {
+				if(Main.MAPPINGS_MAVEN.complete){
+					updateMappings();
+				}
+			});
+		});
+
+		Main.MAPPINGS_MAVEN.onComplete(versions -> {
+			updateMappings();
+		});
 
 		addRow(pane, jPanel -> {
 			jPanel.add(new JLabel("Loader Version:"));
@@ -95,6 +113,17 @@ public abstract class Handler implements InstallerProgress {
 		});
 
 		return pane;
+	}
+
+	private void updateMappings(){
+		mappingVersionComboBox.removeAllItems();
+		for (String str : Main.MAPPINGS_MAVEN.versions) {
+			if(!snapshotCheckBox.isSelected() && Version.isSnapshot(str)){
+				continue;
+			}
+			mappingVersionComboBox.addItem(str);
+		}
+		mappingVersionComboBox.setSelectedIndex(0);
 	}
 
 	@Override
@@ -152,7 +181,7 @@ public abstract class Handler implements InstallerProgress {
 			} catch (IOException | XMLStreamException e) {
 				throw new RuntimeException("Failed to load latest versions", e);
 			}
-			return Main.MAPPINGS_MAVEN.latestVersion;
+			return Main.MAPPINGS_MAVEN.getLatestVersion(args.has("snapshot"));
 		}));
 	}
 

@@ -35,6 +35,7 @@ public class MavenHandler {
 
 	public String latestVersion = "";
 	public List<String> versions = new ArrayList<>();
+	public boolean complete;
 
 	public MavenHandler(String mavenServerURL, String packageName, String jarName) {
 		this.mavenServerURL = mavenServerURL;
@@ -61,11 +62,21 @@ public class MavenHandler {
 		Collections.reverse(versions);
 		latestVersion = versions.get(0);
 
+		complete = true;
 		completeConsumers.forEach(listConsumer -> listConsumer.accept(versions));
 	}
 
 	public void onComplete(Consumer<List<String>> completeConsumer) {
 		completeConsumers.add(completeConsumer);
+	}
+
+	public String getLatestVersion(boolean snapshot){
+		if(snapshot){
+			return latestVersion;
+		} else {
+			return versions.stream()
+				.filter(s -> !Version.isSnapshot(s)).findFirst().orElse(null);
+		}
 	}
 
 }

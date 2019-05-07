@@ -21,7 +21,7 @@ apply plugin: 'edu.sc.seis.launch4j'
 apply plugin: "com.github.ben-manes.versions"
 
 sourceCompatibility = 1.8
-version = '0.4.1'
+version = '0.4.2'
 archivesBaseName = "fabric-installer"
 
 // Fetch build number from Jenkins
