@@ -22,17 +22,40 @@ import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class Utils {
 
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("lang/installer", Locale.getDefault(), new ResourceBundle.Control() {
+		@Override
+		public Locale getFallbackLocale(String baseName, Locale locale) {
+			return locale == Locale.ROOT ? null : Locale.ROOT;
+		}
+
+		@Override
+		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
+			final String bundleName = toBundleName(baseName, locale);
+			final String resourceName = toResourceName(bundleName, "properties");
+			try (InputStream stream = loader.getResourceAsStream(resourceName)) {
+				if (stream != null) {
+					try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+						return new PropertyResourceBundle(reader);
+					}
+				}
+			}
+			return super.newBundle(baseName, locale, format, loader, reload);
+		}
+	});
 
 	public static File findDefaultUserDir() {
 		String home = System.getProperty("user.home", ".");

@@ -18,12 +18,14 @@ package net.fabricmc.installer;
 
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Utils;
 import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 public abstract class Handler implements InstallerProgress {
@@ -60,12 +62,12 @@ public abstract class Handler implements InstallerProgress {
 		setupPane1(pane, installerGui);
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Mappings version:"));
+			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.mapping.version")));
 			jPanel.add(mappingVersionComboBox = new JComboBox<>());
-			jPanel.add(snapshotCheckBox = new JCheckBox("Show snapshots"));
+			jPanel.add(snapshotCheckBox = new JCheckBox(Utils.BUNDLE.getString("option.show.snapshots")));
 			snapshotCheckBox.setSelected(false);
 			snapshotCheckBox.addActionListener(e -> {
-				if(Main.MAPPINGS_MAVEN.complete){
+				if (Main.MAPPINGS_MAVEN.complete) {
 					updateMappings();
 				}
 			});
@@ -76,12 +78,12 @@ public abstract class Handler implements InstallerProgress {
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Loader Version:"));
+			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.loader.version")));
 			jPanel.add(loaderVersionComboBox = new JComboBox<>());
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Select Install Location"));
+			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.select.location")));
 			jPanel.add(installLocation = new JTextField());
 			jPanel.add(selectFolderButton = new JButton());
 
@@ -93,11 +95,11 @@ public abstract class Handler implements InstallerProgress {
 
 		addRow(pane, jPanel -> {
 			jPanel.add(statusLabel = new JLabel());
-			statusLabel.setText("Loading versions");
+			statusLabel.setText(Utils.BUNDLE.getString("prompt.loading.versions"));
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(buttonInstall = new JButton("Install"));
+			jPanel.add(buttonInstall = new JButton(Utils.BUNDLE.getString("prompt.install")));
 			buttonInstall.addActionListener(e -> {
 				buttonInstall.setEnabled(false);
 				install();
@@ -109,16 +111,16 @@ public abstract class Handler implements InstallerProgress {
 				loaderVersionComboBox.addItem(str);
 			}
 			loaderVersionComboBox.setSelectedIndex(0);
-			statusLabel.setText("Ready to install");
+			statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
 		});
 
 		return pane;
 	}
 
-	private void updateMappings(){
+	private void updateMappings() {
 		mappingVersionComboBox.removeAllItems();
 		for (String str : Main.MAPPINGS_MAVEN.versions) {
-			if(!snapshotCheckBox.isSelected() && Version.isSnapshot(str)){
+			if (!snapshotCheckBox.isSelected() && Version.isSnapshot(str)) {
 				continue;
 			}
 			mappingVersionComboBox.addItem(str);
@@ -141,25 +143,25 @@ public abstract class Handler implements InstallerProgress {
 		}
 
 		if (e.getCause() != null) {
-			appendException(errorMessage, prefix + prefixAppend, "Caused by", e.getCause());
+			appendException(errorMessage, prefix + prefixAppend, Utils.BUNDLE.getString("prompt.exception.caused.by"), e.getCause());
 		}
 
 		for (Throwable ec : e.getSuppressed()) {
-			appendException(errorMessage, prefix + prefixAppend, "Suppressed", ec);
+			appendException(errorMessage, prefix + prefixAppend, Utils.BUNDLE.getString("prompt.exception.suppressed"), ec);
 		}
 	}
 
 	@Override
 	public void error(Exception e) {
 		StringBuilder errorMessage = new StringBuilder();
-		appendException(errorMessage, "", "Exception", e);
+		appendException(errorMessage, "", Utils.BUNDLE.getString("prompt.exception"), e);
 
 		System.err.println(errorMessage);
 
 		JOptionPane.showMessageDialog(
 				pane,
 				errorMessage,
-				"Exception occured!",
+				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
 		);
 
@@ -173,7 +175,7 @@ public abstract class Handler implements InstallerProgress {
 		parent.add(panel);
 	}
 
-	protected Version getMappingsVersion(ArgumentParser args){
+	protected Version getMappingsVersion(ArgumentParser args) {
 		return new Version(args.getOrDefault("mappings", () -> {
 			System.out.println("Using latest mapping version");
 			try {
@@ -185,7 +187,7 @@ public abstract class Handler implements InstallerProgress {
 		}));
 	}
 
-	protected String getLoaderVersion(ArgumentParser args){
+	protected String getLoaderVersion(ArgumentParser args) {
 		return args.getOrDefault("loader", () -> {
 			System.out.println("Using latest loader version");
 			try {
