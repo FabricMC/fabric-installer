@@ -16,16 +16,21 @@
 
 package net.fabricmc.installer;
 
+import net.fabricmc.installer.util.Utils;
+
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class InstallerGui extends JFrame {
 
+	private final ResourceBundle bundle = Utils.BUNDLE;
 	private JTabbedPane contentPane;
 
 	public InstallerGui() throws IOException, XMLStreamException {
@@ -39,10 +44,10 @@ public class InstallerGui extends JFrame {
 		Main.LOADER_MAVEN.load();
 	}
 
-	public static void selectInstallLocation(Supplier<String> initalDir, Consumer<String> selectedDir) {
+	public void selectInstallLocation(Supplier<String> initalDir, Consumer<String> selectedDir) {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(initalDir.get()));
-		chooser.setDialogTitle("Select Install Location");
+		chooser.setDialogTitle(bundle.getString("prompt.select.location"));
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setAcceptAllFileFilterUsed(false);
 
@@ -56,20 +61,24 @@ public class InstallerGui extends JFrame {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		InstallerGui dialog = new InstallerGui();
 		dialog.pack();
-		dialog.setTitle("Fabric Installer");
+		dialog.setTitle(dialog.bundle.getString("installer.title"));
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
 	}
 
 	private void initComponents() {
 		contentPane = new JTabbedPane(JTabbedPane.TOP);
-		Main.HANDLERS.forEach(handler -> contentPane.addTab(handler.name(), handler.makePanel(this)));
+		Main.HANDLERS.forEach(handler -> contentPane.addTab(bundle.getString("tab." + handler.name().toLowerCase(Locale.ROOT)), handler.makePanel(this)));
 	}
 
 	private void addRow(Container parent, Consumer<JPanel> consumer) {
 		JPanel panel = new JPanel(new FlowLayout());
 		consumer.accept(panel);
 		parent.add(panel);
+	}
+
+	public ResourceBundle getBundle() {
+		return bundle;
 	}
 
 }

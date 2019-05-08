@@ -18,12 +18,14 @@ package net.fabricmc.installer;
 
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Utils;
 import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 public abstract class Handler implements InstallerProgress {
@@ -39,6 +41,7 @@ public abstract class Handler implements InstallerProgress {
 	public JCheckBox snapshotCheckBox;
 
 	private JPanel pane;
+	private final ResourceBundle bundle = Utils.BUNDLE;
 
 	public abstract String name();
 
@@ -60,9 +63,9 @@ public abstract class Handler implements InstallerProgress {
 		setupPane1(pane, installerGui);
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Mappings version:"));
+			jPanel.add(new JLabel(installerGui.getBundle().getString("prompt.mapping.version")));
 			jPanel.add(mappingVersionComboBox = new JComboBox<>());
-			jPanel.add(snapshotCheckBox = new JCheckBox("Show snapshots"));
+			jPanel.add(snapshotCheckBox = new JCheckBox(installerGui.getBundle().getString("option.show.snapshots")));
 			snapshotCheckBox.setSelected(false);
 			snapshotCheckBox.addActionListener(e -> {
 				if(Main.MAPPINGS_MAVEN.complete){
@@ -76,28 +79,28 @@ public abstract class Handler implements InstallerProgress {
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Loader Version:"));
+			jPanel.add(new JLabel(installerGui.getBundle().getString("prompt.loader.version")));
 			jPanel.add(loaderVersionComboBox = new JComboBox<>());
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel("Select Install Location"));
+			jPanel.add(new JLabel(installerGui.getBundle().getString("prompt.select.location")));
 			jPanel.add(installLocation = new JTextField());
 			jPanel.add(selectFolderButton = new JButton());
 
 			selectFolderButton.setText("...");
-			selectFolderButton.addActionListener(e -> InstallerGui.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
+			selectFolderButton.addActionListener(e -> installerGui.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
 		});
 
 		setupPane2(pane, installerGui);
 
 		addRow(pane, jPanel -> {
 			jPanel.add(statusLabel = new JLabel());
-			statusLabel.setText("Loading versions");
+			statusLabel.setText(installerGui.getBundle().getString("prompt.loading.versions"));
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(buttonInstall = new JButton("Install"));
+			jPanel.add(buttonInstall = new JButton(installerGui.getBundle().getString("prompt.install")));
 			buttonInstall.addActionListener(e -> {
 				buttonInstall.setEnabled(false);
 				install();
@@ -109,7 +112,7 @@ public abstract class Handler implements InstallerProgress {
 				loaderVersionComboBox.addItem(str);
 			}
 			loaderVersionComboBox.setSelectedIndex(0);
-			statusLabel.setText("Ready to install");
+			statusLabel.setText(installerGui.getBundle().getString("prompt.ready.install"));
 		});
 
 		return pane;
@@ -141,30 +144,34 @@ public abstract class Handler implements InstallerProgress {
 		}
 
 		if (e.getCause() != null) {
-			appendException(errorMessage, prefix + prefixAppend, "Caused by", e.getCause());
+			appendException(errorMessage, prefix + prefixAppend, translate("prompt.exception.caused.by"), e.getCause());
 		}
 
 		for (Throwable ec : e.getSuppressed()) {
-			appendException(errorMessage, prefix + prefixAppend, "Suppressed", ec);
+			appendException(errorMessage, prefix + prefixAppend, translate("prompt.exception.suppressed"), ec);
 		}
 	}
 
 	@Override
 	public void error(Exception e) {
 		StringBuilder errorMessage = new StringBuilder();
-		appendException(errorMessage, "", "Exception", e);
+		appendException(errorMessage, "", translate("prompt.exception"), e);
 
 		System.err.println(errorMessage);
 
 		JOptionPane.showMessageDialog(
 				pane,
 				errorMessage,
-				"Exception occured!",
+				translate("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
 		);
 
 		statusLabel.setText(e.getLocalizedMessage());
 		statusLabel.setForeground(Color.RED);
+	}
+
+	private String translate(String key) {
+		return bundle.getString(key);
 	}
 
 	protected void addRow(Container parent, Consumer<JPanel> consumer) {

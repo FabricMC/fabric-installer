@@ -16,7 +16,11 @@
 
 package net.fabricmc.installer.server;
 
-import net.fabricmc.installer.util.*;
+import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.MinecraftLaunchJson;
+import net.fabricmc.installer.util.Reference;
+import net.fabricmc.installer.util.Utils;
+import net.fabricmc.installer.util.Version;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,108 +28,113 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.jar.*;
-import java.util.stream.Collectors;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class ServerInstaller {
 
-	public static void install(File dir, String loaderVersion, Version version, InstallerProgress progress) throws IOException {
-		progress.updateProgress(String.format("Installing fabric server %s", loaderVersion));
-		File libsDir = new File(Utils.findDefaultUserDir(), ".cache" + File.separator + "fabric-installer" + File.separator + "libraries");
-		if (!libsDir.exists()) {
-			if (!libsDir.mkdirs()) {
-				throw new IOException("Could not create " + libsDir.getAbsolutePath() + "!");
-			}
-		}
+    public static void install(File dir, String loaderVersion, Version version, InstallerProgress progress) throws IOException {
+        final ResourceBundle bundle = Utils.BUNDLE;
 
-		progress.updateProgress("Downloading required files");
-		MinecraftLaunchJson meta = Utils.getLaunchMeta(loaderVersion);
+        progress.updateProgress(new MessageFormat(bundle.getString("progress.installing.server")).format(new Object[] {loaderVersion}));
+        File libsDir = new File(Utils.findDefaultUserDir(), ".cache" + File.separator + "fabric-installer" + File.separator + "libraries");
+        if (!libsDir.exists()) {
+            if (!libsDir.mkdirs()) {
+                throw new IOException("Could not create " + libsDir.getAbsolutePath() + "!");
+            }
+        }
 
-		//We add fabric-loader as a lib so it can be downloaded and loaded in the same way as the other libs
-		meta.libraries.add(new MinecraftLaunchJson.Library("net.fabricmc:fabric-loader:" + loaderVersion, "https://maven.fabricmc.net/"));
-		meta.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + version.toString(), Reference.MAVEN_SERVER_URL));
+        progress.updateProgress(bundle.getString("progress.download.libraries"));
+        MinecraftLaunchJson meta = Utils.getLaunchMeta(loaderVersion);
 
-		List<File> libraryFiles = new ArrayList<>();
+        //We add fabric-loader as a lib so it can be downloaded and loaded in the same way as the other libs
+        meta.libraries.add(new MinecraftLaunchJson.Library("net.fabricmc:fabric-loader:" + loaderVersion, "https://maven.fabricmc.net/"));
+        meta.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + version.toString(), Reference.MAVEN_SERVER_URL));
 
-		for (MinecraftLaunchJson.Library library : meta.libraries) {
-			progress.updateProgress("Downloading library " + library.name);
-			File libraryFile = new File(libsDir, library.getFileName());
-			Utils.downloadFile(new URL(library.getURL()), libraryFile);
-			libraryFiles.add(libraryFile);
-		}
+        List<File> libraryFiles = new ArrayList<>();
 
-		progress.updateProgress("Generating server launch JAR");
-		File launchJar = new File(dir, "fabric-server-launch.jar");
-		makeLaunchJar(launchJar, meta, libraryFiles, progress);
+        for (MinecraftLaunchJson.Library library : meta.libraries) {
+            progress.updateProgress(new MessageFormat(bundle.getString("progress.download.library.entry")).format(new Object[] {library.name}));
+            File libraryFile = new File(libsDir, library.getFileName());
+            Utils.downloadFile(new URL(library.getURL()), libraryFile);
+            libraryFiles.add(libraryFile);
+        }
 
-		progress.updateProgress("Done, start server by running " + launchJar.getName());
-	}
+        progress.updateProgress(bundle.getString("progress.generating.launch.jar"));
+        File launchJar = new File(dir, "fabric-server-launch.jar");
+        makeLaunchJar(launchJar, meta, libraryFiles, progress);
 
-	private static void makeLaunchJar(File file, MinecraftLaunchJson meta, List<File> libraryFiles, InstallerProgress progress) throws IOException {
-		if (file.exists()) {
-			if (!file.delete()) {
-				throw new IOException("Could not delete file: " + file.getAbsolutePath());
-			}
-		}
+        progress.updateProgress(new MessageFormat(bundle.getString("progress.done.start.server")).format(new Object[] {launchJar.getName()}));
+    }
 
-		FileOutputStream outputStream = new FileOutputStream(file);
-		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+    private static void makeLaunchJar(File file, MinecraftLaunchJson meta, List<File> libraryFiles, InstallerProgress progress) throws IOException {
+        if (file.exists()) {
+            if (!file.delete()) {
+                throw new IOException("Could not delete file: " + file.getAbsolutePath());
+            }
+        }
 
-		Set<String> addedEntries = new HashSet<>();
+        FileOutputStream outputStream = new FileOutputStream(file);
+        ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 
-		{
-			addedEntries.add("META-INF/MANIFEST.MF");
-			zipOutputStream.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"));
+        Set<String> addedEntries = new HashSet<>();
 
-			Manifest manifest = new Manifest();
-			manifest.getMainAttributes().put(new Attributes.Name("Manifest-Version"), "1.0");
-			manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), "net.fabricmc.loader.launch.server.FabricServerLauncher");
-			manifest.write(zipOutputStream);
+        {
+            addedEntries.add("META-INF/MANIFEST.MF");
+            zipOutputStream.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"));
 
-			zipOutputStream.closeEntry();
+            Manifest manifest = new Manifest();
+            manifest.getMainAttributes().put(new Attributes.Name("Manifest-Version"), "1.0");
+            manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), "net.fabricmc.loader.launch.server.FabricServerLauncher");
+            manifest.write(zipOutputStream);
 
-			addedEntries.add("fabric-server-launch.properties");
-			zipOutputStream.putNextEntry(new ZipEntry("fabric-server-launch.properties"));
-			zipOutputStream.write(("launch.mainClass=" + meta.mainClassServer + "\n").getBytes(StandardCharsets.UTF_8));
-			zipOutputStream.closeEntry();
+            zipOutputStream.closeEntry();
 
-			byte[] buffer = new byte[32768];
+            addedEntries.add("fabric-server-launch.properties");
+            zipOutputStream.putNextEntry(new ZipEntry("fabric-server-launch.properties"));
+            zipOutputStream.write(("launch.mainClass=" + meta.mainClassServer + "\n").getBytes(StandardCharsets.UTF_8));
+            zipOutputStream.closeEntry();
 
-			for (File f : libraryFiles) {
-				progress.updateProgress("Generating server launch JAR: " + f.getName());
+            byte[] buffer = new byte[32768];
 
-				try (
-						FileInputStream is = new FileInputStream(f);
-						JarInputStream jis = new JarInputStream(is)
-				) {
-					JarEntry entry;
-					while ((entry = jis.getNextJarEntry()) != null) {
-						if (!addedEntries.contains(entry.getName())) {
-							JarEntry newEntry = new JarEntry(entry.getName());
-							zipOutputStream.putNextEntry(newEntry);
+            for (File f : libraryFiles) {
+                progress.updateProgress(new MessageFormat("progress.generating.launch.jar.library").format(new Object[] {f.getName()}));
 
-							int r;
-							while ((r = jis.read(buffer, 0, buffer.length)) >= 0) {
-								zipOutputStream.write(buffer, 0, r);
-							}
+                try (
+                        FileInputStream is = new FileInputStream(f);
+                        JarInputStream jis = new JarInputStream(is)
+                ) {
+                    JarEntry entry;
+                    while ((entry = jis.getNextJarEntry()) != null) {
+                        if (!addedEntries.contains(entry.getName())) {
+                            JarEntry newEntry = new JarEntry(entry.getName());
+                            zipOutputStream.putNextEntry(newEntry);
 
-							zipOutputStream.closeEntry();
-							addedEntries.add(entry.getName());
-						}
-					}
-				}
- 			}
-		}
+                            int r;
+                            while ((r = jis.read(buffer, 0, buffer.length)) >= 0) {
+                                zipOutputStream.write(buffer, 0, r);
+                            }
 
-		zipOutputStream.close();
-		outputStream.close();
-	}
+                            zipOutputStream.closeEntry();
+                            addedEntries.add(entry.getName());
+                        }
+                    }
+                }
+            }
+        }
+
+        zipOutputStream.close();
+        outputStream.close();
+    }
 
 }

@@ -18,7 +18,6 @@ package net.fabricmc.installer.client;
 
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
-import net.fabricmc.installer.Main;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Utils;
@@ -27,6 +26,8 @@ import net.fabricmc.installer.util.Version;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 public class ClientHandler extends Handler {
 
@@ -44,11 +45,12 @@ public class ClientHandler extends Handler {
 		Version version = new Version(versionStr);
 		System.out.println("Installing");
 		new Thread(() -> {
+			final ResourceBundle bundle = Utils.BUNDLE;
 			try {
-				updateProgress("Installing : " + loaderVersion);
+				updateProgress(new MessageFormat(bundle.getString("progress.installing")).format(new Object[] {loaderVersion}));
 				File mcPath = new File(installLocation.getText());
 				if (!mcPath.exists()) {
-					throw new RuntimeException("No launcher directory found");
+					throw new RuntimeException(bundle.getString("progress.exception.no.launcher.directory"));
 				}
 				String profileName = ClientInstaller.install(mcPath, version, loaderVersion, this);
 				if (createProfile.isSelected()) {
@@ -87,7 +89,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void setupPane2(JPanel pane, InstallerGui installerGui) {
-		addRow(pane, jPanel -> jPanel.add(createProfile = new JCheckBox("Create profile", true)));
+		addRow(pane, jPanel -> jPanel.add(createProfile = new JCheckBox(installerGui.getBundle().getString("option.create.profile"), true)));
 
 		installLocation.setText(Utils.findDefaultInstallDir().getAbsolutePath());
 	}

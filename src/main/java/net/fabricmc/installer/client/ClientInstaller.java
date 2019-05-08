@@ -57,7 +57,7 @@ public class ClientInstaller {
 
 		Utils.writeToFile(profileJson, Utils.GSON.toJson(launchJson));
 
-		progress.updateProgress("Done");
+		progress.updateProgress(Utils.BUNDLE.getString("progress.done"));
 
 		return profileName;
 	}
