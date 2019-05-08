@@ -63,12 +63,12 @@ public abstract class Handler implements InstallerProgress {
 		setupPane1(pane, installerGui);
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel(installerGui.getBundle().getString("prompt.mapping.version")));
+			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.mapping.version")));
 			jPanel.add(mappingVersionComboBox = new JComboBox<>());
-			jPanel.add(snapshotCheckBox = new JCheckBox(installerGui.getBundle().getString("option.show.snapshots")));
+			jPanel.add(snapshotCheckBox = new JCheckBox(Utils.BUNDLE.getString("option.show.snapshots")));
 			snapshotCheckBox.setSelected(false);
 			snapshotCheckBox.addActionListener(e -> {
-				if(Main.MAPPINGS_MAVEN.complete){
+				if (Main.MAPPINGS_MAVEN.complete) {
 					updateMappings();
 				}
 			});
@@ -79,28 +79,28 @@ public abstract class Handler implements InstallerProgress {
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel(installerGui.getBundle().getString("prompt.loader.version")));
+			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.loader.version")));
 			jPanel.add(loaderVersionComboBox = new JComboBox<>());
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel(installerGui.getBundle().getString("prompt.select.location")));
+			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.select.location")));
 			jPanel.add(installLocation = new JTextField());
 			jPanel.add(selectFolderButton = new JButton());
 
 			selectFolderButton.setText("...");
-			selectFolderButton.addActionListener(e -> installerGui.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
+			selectFolderButton.addActionListener(e -> InstallerGui.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
 		});
 
 		setupPane2(pane, installerGui);
 
 		addRow(pane, jPanel -> {
 			jPanel.add(statusLabel = new JLabel());
-			statusLabel.setText(installerGui.getBundle().getString("prompt.loading.versions"));
+			statusLabel.setText(Utils.BUNDLE.getString("prompt.loading.versions"));
 		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(buttonInstall = new JButton(installerGui.getBundle().getString("prompt.install")));
+			jPanel.add(buttonInstall = new JButton(Utils.BUNDLE.getString("prompt.install")));
 			buttonInstall.addActionListener(e -> {
 				buttonInstall.setEnabled(false);
 				install();
@@ -112,16 +112,16 @@ public abstract class Handler implements InstallerProgress {
 				loaderVersionComboBox.addItem(str);
 			}
 			loaderVersionComboBox.setSelectedIndex(0);
-			statusLabel.setText(installerGui.getBundle().getString("prompt.ready.install"));
+			statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
 		});
 
 		return pane;
 	}
 
-	private void updateMappings(){
+	private void updateMappings() {
 		mappingVersionComboBox.removeAllItems();
 		for (String str : Main.MAPPINGS_MAVEN.versions) {
-			if(!snapshotCheckBox.isSelected() && Version.isSnapshot(str)){
+			if (!snapshotCheckBox.isSelected() && Version.isSnapshot(str)) {
 				continue;
 			}
 			mappingVersionComboBox.addItem(str);
@@ -180,7 +180,7 @@ public abstract class Handler implements InstallerProgress {
 		parent.add(panel);
 	}
 
-	protected Version getMappingsVersion(ArgumentParser args){
+	protected Version getMappingsVersion(ArgumentParser args) {
 		return new Version(args.getOrDefault("mappings", () -> {
 			System.out.println("Using latest mapping version");
 			try {
@@ -192,7 +192,7 @@ public abstract class Handler implements InstallerProgress {
 		}));
 	}
 
-	protected String getLoaderVersion(ArgumentParser args){
+	protected String getLoaderVersion(ArgumentParser args) {
 		return args.getOrDefault("loader", () -> {
 			System.out.println("Using latest loader version");
 			try {

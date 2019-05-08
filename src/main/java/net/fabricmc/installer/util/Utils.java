@@ -22,7 +22,6 @@ import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;

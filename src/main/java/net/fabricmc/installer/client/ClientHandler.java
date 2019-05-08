@@ -47,7 +47,7 @@ public class ClientHandler extends Handler {
 		new Thread(() -> {
 			final ResourceBundle bundle = Utils.BUNDLE;
 			try {
-				updateProgress(new MessageFormat(bundle.getString("progress.installing")).format(new Object[] {loaderVersion}));
+				updateProgress(new MessageFormat(bundle.getString("progress.installing")).format(new Object[]{loaderVersion}));
 				File mcPath = new File(installLocation.getText());
 				if (!mcPath.exists()) {
 					throw new RuntimeException(bundle.getString("progress.exception.no.launcher.directory"));
@@ -89,7 +89,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void setupPane2(JPanel pane, InstallerGui installerGui) {
-		addRow(pane, jPanel -> jPanel.add(createProfile = new JCheckBox(installerGui.getBundle().getString("option.create.profile"), true)));
+		addRow(pane, jPanel -> jPanel.add(createProfile = new JCheckBox(Utils.BUNDLE.getString("option.create.profile"), true)));
 
 		installLocation.setText(Utils.findDefaultInstallDir().getAbsolutePath());
 	}
