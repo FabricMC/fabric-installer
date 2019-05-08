@@ -36,9 +36,7 @@ import java.util.zip.ZipOutputStream;
 public class ServerInstaller {
 
 	public static void install(File dir, String loaderVersion, Version version, InstallerProgress progress) throws IOException {
-		final ResourceBundle bundle = Utils.BUNDLE;
-
-		progress.updateProgress(new MessageFormat(bundle.getString("progress.installing.server")).format(new Object[]{loaderVersion}));
+		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{loaderVersion}));
 		File libsDir = new File(Utils.findDefaultUserDir(), ".cache" + File.separator + "fabric-installer" + File.separator + "libraries");
 		if (!libsDir.exists()) {
 			if (!libsDir.mkdirs()) {
@@ -46,7 +44,7 @@ public class ServerInstaller {
 			}
 		}
 
-		progress.updateProgress(bundle.getString("progress.download.libraries"));
+		progress.updateProgress(Utils.BUNDLE.getString("progress.download.libraries"));
 		MinecraftLaunchJson meta = Utils.getLaunchMeta(loaderVersion);
 
 		//We add fabric-loader as a lib so it can be downloaded and loaded in the same way as the other libs
@@ -56,17 +54,17 @@ public class ServerInstaller {
 		List<File> libraryFiles = new ArrayList<>();
 
 		for (MinecraftLaunchJson.Library library : meta.libraries) {
-			progress.updateProgress(new MessageFormat(bundle.getString("progress.download.library.entry")).format(new Object[]{library.name}));
+			progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.download.library.entry")).format(new Object[]{library.name}));
 			File libraryFile = new File(libsDir, library.getFileName());
 			Utils.downloadFile(new URL(library.getURL()), libraryFile);
 			libraryFiles.add(libraryFile);
 		}
 
-		progress.updateProgress(bundle.getString("progress.generating.launch.jar"));
+		progress.updateProgress(Utils.BUNDLE.getString("progress.generating.launch.jar"));
 		File launchJar = new File(dir, "fabric-server-launch.jar");
 		makeLaunchJar(launchJar, meta, libraryFiles, progress);
 
-		progress.updateProgress(new MessageFormat(bundle.getString("progress.done.start.server")).format(new Object[]{launchJar.getName()}));
+		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getName()}));
 	}
 
 	private static void makeLaunchJar(File file, MinecraftLaunchJson meta, List<File> libraryFiles, InstallerProgress progress) throws IOException {

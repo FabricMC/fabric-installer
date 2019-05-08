@@ -41,7 +41,6 @@ public abstract class Handler implements InstallerProgress {
 	public JCheckBox snapshotCheckBox;
 
 	private JPanel pane;
-	private final ResourceBundle bundle = Utils.BUNDLE;
 
 	public abstract String name();
 
@@ -144,34 +143,30 @@ public abstract class Handler implements InstallerProgress {
 		}
 
 		if (e.getCause() != null) {
-			appendException(errorMessage, prefix + prefixAppend, translate("prompt.exception.caused.by"), e.getCause());
+			appendException(errorMessage, prefix + prefixAppend, Utils.BUNDLE.getString("prompt.exception.caused.by"), e.getCause());
 		}
 
 		for (Throwable ec : e.getSuppressed()) {
-			appendException(errorMessage, prefix + prefixAppend, translate("prompt.exception.suppressed"), ec);
+			appendException(errorMessage, prefix + prefixAppend, Utils.BUNDLE.getString("prompt.exception.suppressed"), ec);
 		}
 	}
 
 	@Override
 	public void error(Exception e) {
 		StringBuilder errorMessage = new StringBuilder();
-		appendException(errorMessage, "", translate("prompt.exception"), e);
+		appendException(errorMessage, "", Utils.BUNDLE.getString("prompt.exception"), e);
 
 		System.err.println(errorMessage);
 
 		JOptionPane.showMessageDialog(
 				pane,
 				errorMessage,
-				translate("prompt.exception.occurrence"),
+				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
 		);
 
 		statusLabel.setText(e.getLocalizedMessage());
 		statusLabel.setForeground(Color.RED);
-	}
-
-	private String translate(String key) {
-		return bundle.getString(key);
 	}
 
 	protected void addRow(Container parent, Consumer<JPanel> consumer) {

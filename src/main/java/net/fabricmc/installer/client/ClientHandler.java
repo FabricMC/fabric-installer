@@ -45,12 +45,11 @@ public class ClientHandler extends Handler {
 		Version version = new Version(versionStr);
 		System.out.println("Installing");
 		new Thread(() -> {
-			final ResourceBundle bundle = Utils.BUNDLE;
 			try {
-				updateProgress(new MessageFormat(bundle.getString("progress.installing")).format(new Object[]{loaderVersion}));
+				updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing")).format(new Object[]{loaderVersion}));
 				File mcPath = new File(installLocation.getText());
 				if (!mcPath.exists()) {
-					throw new RuntimeException(bundle.getString("progress.exception.no.launcher.directory"));
+					throw new RuntimeException(Utils.BUNDLE.getString("progress.exception.no.launcher.directory"));
 				}
 				String profileName = ClientInstaller.install(mcPath, version, loaderVersion, this);
 				if (createProfile.isSelected()) {
