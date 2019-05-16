@@ -38,11 +38,6 @@ public class Utils {
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("lang/installer", Locale.getDefault(), new ResourceBundle.Control() {
 		@Override
-		public Locale getFallbackLocale(String baseName, Locale locale) {
-			return locale == Locale.ROOT ? null : Locale.ROOT;
-		}
-
-		@Override
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
 			final String bundleName = toBundleName(baseName, locale);
 			final String resourceName = toResourceName(bundleName, "properties");
