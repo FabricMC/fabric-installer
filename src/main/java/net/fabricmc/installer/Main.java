@@ -74,7 +74,7 @@ public class Main {
 			LOADER_MAVEN.load();
 			MAPPINGS_MAVEN.load();
 
-			System.out.printf("\nLatest Mappings: %s\nLatest Loader: %s\n", MAPPINGS_MAVEN.latestVersion, Main.MAPPINGS_MAVEN.getLatestVersion(argumentParser.has("snapshot")));
+			System.out.printf("\nLatest Mappings: %s\nLatest Loader: %s\n", MAPPINGS_MAVEN.getLatestVersion(argumentParser.has("snapshot")), Main.LOADER_MAVEN.latestVersion);
 		} else {
 			for (Handler handler : HANDLERS) {
 				if (command.equalsIgnoreCase(handler.name())) {
