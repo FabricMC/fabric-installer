@@ -52,6 +52,6 @@ public class Version {
 
 	public static boolean isSnapshot(String version){
 		//This isnt great, but better than downloading a json imo
-		return version.contains("Pre-Release") || version.contains("19w") || version.contains("18w") || version.startsWith("3D");
+		return version.contains("-pre") || version.contains("Pre-Release") || version.contains("19w") || version.contains("18w") || version.startsWith("3D");
 	}
 }
