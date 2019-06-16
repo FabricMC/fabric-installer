@@ -35,7 +35,7 @@ import java.util.zip.ZipOutputStream;
 
 public class ServerInstaller {
 
-	public static void install(File dir, String loaderVersion, Version version, InstallerProgress progress) throws IOException {
+	public static void install(File dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{loaderVersion}));
 		File libsDir = new File(Utils.findDefaultUserDir(), ".cache" + File.separator + "fabric-installer" + File.separator + "libraries");
 		if (!libsDir.exists()) {
@@ -49,7 +49,7 @@ public class ServerInstaller {
 
 		//We add fabric-loader as a lib so it can be downloaded and loaded in the same way as the other libs
 		meta.libraries.add(new MinecraftLaunchJson.Library("net.fabricmc:fabric-loader:" + loaderVersion, "https://maven.fabricmc.net/"));
-		meta.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + version.toString(), Reference.MAVEN_SERVER_URL));
+		meta.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + gameVersion, Reference.MAVEN_SERVER_URL));
 
 		List<File> libraryFiles = new ArrayList<>();
 

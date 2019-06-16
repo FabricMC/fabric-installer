@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class MavenHandler {
+public class MavenHandler extends CompletableHandler<List<String>> {
 
 	private final String mavenServerURL;
 	private final String packageName;
@@ -35,15 +35,12 @@ public class MavenHandler {
 
 	public String latestVersion = "";
 	public List<String> versions = new ArrayList<>();
-	public boolean complete;
 
 	public MavenHandler(String mavenServerURL, String packageName, String jarName) {
 		this.mavenServerURL = mavenServerURL;
 		this.packageName = packageName;
 		this.jarName = jarName;
 	}
-
-	private List<Consumer<List<String>>> completeConsumers = new ArrayList<>();
 
 	public void load() throws IOException, XMLStreamException {
 
@@ -61,22 +58,9 @@ public class MavenHandler {
 
 		Collections.reverse(versions);
 		latestVersion = versions.get(0);
-
-		complete = true;
-		completeConsumers.forEach(listConsumer -> listConsumer.accept(versions));
+		complete(versions);
 	}
 
-	public void onComplete(Consumer<List<String>> completeConsumer) {
-		completeConsumers.add(completeConsumer);
-	}
 
-	public String getLatestVersion(boolean snapshot){
-		if(snapshot){
-			return latestVersion;
-		} else {
-			return versions.stream()
-				.filter(s -> !Version.isSnapshot(s)).findFirst().orElse(null);
-		}
-	}
 
 }

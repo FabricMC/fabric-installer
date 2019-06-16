@@ -23,17 +23,17 @@ import java.io.IOException;
 
 public class ClientInstaller {
 
-	public static String install(File mcDir, Version version, String loaderVersion, InstallerProgress progress) throws IOException {
-		System.out.println("Installing " + version + " with fabric " + loaderVersion);
+	public static String install(File mcDir, String gameVersion, String loaderVersion, InstallerProgress progress) throws IOException {
+		System.out.println("Installing " + gameVersion + " with fabric " + loaderVersion);
 
-		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, version);
+		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, gameVersion);
 
 		MinecraftLaunchJson launchJson = Utils.getLaunchMeta(loaderVersion);
 		launchJson.id = profileName;
-		launchJson.inheritsFrom = version.getMinecraftVersion();
+		launchJson.inheritsFrom = gameVersion;
 
 		//Adds loader and the mappings
-		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + version.toString(), Reference.MAVEN_SERVER_URL));
+		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + gameVersion, Reference.MAVEN_SERVER_URL));
 		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.LOADER_NAME + ":" + loaderVersion, Reference.MAVEN_SERVER_URL));
 
 		File versionsDir = new File(mcDir, "versions");

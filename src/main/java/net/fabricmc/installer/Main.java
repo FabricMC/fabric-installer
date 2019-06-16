@@ -20,6 +20,7 @@ import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.MavenHandler;
+import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Reference;
 
 import javax.swing.*;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
 
 public class Main {
 
-	public static final MavenHandler MAPPINGS_MAVEN = new MavenHandler(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.MAPPINGS_NAME);
+	public static final MetaHandler GAME_VERSION_META = new MetaHandler("https://meta.fabricmc.net/v2/versions/game");
 	public static final MavenHandler LOADER_MAVEN = new MavenHandler(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME);
 
 	//TODO is gui the best name for this?
@@ -72,9 +73,9 @@ public class Main {
 			HANDLERS.forEach(handler -> System.out.printf("%s %s\n", handler.name().toLowerCase(), handler.cliHelp()));
 
 			LOADER_MAVEN.load();
-			MAPPINGS_MAVEN.load();
+			GAME_VERSION_META.load();
 
-			System.out.printf("\nLatest Mappings: %s\nLatest Loader: %s\n", MAPPINGS_MAVEN.getLatestVersion(argumentParser.has("snapshot")), Main.LOADER_MAVEN.latestVersion);
+			System.out.printf("\nLatest Version: %s\nLatest Loader: %s\n", GAME_VERSION_META.getLatestVersion(argumentParser.has("snapshot")).getVersion(), Main.LOADER_MAVEN.latestVersion);
 		} else {
 			for (Handler handler : HANDLERS) {
 				if (command.equalsIgnoreCase(handler.name())) {

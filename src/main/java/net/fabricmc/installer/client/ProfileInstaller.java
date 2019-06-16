@@ -19,7 +19,6 @@ package net.fabricmc.installer.client;
 import com.google.gson.JsonObject;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
-import net.fabricmc.installer.util.Version;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,7 @@ import java.util.Date;
 
 public class ProfileInstaller {
 
-	public static void setupProfile(File path, String name, Version version) throws IOException {
+	public static void setupProfile(File path, String name, String gameVersion) throws IOException {
 		File launcherProfiles = new File(path, "launcher_profiles.json");
 		if (!launcherProfiles.exists()) {
 			System.out.println("Could not find launcher_profiles");
@@ -39,7 +38,7 @@ public class ProfileInstaller {
 		String json = Utils.readFile(launcherProfiles);
 		JsonObject jsonObject = Utils.GSON.fromJson(json, JsonObject.class);
 		JsonObject profiles = jsonObject.getAsJsonObject("profiles");
-		String profileName = Reference.LOADER_NAME + "-" + version.getMinecraftVersion();
+		String profileName = Reference.LOADER_NAME + "-" + gameVersion;
 
 		JsonObject profile;
 		if (profiles.has(profileName)) {

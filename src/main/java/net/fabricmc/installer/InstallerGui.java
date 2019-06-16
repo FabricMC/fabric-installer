@@ -38,7 +38,7 @@ public class InstallerGui extends JFrame {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
 
-		Main.MAPPINGS_MAVEN.load();
+		Main.GAME_VERSION_META.load();
 		Main.LOADER_MAVEN.load();
 	}
 

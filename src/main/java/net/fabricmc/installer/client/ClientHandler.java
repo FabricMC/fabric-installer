@@ -21,13 +21,11 @@ import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Utils;
-import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.MessageFormat;
-import java.util.ResourceBundle;
 
 public class ClientHandler extends Handler {
 
@@ -40,9 +38,8 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void install() {
-		String versionStr = (String) mappingVersionComboBox.getSelectedItem();
+		String gameVersion = (String) gameVersionComboBox.getSelectedItem();
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
-		Version version = new Version(versionStr);
 		System.out.println("Installing");
 		new Thread(() -> {
 			try {
@@ -51,9 +48,9 @@ public class ClientHandler extends Handler {
 				if (!mcPath.exists()) {
 					throw new RuntimeException(Utils.BUNDLE.getString("progress.exception.no.launcher.directory"));
 				}
-				String profileName = ClientInstaller.install(mcPath, version, loaderVersion, this);
+				String profileName = ClientInstaller.install(mcPath, gameVersion, loaderVersion, this);
 				if (createProfile.isSelected()) {
-					ProfileInstaller.setupProfile(mcPath, profileName, version);
+					ProfileInstaller.setupProfile(mcPath, profileName, gameVersion);
 				}
 			} catch (Exception e) {
 				error(e);
@@ -69,16 +66,16 @@ public class ClientHandler extends Handler {
 			throw new FileNotFoundException("Launcher directory not found at " + file.getAbsolutePath());
 		}
 
-		Version mappingsVersion = getMappingsVersion(args);
+		String gameVersion = getGameVersion(args);
 		String loaderVersion = getLoaderVersion(args);
 
-		String profileName = ClientInstaller.install(file, mappingsVersion, loaderVersion, InstallerProgress.CONSOLE);
-		ProfileInstaller.setupProfile(file, profileName, mappingsVersion);
+		String profileName = ClientInstaller.install(file, gameVersion, loaderVersion, InstallerProgress.CONSOLE);
+		ProfileInstaller.setupProfile(file, profileName, gameVersion);
 	}
 
 	@Override
 	public String cliHelp() {
-		return "-dir <install dir, required> -mappings <mappings version, default latest> -loader <loader version, default latest>";
+		return "-dir <install dir, required> -version <minecraft version, default latest> -loader <loader version, default latest>";
 	}
 
 	@Override

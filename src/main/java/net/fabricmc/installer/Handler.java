@@ -18,21 +18,20 @@ package net.fabricmc.installer;
 
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Utils;
-import net.fabricmc.installer.util.Version;
 
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.IOException;
-import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 public abstract class Handler implements InstallerProgress {
 
 	public JButton buttonInstall;
 
-	public JComboBox<String> mappingVersionComboBox;
+	public JComboBox<String> gameVersionComboBox;
 	public JComboBox<String> loaderVersionComboBox;
 	public JTextField installLocation;
 	public JButton selectFolderButton;
@@ -62,19 +61,19 @@ public abstract class Handler implements InstallerProgress {
 		setupPane1(pane, installerGui);
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.mapping.version")));
-			jPanel.add(mappingVersionComboBox = new JComboBox<>());
+			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.game.version")));
+			jPanel.add(gameVersionComboBox = new JComboBox<>());
 			jPanel.add(snapshotCheckBox = new JCheckBox(Utils.BUNDLE.getString("option.show.snapshots")));
 			snapshotCheckBox.setSelected(false);
 			snapshotCheckBox.addActionListener(e -> {
-				if (Main.MAPPINGS_MAVEN.complete) {
-					updateMappings();
+				if (Main.GAME_VERSION_META.isComplete()) {
+					updateGameVersions();
 				}
 			});
 		});
 
-		Main.MAPPINGS_MAVEN.onComplete(versions -> {
-			updateMappings();
+		Main.GAME_VERSION_META.onComplete(versions -> {
+			updateGameVersions();
 		});
 
 		addRow(pane, jPanel -> {
@@ -117,15 +116,15 @@ public abstract class Handler implements InstallerProgress {
 		return pane;
 	}
 
-	private void updateMappings() {
-		mappingVersionComboBox.removeAllItems();
-		for (String str : Main.MAPPINGS_MAVEN.versions) {
-			if (!snapshotCheckBox.isSelected() && Version.isSnapshot(str)) {
+	private void updateGameVersions() {
+		gameVersionComboBox.removeAllItems();
+		for (MetaHandler.GameVersion version : Main.GAME_VERSION_META.getVersions()) {
+			if (!snapshotCheckBox.isSelected() && !version.isStable()) {
 				continue;
 			}
-			mappingVersionComboBox.addItem(str);
+			gameVersionComboBox.addItem(version.getVersion());
 		}
-		mappingVersionComboBox.setSelectedIndex(0);
+		gameVersionComboBox.setSelectedIndex(0);
 	}
 
 	@Override
@@ -175,16 +174,16 @@ public abstract class Handler implements InstallerProgress {
 		parent.add(panel);
 	}
 
-	protected Version getMappingsVersion(ArgumentParser args) {
-		return new Version(args.getOrDefault("mappings", () -> {
+	protected String getGameVersion(ArgumentParser args) {
+		return args.getOrDefault("version", () -> {
 			System.out.println("Using latest mapping version");
 			try {
-				Main.MAPPINGS_MAVEN.load();
-			} catch (IOException | XMLStreamException e) {
+				Main.GAME_VERSION_META.load();
+			} catch (IOException e) {
 				throw new RuntimeException("Failed to load latest versions", e);
 			}
-			return Main.MAPPINGS_MAVEN.getLatestVersion(args.has("snapshot"));
-		}));
+			return Main.GAME_VERSION_META.getLatestVersion(args.has("snapshot")).getVersion();
+		});
 	}
 
 	protected String getLoaderVersion(ArgumentParser args) {
