@@ -84,7 +84,7 @@ public class Main {
 					} catch (Exception e) {
 						throw new RuntimeException("Failed to install " + handler.name(), e);
 					}
-					break;
+					return;
 				}
 			}
 			//Only reached if a handler is not found
