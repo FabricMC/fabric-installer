@@ -43,6 +43,11 @@ public class ServerInstaller {
 				throw new IOException("Could not create " + libsDir.getAbsolutePath() + "!");
 			}
 		}
+		if(!dir.exists()){
+			if (!dir.mkdirs()) {
+				throw new IOException("Could not create " + dir.getAbsolutePath() + "!");
+			}
+		}
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.download.libraries"));
 		MinecraftLaunchJson meta = Utils.getLaunchMeta(loaderVersion);
