@@ -20,10 +20,13 @@ import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.LauncherMeta;
+import net.fabricmc.installer.util.Utils;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URL;
 
 public class ServerHandler extends Handler {
 
@@ -39,6 +42,7 @@ public class ServerHandler extends Handler {
 		new Thread(() -> {
 			try {
 				ServerInstaller.install(new File(installLocation.getText()), loaderVersion, gameVersion, this);
+				ServerPostInstallDialog.show(this);
 			} catch (Exception e) {
 				error(e);
 			}
@@ -55,11 +59,18 @@ public class ServerHandler extends Handler {
 		String loaderVersion = getLoaderVersion(args);
 		String gameVersion = getGameVersion(args);
 		ServerInstaller.install(file.getAbsoluteFile(), loaderVersion, gameVersion, InstallerProgress.CONSOLE);
+
+		if(args.has("downloadMinecraft")){
+			File serverJar = new File(file, "server.jar");
+			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
+			Utils.downloadFile(new URL(LauncherMeta.getLauncherMeta().getVersion(gameVersion).getVersionMeta().downloads.get("server").url), serverJar);
+			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.done"));
+		}
 	}
 
 	@Override
 	public String cliHelp() {
-		return "-dir <install dir, default current dir> -version <minecraft version, default latest> -loader <loader version, default latest>";
+		return "-dir <install dir, default current dir> -version <minecraft version, default latest> -loader <loader version, default latest> -downloadMinecraft";
 	}
 
 	@Override

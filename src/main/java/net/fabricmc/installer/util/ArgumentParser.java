@@ -45,7 +45,10 @@ public class ArgumentParser {
 	}
 
 	public String getOrDefault(String argument, Supplier<String> stringSuppler) {
-		return argMap.getOrDefault(argument, stringSuppler.get());
+		if(!argMap.containsKey(argument)){
+			return stringSuppler.get();
+		}
+		return argMap.get(argument);
 	}
 
 	public boolean has(String argument) {

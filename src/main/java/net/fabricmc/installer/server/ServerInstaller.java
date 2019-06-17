@@ -36,7 +36,7 @@ import java.util.zip.ZipOutputStream;
 public class ServerInstaller {
 
 	public static void install(File dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
-		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{loaderVersion}));
+		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{String.format("%s(%s)", loaderVersion, gameVersion)}));
 		File libsDir = new File(Utils.findDefaultUserDir(), ".cache" + File.separator + "fabric-installer" + File.separator + "libraries");
 		if (!libsDir.exists()) {
 			if (!libsDir.mkdirs()) {
@@ -98,7 +98,7 @@ public class ServerInstaller {
 			byte[] buffer = new byte[32768];
 
 			for (File f : libraryFiles) {
-				progress.updateProgress(new MessageFormat("progress.generating.launch.jar.library").format(new Object[]{f.getName()}));
+				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.generating.launch.jar.library")).format(new Object[]{f.getName()}));
 
 				try (
 						FileInputStream is = new FileInputStream(f);

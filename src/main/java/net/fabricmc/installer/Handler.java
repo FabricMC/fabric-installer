@@ -175,8 +175,8 @@ public abstract class Handler implements InstallerProgress {
 	}
 
 	protected String getGameVersion(ArgumentParser args) {
-		return args.getOrDefault("version", () -> {
-			System.out.println("Using latest mapping version");
+		return args.getOrDefault("mcversion", () -> {
+			System.out.println("Using latest game version");
 			try {
 				Main.GAME_VERSION_META.load();
 			} catch (IOException e) {

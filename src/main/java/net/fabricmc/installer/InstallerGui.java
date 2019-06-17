@@ -29,6 +29,8 @@ import java.util.function.Supplier;
 
 public class InstallerGui extends JFrame {
 
+	public static InstallerGui instance;
+
 	private JTabbedPane contentPane;
 
 	public InstallerGui() throws IOException, XMLStreamException {
@@ -58,6 +60,7 @@ public class InstallerGui extends JFrame {
 		//This will make people happy
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		InstallerGui dialog = new InstallerGui();
+		instance = dialog;
 		dialog.pack();
 		dialog.setTitle(Utils.BUNDLE.getString("installer.title"));
 		dialog.setLocationRelativeTo(null);
@@ -69,9 +72,4 @@ public class InstallerGui extends JFrame {
 		Main.HANDLERS.forEach(handler -> contentPane.addTab(Utils.BUNDLE.getString("tab." + handler.name().toLowerCase(Locale.ROOT)), handler.makePanel(this)));
 	}
 
-	private void addRow(Container parent, Consumer<JPanel> consumer) {
-		JPanel panel = new JPanel(new FlowLayout());
-		consumer.accept(panel);
-		parent.add(panel);
-	}
 }
