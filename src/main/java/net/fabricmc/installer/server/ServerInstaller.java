@@ -24,8 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.jar.Attributes;
@@ -64,43 +62,10 @@ public class ServerInstaller {
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.generating.launch.jar"));
 
-		Path fabricCache = dir.toPath().resolve(".fabric");
-		if (Files.exists(fabricCache)) {
-			deleteDirectory(fabricCache);
-		}
-
 		File launchJar = new File(dir, "fabric-server-launch.jar");
 		makeLaunchJar(launchJar, meta, libraryFiles, progress);
 
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getName()}));
-	}
-
-	private static void deleteDirectory(Path path) throws IOException {
-		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.delete(file);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-				if (exc != null) {
-					throw exc;
-				}
-				Files.delete(file);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				if (exc != null) {
-					throw exc;
-				}
-				Files.delete(dir);
-				return FileVisitResult.CONTINUE;
-			}
-		});
 	}
 
 	private static void makeLaunchJar(File file, MinecraftLaunchJson meta, List<File> libraryFiles, InstallerProgress progress) throws IOException {
