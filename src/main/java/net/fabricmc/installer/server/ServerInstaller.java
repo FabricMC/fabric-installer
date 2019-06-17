@@ -61,6 +61,7 @@ public class ServerInstaller {
 		}
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.generating.launch.jar"));
+
 		File launchJar = new File(dir, "fabric-server-launch.jar");
 		makeLaunchJar(launchJar, meta, libraryFiles, progress);
 
