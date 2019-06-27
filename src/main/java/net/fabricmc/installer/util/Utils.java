@@ -117,19 +117,23 @@ public class Utils {
 	}
 
 	public static String getProfileIcon() {
-		try {
-			File iconFile = new File(Utils.class.getResource("/profile_icon.png").getFile()); // icons must be 128x128 and a .png
-			FileInputStream fis = new FileInputStream(iconFile);
 
-			byte[] iconBytes = new byte[(int) iconFile.length()];
-			fis.read(iconBytes);
-			fis.close();
+		try (InputStream is = Utils.class.getClassLoader().getResourceAsStream("profile_icon.png")) {
+			byte[] ret = new byte[4096];
+			int offset = 0;
+			int len;
 
-			return "data:image/png;base64," + Base64.getEncoder().encodeToString(iconBytes);
+			while ((len = is.read(ret, offset, ret.length - offset)) != -1) {
+				offset += len;
+				if (offset == ret.length) ret = Arrays.copyOf(ret, ret.length * 2);
+			}
+
+			return "data:image/png;base64," + Base64.getEncoder().encodeToString(Arrays.copyOf(ret, offset));
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return "TNT"; // Fallback to TNT icon if we cant load Fabric icon from classpath.
+		return "TNT"; // Fallback to TNT icon if we cant load Fabric icon.
 	}
 
 }
