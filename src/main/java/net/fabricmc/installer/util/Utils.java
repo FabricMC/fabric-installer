@@ -19,7 +19,6 @@ package net.fabricmc.installer.util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -27,9 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.PropertyResourceBundle;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -117,6 +114,26 @@ public class Utils {
 		String fabricInstallMeta = Utils.readTextFile(new URL(url));
 		JsonObject installMeta = Utils.GSON.fromJson(fabricInstallMeta, JsonObject.class);
 		return new MinecraftLaunchJson(installMeta);
+	}
+
+	public static String getProfileIcon() {
+
+		try (InputStream is = Utils.class.getClassLoader().getResourceAsStream("profile_icon.png")) {
+			byte[] ret = new byte[4096];
+			int offset = 0;
+			int len;
+
+			while ((len = is.read(ret, offset, ret.length - offset)) != -1) {
+				offset += len;
+				if (offset == ret.length) ret = Arrays.copyOf(ret, ret.length * 2);
+			}
+
+			return "data:image/png;base64," + Base64.getEncoder().encodeToString(Arrays.copyOf(ret, offset));
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "TNT"; // Fallback to TNT icon if we cant load Fabric icon.
 	}
 
 }
