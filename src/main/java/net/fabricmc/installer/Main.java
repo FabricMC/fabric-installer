@@ -18,10 +18,7 @@ package net.fabricmc.installer;
 
 import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
-import net.fabricmc.installer.util.ArgumentParser;
-import net.fabricmc.installer.util.MavenHandler;
-import net.fabricmc.installer.util.MetaHandler;
-import net.fabricmc.installer.util.Reference;
+import net.fabricmc.installer.util.*;
 
 import javax.swing.*;
 import javax.xml.stream.XMLStreamException;
@@ -67,7 +64,12 @@ public class Main {
 		setDebugLevel(Level.SEVERE);
 
 		if (command == null) {
-			InstallerGui.start();
+			try {
+				InstallerGui.start();
+			} catch (Exception e){
+				e.printStackTrace();
+				new CrashDialog(e);
+			}
 		} else if (command.equals("help")) {
 			System.out.println("help - Opens this menu");
 			HANDLERS.forEach(handler -> System.out.printf("%s %s\n", handler.name().toLowerCase(), handler.cliHelp()));
