@@ -60,7 +60,7 @@ public class ProfileInstaller {
 		jsonObject.addProperty("type", "custom");
 		jsonObject.addProperty("created", Utils.ISO_8601.format(new Date()));
 		jsonObject.addProperty("lastUsed", Utils.ISO_8601.format(new Date()));
-		jsonObject.addProperty("icon", "TNT");
+		jsonObject.addProperty("icon", Utils.getProfileIcon());
 		return jsonObject;
 	}
 
