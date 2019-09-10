@@ -70,7 +70,7 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public String cliHelp() {
-		return "-dir <install dir, default current dir> -version <minecraft version, default latest> -loader <loader version, default latest> -downloadMinecraft";
+		return "-dir <install dir, default current dir> -mcversion <minecraft version, default latest> -loader <loader version, default latest> -downloadMinecraft";
 	}
 
 	@Override
