@@ -75,7 +75,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public String cliHelp() {
-		return "-dir <install dir, required> -version <minecraft version, default latest> -loader <loader version, default latest>";
+		return "-dir <install dir, required> -mcversion <minecraft version, default latest> -loader <loader version, default latest>";
 	}
 
 	@Override
