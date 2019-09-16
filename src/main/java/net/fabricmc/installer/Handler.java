@@ -105,11 +105,20 @@ public abstract class Handler implements InstallerProgress {
 			});
 		});
 
-		Main.LOADER_MAVEN.onComplete(versions -> {
-			for (String str : versions) {
-				loaderVersionComboBox.addItem(str);
+		Main.LOADER_META.onComplete(versions -> {
+			int stableIndex = -1;
+			for (int i = 0; i < versions.size(); i++) {
+				MetaHandler.GameVersion version = versions.get(i);
+				loaderVersionComboBox.addItem(version.getVersion());
+				if(version.isStable()){
+					stableIndex = i;
+				}
 			}
-			loaderVersionComboBox.setSelectedIndex(0);
+			//If no stable versions are found, default to the latest version
+			if(stableIndex == -1){
+				stableIndex = 0;
+			}
+			loaderVersionComboBox.setSelectedIndex(stableIndex);
 			statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
 		});
 
@@ -190,11 +199,11 @@ public abstract class Handler implements InstallerProgress {
 		return args.getOrDefault("loader", () -> {
 			System.out.println("Using latest loader version");
 			try {
-				Main.LOADER_MAVEN.load();
-			} catch (IOException | XMLStreamException e) {
+				Main.LOADER_META.load();
+			} catch (IOException e) {
 				throw new RuntimeException("Failed to load latest versions", e);
 			}
-			return Main.LOADER_MAVEN.latestVersion;
+			return Main.LOADER_META.getLatestVersion(false).getVersion();
 		});
 	}
 

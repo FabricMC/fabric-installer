@@ -33,7 +33,7 @@ public class InstallerGui extends JFrame {
 
 	private JTabbedPane contentPane;
 
-	public InstallerGui() throws IOException, XMLStreamException {
+	public InstallerGui() throws IOException {
 		initComponents();
 		setContentPane(contentPane);
 
@@ -41,7 +41,7 @@ public class InstallerGui extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
 
 		Main.GAME_VERSION_META.load();
-		Main.LOADER_MAVEN.load();
+		Main.LOADER_META.load();
 	}
 
 	public static void selectInstallLocation(Supplier<String> initalDir, Consumer<String> selectedDir) {

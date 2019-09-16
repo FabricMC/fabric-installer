@@ -18,10 +18,12 @@ package net.fabricmc.installer;
 
 import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
-import net.fabricmc.installer.util.*;
+import net.fabricmc.installer.util.ArgumentParser;
+import net.fabricmc.installer.util.CrashDialog;
+import net.fabricmc.installer.util.MetaHandler;
 
 import javax.swing.*;
-import javax.xml.stream.XMLStreamException;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +35,12 @@ import java.util.logging.Logger;
 public class Main {
 
 	public static final MetaHandler GAME_VERSION_META = new MetaHandler("https://meta.fabricmc.net/v2/versions/game");
-	public static final MavenHandler LOADER_MAVEN = new MavenHandler(Reference.MAVEN_SERVER_URL, Reference.PACKAGE, Reference.LOADER_NAME);
+	public static final MetaHandler LOADER_META = new MetaHandler("https://meta.fabricmc.net/v2/versions/loader");
 
 	//TODO is gui the best name for this?
 	public static final List<Handler> HANDLERS = new ArrayList<>();
 
-	public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, XMLStreamException {
+	public static void main(String[] args) throws IOException {
 		String[] versionSplit = System.getProperty("java.version").split("\\.");
 		if (versionSplit.length == 2) { //Only check 1.x versions of java, new versions are formatted liked 12
 			int javaVersionMajor = Integer.parseInt(versionSplit[0]);
@@ -63,6 +65,11 @@ public class Main {
 		//Used to suppress warning from libs
 		setDebugLevel(Level.SEVERE);
 
+		//Default to the help command in a headless environment
+		if(GraphicsEnvironment.isHeadless() && command == null){
+			command = "help";
+		}
+
 		if (command == null) {
 			try {
 				InstallerGui.start();
@@ -74,10 +81,10 @@ public class Main {
 			System.out.println("help - Opens this menu");
 			HANDLERS.forEach(handler -> System.out.printf("%s %s\n", handler.name().toLowerCase(), handler.cliHelp()));
 
-			LOADER_MAVEN.load();
+			LOADER_META.load();
 			GAME_VERSION_META.load();
 
-			System.out.printf("\nLatest Version: %s\nLatest Loader: %s\n", GAME_VERSION_META.getLatestVersion(argumentParser.has("snapshot")).getVersion(), Main.LOADER_MAVEN.latestVersion);
+			System.out.printf("\nLatest Version: %s\nLatest Loader: %s\n", GAME_VERSION_META.getLatestVersion(argumentParser.has("snapshot")).getVersion(), Main.LOADER_META.getLatestVersion(false).getVersion());
 		} else {
 			for (Handler handler : HANDLERS) {
 				if (command.equalsIgnoreCase(handler.name())) {
