@@ -186,6 +186,7 @@ public class ServerPostInstallDialog extends JDialog {
 		launchScripts.forEach((file, s) -> {
 			try {
 				Utils.writeToFile(file, s);
+				file.setExecutable(true, false);
 			} catch (FileNotFoundException e) {
 				serverHandler.error(e);
 			}
