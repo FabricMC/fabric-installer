@@ -18,10 +18,16 @@ package net.fabricmc.installer.server;
 
 import net.fabricmc.installer.util.*;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
@@ -34,6 +40,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class ServerInstaller {
+	private static final String servicesDir = "META-INF/services/";
 
 	public static void install(File dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{String.format("%s(%s)", loaderVersion, gameVersion)}));
@@ -101,19 +108,29 @@ public class ServerInstaller {
 			zipOutputStream.write(("launch.mainClass=" + meta.mainClassServer + "\n").getBytes(StandardCharsets.UTF_8));
 			zipOutputStream.closeEntry();
 
+			Map<String, Set<String>> services = new HashMap<>();
 			byte[] buffer = new byte[32768];
 
 			for (File f : libraryFiles) {
 				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.generating.launch.jar.library")).format(new Object[]{f.getName()}));
 
+				// read service definitions (merging them), copy other files
 				try (
 						FileInputStream is = new FileInputStream(f);
 						JarInputStream jis = new JarInputStream(is)
 				) {
 					JarEntry entry;
 					while ((entry = jis.getNextJarEntry()) != null) {
-						if (!addedEntries.contains(entry.getName())) {
-							JarEntry newEntry = new JarEntry(entry.getName());
+						if (entry.isDirectory()) continue;
+
+						String name = entry.getName();
+
+						if (name.startsWith(servicesDir) && name.indexOf('/', servicesDir.length()) < 0) { // service definition file
+							parseServiceDefinition(name, jis, services);
+						} else if (!addedEntries.add(name)) {
+							System.out.printf("duplicate file: %s%n", name);
+						} else {
+							JarEntry newEntry = new JarEntry(name);
 							zipOutputStream.putNextEntry(newEntry);
 
 							int r;
@@ -122,10 +139,19 @@ public class ServerInstaller {
 							}
 
 							zipOutputStream.closeEntry();
-							addedEntries.add(entry.getName());
 						}
 					}
 				}
+			}
+
+			// write service definitions
+			for (Map.Entry<String, Set<String>> entry : services.entrySet()) {
+				JarEntry newEntry = new JarEntry(entry.getKey());
+				zipOutputStream.putNextEntry(newEntry);
+
+				writeServiceDefinition(entry.getValue(), zipOutputStream);
+
+				zipOutputStream.closeEntry();
 			}
 		}
 
@@ -133,4 +159,32 @@ public class ServerInstaller {
 		outputStream.close();
 	}
 
+	private static void parseServiceDefinition(String name, InputStream rawIs, Map<String, Set<String>> services) throws IOException {
+		Collection<String> out = null;
+		BufferedReader reader = new BufferedReader(new InputStreamReader(rawIs, StandardCharsets.UTF_8));
+		String line;
+
+		while ((line = reader.readLine()) != null) {
+			int pos = line.indexOf('#');
+			if (pos >= 0) line = line.substring(0, pos);
+			line = line.trim();
+
+			if (!line.isEmpty()) {
+				if (out == null) out = services.computeIfAbsent(name, ignore -> new LinkedHashSet<>());
+
+				out.add(line);
+			}
+		}
+	}
+
+	private static void writeServiceDefinition(Collection<String> defs, OutputStream os) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
+
+		for (String def : defs) {
+			writer.write(def);
+			writer.write('\n');
+		}
+
+		writer.flush();
+	}
 }

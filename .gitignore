@@ -15,3 +15,9 @@
 /out
 /classes
 /test
+
+/bin/
+/.classpath
+/.project
+/.settings
+
