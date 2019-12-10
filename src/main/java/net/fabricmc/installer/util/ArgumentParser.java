@@ -19,6 +19,7 @@ package net.fabricmc.installer.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ArgumentParser {
@@ -53,6 +54,12 @@ public class ArgumentParser {
 
 	public boolean has(String argument) {
 		return argMap.containsKey(argument);
+	}
+
+	public void ifPresent(String argument, Consumer<String> consumer) {
+		if(has(argument)) {
+			consumer.accept(get(argument));
+		}
 	}
 
 	public Optional<String> getCommand() {

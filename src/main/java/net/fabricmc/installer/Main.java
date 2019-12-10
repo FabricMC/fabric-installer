@@ -21,6 +21,7 @@ import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.CrashDialog;
 import net.fabricmc.installer.util.MetaHandler;
+import net.fabricmc.installer.util.Reference;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,8 +35,8 @@ import java.util.logging.Logger;
 
 public class Main {
 
-	public static final MetaHandler GAME_VERSION_META = new MetaHandler("https://meta.fabricmc.net/v2/versions/game");
-	public static final MetaHandler LOADER_META = new MetaHandler("https://meta.fabricmc.net/v2/versions/loader");
+	public static MetaHandler GAME_VERSION_META;
+	public static MetaHandler LOADER_META;
 
 	//TODO is gui the best name for this?
 	public static final List<Handler> HANDLERS = new ArrayList<>();
@@ -64,6 +65,13 @@ public class Main {
 
 		//Used to suppress warning from libs
 		setDebugLevel(Level.SEVERE);
+
+		//Can be used if you wish to re-host or provide custom versions. Ensure you include the trailing /
+		argumentParser.ifPresent("mavenurl", s -> Reference.mavenServerUrl = s);
+		final String metaUrl = argumentParser.getOrDefault("metaurl", () -> "https://meta.fabricmc.net/");
+
+		GAME_VERSION_META = new MetaHandler(metaUrl + "v2/versions/game");
+		LOADER_META = new MetaHandler(metaUrl + "v2/versions/loader");
 
 		//Default to the help command in a headless environment
 		if(GraphicsEnvironment.isHeadless() && command == null){

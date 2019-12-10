@@ -33,8 +33,8 @@ public class ClientInstaller {
 		launchJson.inheritsFrom = gameVersion;
 
 		//Adds loader and the mappings
-		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + gameVersion, Reference.MAVEN_SERVER_URL));
-		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.LOADER_NAME + ":" + loaderVersion, Reference.MAVEN_SERVER_URL));
+		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + gameVersion, Reference.mavenServerUrl));
+		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.LOADER_NAME + ":" + loaderVersion, Reference.mavenServerUrl));
 
 		File versionsDir = new File(mcDir, "versions");
 		File profileDir = new File(versionsDir, profileName);

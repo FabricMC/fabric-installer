@@ -17,9 +17,9 @@
 package net.fabricmc.installer.util;
 
 public class Reference {
-
-	public static final String MAVEN_SERVER_URL = "https://maven.fabricmc.net/";
 	public static final String PACKAGE = "net/fabricmc";
 	public static final String LOADER_NAME = "fabric-loader";
 	public static final String MAPPINGS_NAME = "intermediary";
+
+	public static String mavenServerUrl = "https://maven.fabricmc.net/";
 }
