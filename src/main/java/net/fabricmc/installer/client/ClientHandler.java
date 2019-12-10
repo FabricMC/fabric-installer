@@ -70,6 +70,9 @@ public class ClientHandler extends Handler {
 		String loaderVersion = getLoaderVersion(args);
 
 		String profileName = ClientInstaller.install(file, gameVersion, loaderVersion, InstallerProgress.CONSOLE);
+		if(args.has("noprofile")) {
+			return;
+		}
 		ProfileInstaller.setupProfile(file, profileName, gameVersion);
 	}
 
