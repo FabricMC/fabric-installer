@@ -20,11 +20,16 @@ import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.MessageFormat;
 
 public class ClientHandler extends Handler {
@@ -52,11 +57,27 @@ public class ClientHandler extends Handler {
 				if (createProfile.isSelected()) {
 					ProfileInstaller.setupProfile(mcPath, profileName, gameVersion);
 				}
+				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion, gameVersion));
 			} catch (Exception e) {
 				error(e);
 			}
 			buttonInstall.setEnabled(true);
 		}).start();
+	}
+
+	private void showInstalledMessage(String loaderVersion, String gameVersion) {
+		JEditorPane pane = new JEditorPane("text/html", new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}));
+		pane.setEditable(false);
+		pane.addHyperlinkListener(e -> {
+			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+				try {
+					Desktop.getDesktop().browse(e.getURL().toURI());
+				} catch (IOException | URISyntaxException exception) {
+					error(exception);
+				}
+			}
+		});
+		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	@Override
