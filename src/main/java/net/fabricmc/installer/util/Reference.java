@@ -22,5 +22,5 @@ public class Reference {
 	public static final String MAPPINGS_NAME = "intermediary";
 
 	public static String mavenServerUrl = "https://maven.fabricmc.net/";
-	public static String fabricApiUrl = "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all/";
+	public static String fabricApiUrl = "https://www.curseforge.com/minecraft/mc-mods/fabric-api/";
 }
