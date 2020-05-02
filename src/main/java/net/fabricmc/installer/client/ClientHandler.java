@@ -69,12 +69,16 @@ public class ClientHandler extends Handler {
 		JEditorPane pane = new JEditorPane("text/html", new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}));
 		pane.setEditable(false);
 		pane.addHyperlinkListener(e -> {
-			if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-				try {
-					Desktop.getDesktop().browse(e.getURL().toURI());
-				} catch (IOException | URISyntaxException exception) {
-					error(exception);
+			try {
+				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+					if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+						Desktop.getDesktop().browse(e.getURL().toURI());
+					} else {
+						throw new UnsupportedOperationException("Failed to open " + e.getURL().toString());
+					}
 				}
+			} catch (Exception exception) {
+				error(exception);
 			}
 		});
 		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE);

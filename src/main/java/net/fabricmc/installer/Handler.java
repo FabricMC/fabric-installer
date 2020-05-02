@@ -22,7 +22,6 @@ import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Utils;
 
 import javax.swing.*;
-import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -166,9 +165,12 @@ public abstract class Handler implements InstallerProgress {
 
 		System.err.println(errorMessage);
 
+		JEditorPane textPane = new JEditorPane("text/html", errorMessage.toString().replace("\n", "<br>"));
+		textPane.setEditable(false);
+		
 		JOptionPane.showMessageDialog(
 				pane,
-				errorMessage,
+				textPane,
 				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
 		);
