@@ -139,7 +139,7 @@ public abstract class Handler implements InstallerProgress {
 	@Override
 	public void updateProgress(String text) {
 		statusLabel.setText(text);
-		statusLabel.setForeground(Color.BLACK);
+		statusLabel.setForeground(UIManager.getColor("Label.foreground"));
 	}
 
 	private void appendException(StringBuilder errorMessage, String prefix, String name, Throwable e) {
@@ -166,15 +166,15 @@ public abstract class Handler implements InstallerProgress {
 
 		System.err.println(errorMessage);
 
+		statusLabel.setText(e.getLocalizedMessage());
+		statusLabel.setForeground(Color.RED);
+
 		JOptionPane.showMessageDialog(
 				pane,
 				errorMessage,
 				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
 		);
-
-		statusLabel.setText(e.getLocalizedMessage());
-		statusLabel.setForeground(Color.RED);
 	}
 
 	protected void addRow(Container parent, Consumer<JPanel> consumer) {
