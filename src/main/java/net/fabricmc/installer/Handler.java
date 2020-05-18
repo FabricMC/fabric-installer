@@ -138,7 +138,7 @@ public abstract class Handler implements InstallerProgress {
 	@Override
 	public void updateProgress(String text) {
 		statusLabel.setText(text);
-		statusLabel.setForeground(Color.BLACK);
+		statusLabel.setForeground(UIManager.getColor("Label.foreground"));
 	}
 
 	private void appendException(StringBuilder errorMessage, String prefix, String name, Throwable e) {
@@ -168,15 +168,15 @@ public abstract class Handler implements InstallerProgress {
 		JEditorPane textPane = new JEditorPane("text/html", errorMessage.toString().replace("\n", "<br>"));
 		textPane.setEditable(false);
 		
+		statusLabel.setText(e.getLocalizedMessage());
+		statusLabel.setForeground(Color.RED);
+
 		JOptionPane.showMessageDialog(
 				pane,
 				textPane,
 				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
 		);
-
-		statusLabel.setText(e.getLocalizedMessage());
-		statusLabel.setForeground(Color.RED);
 	}
 
 	protected void addRow(Container parent, Consumer<JPanel> consumer) {
