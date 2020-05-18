@@ -109,12 +109,12 @@ public abstract class Handler implements InstallerProgress {
 			for (int i = 0; i < versions.size(); i++) {
 				MetaHandler.GameVersion version = versions.get(i);
 				loaderVersionComboBox.addItem(version.getVersion());
-				if(version.isStable()){
+				if (version.isStable()) {
 					stableIndex = i;
 				}
 			}
 			//If no stable versions are found, default to the latest version
-			if(stableIndex == -1){
+			if (stableIndex == -1) {
 				stableIndex = 0;
 			}
 			loaderVersionComboBox.setSelectedIndex(stableIndex);
@@ -159,16 +159,22 @@ public abstract class Handler implements InstallerProgress {
 	}
 
 	@Override
-	public void error(Exception e) {
+	public void error(Throwable throwable) {
 		StringBuilder errorMessage = new StringBuilder();
-		appendException(errorMessage, "", Utils.BUNDLE.getString("prompt.exception"), e);
+		appendException(errorMessage, "", Utils.BUNDLE.getString("prompt.exception"), throwable);
 
 		System.err.println(errorMessage);
 
-		JEditorPane textPane = new JEditorPane("text/html", errorMessage.toString().replace("\n", "<br>"));
+		JLabel label = new JLabel();
+		Font font = label.getFont();
+		Color color = label.getBackground();
+		String style = "font-family:" + font.getFamily() + ";" + "font-weight:" + (font.isBold() ? "bold" : "normal") + ";" +
+		               "font-size:" + font.getSize() + "pt;" +
+		               "background-color: rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ");";
+		JEditorPane textPane = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" + errorMessage.toString().replace("\n", "<br>") + "</body></html>");
 		textPane.setEditable(false);
 		
-		statusLabel.setText(e.getLocalizedMessage());
+		statusLabel.setText(throwable.getLocalizedMessage());
 		statusLabel.setForeground(Color.RED);
 
 		JOptionPane.showMessageDialog(

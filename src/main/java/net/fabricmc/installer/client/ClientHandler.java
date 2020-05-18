@@ -28,8 +28,6 @@ import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.text.MessageFormat;
 
 public class ClientHandler extends Handler {
@@ -66,7 +64,14 @@ public class ClientHandler extends Handler {
 	}
 
 	private void showInstalledMessage(String loaderVersion, String gameVersion) {
-		JEditorPane pane = new JEditorPane("text/html", new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}));
+		JLabel label = new JLabel();
+		Font font = label.getFont();
+		Color color = label.getBackground();
+
+		String style = "font-family:" + font.getFamily() + ";" + "font-weight:" + (font.isBold() ? "bold" : "normal") + ";" +
+		               "font-size:" + font.getSize() + "pt;" +
+		               "background-color: rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ");";
+		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}) + "</body></html>");
 		pane.setEditable(false);
 		pane.addHyperlinkListener(e -> {
 			try {
@@ -77,8 +82,8 @@ public class ClientHandler extends Handler {
 						throw new UnsupportedOperationException("Failed to open " + e.getURL().toString());
 					}
 				}
-			} catch (Exception exception) {
-				error(exception);
+			} catch (Throwable throwable) {
+				error(throwable);
 			}
 		});
 		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE);
@@ -95,7 +100,7 @@ public class ClientHandler extends Handler {
 		String loaderVersion = getLoaderVersion(args);
 
 		String profileName = ClientInstaller.install(file, gameVersion, loaderVersion, InstallerProgress.CONSOLE);
-		if(args.has("noprofile")) {
+		if (args.has("noprofile")) {
 			return;
 		}
 		ProfileInstaller.setupProfile(file, profileName, gameVersion);
