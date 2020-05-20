@@ -109,12 +109,12 @@ public abstract class Handler implements InstallerProgress {
 			for (int i = 0; i < versions.size(); i++) {
 				MetaHandler.GameVersion version = versions.get(i);
 				loaderVersionComboBox.addItem(version.getVersion());
-				if (version.isStable()) {
+				if(version.isStable()){
 					stableIndex = i;
 				}
 			}
 			//If no stable versions are found, default to the latest version
-			if (stableIndex == -1) {
+			if(stableIndex == -1){
 				stableIndex = 0;
 			}
 			loaderVersionComboBox.setSelectedIndex(stableIndex);
