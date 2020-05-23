@@ -64,14 +64,7 @@ public class ClientHandler extends Handler {
 	}
 
 	private void showInstalledMessage(String loaderVersion, String gameVersion) {
-		JLabel label = new JLabel();
-		Font font = label.getFont();
-		Color color = label.getBackground();
-
-		String style = "font-family:" + font.getFamily() + ";" + "font-weight:" + (font.isBold() ? "bold" : "normal") + ";" +
-		               "font-size:" + font.getSize() + "pt;" +
-		               "background-color: rgb(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ");";
-		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}) + "</body></html>");
+		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}) + "</body></html>");
 		pane.setEditable(false);
 		pane.addHyperlinkListener(e -> {
 			try {
@@ -100,7 +93,7 @@ public class ClientHandler extends Handler {
 		String loaderVersion = getLoaderVersion(args);
 
 		String profileName = ClientInstaller.install(file, gameVersion, loaderVersion, InstallerProgress.CONSOLE);
-		if(args.has("noprofile")) {
+		if (args.has("noprofile")) {
 			return;
 		}
 		ProfileInstaller.setupProfile(file, profileName, gameVersion);
