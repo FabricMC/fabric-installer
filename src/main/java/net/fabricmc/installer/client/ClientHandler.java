@@ -20,9 +20,12 @@ import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.MessageFormat;
@@ -52,11 +55,31 @@ public class ClientHandler extends Handler {
 				if (createProfile.isSelected()) {
 					ProfileInstaller.setupProfile(mcPath, profileName, gameVersion);
 				}
+				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion, gameVersion));
 			} catch (Exception e) {
 				error(e);
 			}
 			buttonInstall.setEnabled(true);
 		}).start();
+	}
+
+	private void showInstalledMessage(String loaderVersion, String gameVersion) {
+		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}) + "</body></html>");
+		pane.setEditable(false);
+		pane.addHyperlinkListener(e -> {
+			try {
+				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+					if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+						Desktop.getDesktop().browse(e.getURL().toURI());
+					} else {
+						throw new UnsupportedOperationException("Failed to open " + e.getURL().toString());
+					}
+				}
+			} catch (Throwable throwable) {
+				error(throwable);
+			}
+		});
+		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	@Override
@@ -70,7 +93,7 @@ public class ClientHandler extends Handler {
 		String loaderVersion = getLoaderVersion(args);
 
 		String profileName = ClientInstaller.install(file, gameVersion, loaderVersion, InstallerProgress.CONSOLE);
-		if(args.has("noprofile")) {
+		if (args.has("noprofile")) {
 			return;
 		}
 		ProfileInstaller.setupProfile(file, profileName, gameVersion);
