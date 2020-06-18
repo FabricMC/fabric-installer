@@ -6,9 +6,9 @@ buildscript {
 		jcenter()
 	}
 	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:5.0.0'
-		classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
-		classpath "com.github.ben-manes:gradle-versions-plugin:0.21.0"
+		classpath 'com.github.jengelman.gradle.plugins:shadow:6.0.0'
+		classpath 'edu.sc.seis.gradle:launch4j:2.4.6'
+		classpath "com.github.ben-manes:gradle-versions-plugin:0.28.0"
 	}
 }
 
@@ -39,8 +39,8 @@ repositories {
 }
 
 dependencies {
-	compile 'com.google.code.gson:gson:2.8.5'
-	testCompile 'junit:junit:4.12'
+	implementation 'com.google.code.gson:gson:2.8.6'
+	testImplementation 'junit:junit:4.13'
 }
 
 shadowJar {
@@ -55,7 +55,7 @@ build.dependsOn shadowJar
 jar {
     manifest {
         attributes 'Implementation-Title': 'FabricInstaller',
-                'Implementation-Version': version,
+                'Implementation-Version': project.version,
                 'Main-Class': 'net.fabricmc.installer.Main'
     }
 	enabled = false
@@ -71,7 +71,7 @@ launch4j {
 	manifest = "${projectDir}/l4j-manifest.xml" // https://docs.microsoft.com/en-us/windows/desktop/sbscs/application-manifests This helps with
 }
 
-tasks.build.dependsOn 'launch4j'
+tasks.build.dependsOn 'createExe'
 
 apply from: 'https://github.com/FabricMC/fabric-docs/raw/master/gradle/license.gradle'
 
