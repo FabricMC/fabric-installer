@@ -22,7 +22,6 @@ import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Utils;
 
 import javax.swing.*;
-import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -110,12 +109,12 @@ public abstract class Handler implements InstallerProgress {
 			for (int i = 0; i < versions.size(); i++) {
 				MetaHandler.GameVersion version = versions.get(i);
 				loaderVersionComboBox.addItem(version.getVersion());
-				if(version.isStable()){
+				if (version.isStable()) {
 					stableIndex = i;
 				}
 			}
 			//If no stable versions are found, default to the latest version
-			if(stableIndex == -1){
+			if (stableIndex == -1) {
 				stableIndex = 0;
 			}
 			loaderVersionComboBox.setSelectedIndex(stableIndex);
@@ -159,19 +158,32 @@ public abstract class Handler implements InstallerProgress {
 		}
 	}
 
+	protected String buildEditorPaneStyle() {
+		JLabel label = new JLabel();
+		Font font = label.getFont();
+		Color color = label.getBackground();
+		return String.format(
+				"font-family:%s;font-weight:%s;font-size:%dpt;background-color: rgb(%d,%d,%d);",
+				font.getFamily(), (font.isBold() ? "bold" : "normal"), font.getSize(), color.getRed(), color.getGreen(), color.getBlue()
+		);
+	}
+
 	@Override
-	public void error(Exception e) {
+	public void error(Throwable throwable) {
 		StringBuilder errorMessage = new StringBuilder();
-		appendException(errorMessage, "", Utils.BUNDLE.getString("prompt.exception"), e);
+		appendException(errorMessage, "", Utils.BUNDLE.getString("prompt.exception"), throwable);
 
 		System.err.println(errorMessage);
 
-		statusLabel.setText(e.getLocalizedMessage());
+		JEditorPane textPane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + errorMessage.toString().replace("\n", "<br>") + "</body></html>");
+		textPane.setEditable(false);
+
+		statusLabel.setText(throwable.getLocalizedMessage());
 		statusLabel.setForeground(Color.RED);
 
 		JOptionPane.showMessageDialog(
 				pane,
-				errorMessage,
+				textPane,
 				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
 		);
