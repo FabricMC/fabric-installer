@@ -83,7 +83,7 @@ publishing {
 			version project.version
 
 			artifact (file("${projectDir}/build/launch4j/${archivesBaseName}-${project.version}.exe"))
-			artifact (jar)
+			artifact (file("${projectDir}/build/libs/${archivesBaseName}-${project.version}.jar"))
 		}
 	}
 	repositories {
