@@ -31,6 +31,7 @@ public class MinecraftLaunchJson {
 	public String inheritsFrom;
 	public String releaseTime = Utils.ISO_8601.format(new Date());
 	public String time = releaseTime;
+	public String type = "release";
 	public String mainClass;
 	public transient String mainClassServer;
 	public Arguments arguments = new Arguments();
