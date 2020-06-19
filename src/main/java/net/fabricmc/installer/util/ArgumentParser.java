@@ -73,8 +73,12 @@ public class ArgumentParser {
 				String key = args[i].substring(1);
 				String value = null;
 				if (i + 1 < args.length) {
+					value = args[i + 1];
+					if (value.startsWith("-")) {
+						argMap.put(key, "");
+						continue;
+					}
 					i++;
-					value = args[i];
 				}
 				if (argMap.containsKey(key)) {
 					throw new IllegalArgumentException(String.format("Argument %s already passed", key));
