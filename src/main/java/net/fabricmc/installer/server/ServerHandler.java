@@ -27,6 +27,8 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class ServerHandler extends Handler {
 
@@ -62,8 +64,11 @@ public class ServerHandler extends Handler {
 
 		if(args.has("downloadMinecraft")){
 			File serverJar = new File(file, "server.jar");
+			File serverJarTmp = new File(file, "server.jar.tmp");
+			Files.deleteIfExists(serverJar.toPath());
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
-			Utils.downloadFile(new URL(LauncherMeta.getLauncherMeta().getVersion(gameVersion).getVersionMeta().downloads.get("server").url), serverJar);
+			Utils.downloadFile(new URL(LauncherMeta.getLauncherMeta().getVersion(gameVersion).getVersionMeta().downloads.get("server").url), serverJarTmp);
+			Files.move(serverJarTmp.toPath(), serverJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.done"));
 		}
 	}

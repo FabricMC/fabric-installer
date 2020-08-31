@@ -26,6 +26,8 @@ import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +45,7 @@ public class ServerPostInstallDialog extends JDialog {
 	private String minecraftVersion;
 	private File installDir;
 	private File minecraftJar;
+	private File minecraftJarTmp;
 
 	private JLabel serverJarLabel;
 	private JButton downloadButton;
@@ -54,6 +57,7 @@ public class ServerPostInstallDialog extends JDialog {
 		this.minecraftVersion = (String) handler.gameVersionComboBox.getSelectedItem();
 		this.installDir = new File(handler.installLocation.getText());
 		this.minecraftJar = new File(installDir, "server.jar");
+		this.minecraftJarTmp = new File(installDir, "server.jar.tmp");
 
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		initComponents();
@@ -133,8 +137,13 @@ public class ServerPostInstallDialog extends JDialog {
 
 	private void doServerJarDownload() {
 		downloadButton.setEnabled(false);
-		if (minecraftJar.exists()) {
-			minecraftJar.delete();
+		try {
+			Files.deleteIfExists(minecraftJar.toPath());
+			Files.deleteIfExists(minecraftJarTmp.toPath());
+		} catch (IOException e) {
+			color(serverJarLabel, Color.RED).setText(e.getMessage());
+			serverHandler.error(e);
+			return;
 		}
 		new Thread(() -> {
 			try {
@@ -144,7 +153,7 @@ public class ServerPostInstallDialog extends JDialog {
 
 				BufferedInputStream inputStream = new BufferedInputStream(httpConnection.getInputStream());
 
-				FileOutputStream outputStream = new FileOutputStream(minecraftJar);
+				FileOutputStream outputStream = new FileOutputStream(minecraftJarTmp);
 				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream, 1024);
 
 				byte[] buffer = new byte[1024];
@@ -160,6 +169,8 @@ public class ServerPostInstallDialog extends JDialog {
 				}
 				bufferedOutputStream.close();
 				inputStream.close();
+
+				Files.move(minecraftJarTmp.toPath(), minecraftJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 				updateServerJarLabel();
 				downloadButton.setEnabled(true);
