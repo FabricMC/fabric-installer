@@ -26,7 +26,7 @@ import java.util.Date;
 
 public class ProfileInstaller {
 
-	public static void setupProfile(File path,String customName, String name, String gameVersion) throws IOException {
+	public static void setupProfile(File path,String customProfileName, String name, String gameVersion) throws IOException {
 		File launcherProfiles = new File(path, "launcher_profiles.json");
 		if (!launcherProfiles.exists()) {
 			System.out.println("Could not find launcher_profiles");
@@ -38,7 +38,7 @@ public class ProfileInstaller {
 		String json = Utils.readFile(launcherProfiles);
 		JsonObject jsonObject = Utils.GSON.fromJson(json, JsonObject.class);
 		JsonObject profiles = jsonObject.getAsJsonObject("profiles");
-		String profileName = customName.replace("{loader}", Reference.LOADER_NAME).replace("{version}", gameVersion);
+		String profileName = customProfileName.replace("{loader}", Reference.LOADER_NAME).replace("{version}", gameVersion);
 
 		JsonObject profile;
 		if (profiles.has(profileName)) {

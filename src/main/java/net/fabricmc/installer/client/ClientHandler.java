@@ -33,7 +33,7 @@ import java.text.MessageFormat;
 public class ClientHandler extends Handler {
 
 	private JCheckBox createProfile;
-	public JTextField profilName;
+	public JTextField profileNameField;
 
 	@Override
 	public String name() {
@@ -54,7 +54,7 @@ public class ClientHandler extends Handler {
 				}
 				String profileName = ClientInstaller.install(mcPath, gameVersion, loaderVersion, this);
 				if (createProfile.isSelected()) {
-					ProfileInstaller.setupProfile(mcPath, profilName.getText(), profileName, gameVersion);
+					ProfileInstaller.setupProfile(mcPath, profileNameField.getText(), profileName, gameVersion);
 				}
 				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion, gameVersion));
 			} catch (Exception e) {
@@ -97,7 +97,7 @@ public class ClientHandler extends Handler {
 		if (args.has("noprofile")) {
 			return;
 		}
-		ProfileInstaller.setupProfile(file,profilName.getText(), profileName, gameVersion);
+		ProfileInstaller.setupProfile(file,profileNameField.getText(), profileName, gameVersion);
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public class ClientHandler extends Handler {
 
 		addRow(pane, jPanel -> {
 			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.select.profile_name")));
-			jPanel.add(profilName = new JTextField("{loader}-{version}"));
+			jPanel.add(profileNameField = new JTextField("{loader}-{version}"));
 		});
 
 		installLocation.setText(Utils.findDefaultInstallDir().getAbsolutePath());
