@@ -18,7 +18,6 @@ package net.fabricmc.installer.client;
 
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
-import net.fabricmc.installer.Main;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Reference;
