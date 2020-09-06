@@ -18,6 +18,7 @@ package net.fabricmc.installer.client;
 
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
+import net.fabricmc.installer.Main;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Reference;
@@ -34,6 +35,7 @@ public class ClientHandler extends Handler {
 
 	private JCheckBox createProfile;
 	public JTextField profileNameField;
+	public JLabel profileNameText;
 
 	@Override
 	public String name() {
@@ -112,10 +114,16 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void setupPane2(JPanel pane, InstallerGui installerGui) {
-		addRow(pane, jPanel -> jPanel.add(createProfile = new JCheckBox(Utils.BUNDLE.getString("option.create.profile"), true)));
+		addRow(pane, jPanel -> {
+			jPanel.add(createProfile = new JCheckBox(Utils.BUNDLE.getString("option.create.profile"), true));
+			createProfile.addActionListener(e -> {
+				profileNameText.setVisible(createProfile.isSelected());
+				profileNameField.setVisible(createProfile.isSelected());
+			});
+		});
 
 		addRow(pane, jPanel -> {
-			jPanel.add(new JLabel(Utils.BUNDLE.getString("prompt.select.profile_name")));
+			jPanel.add(profileNameText = new JLabel(Utils.BUNDLE.getString("prompt.select.profile_name")));
 			jPanel.add(profileNameField = new JTextField("{loader}-{version}"));
 		});
 
