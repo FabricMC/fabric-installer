@@ -152,8 +152,8 @@ public class Utils {
 
     private static List<String> getRunningProcesses() throws IOException {
         Process proc;
-        if (System.getProperty("os.name").contains("win")) {
-            proc = Runtime.getRuntime().exec("tasklist.exe /L");
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            proc = Runtime.getRuntime().exec("tasklist.exe /FO TABLE /NH /FI \"IMAGENAME eq MinecraftLauncher.exe\"");
         } else {
             proc = Runtime.getRuntime().exec("ps -e -o command");
         }
