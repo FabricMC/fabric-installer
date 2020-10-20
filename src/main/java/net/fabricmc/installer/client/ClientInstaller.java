@@ -19,6 +19,7 @@ package net.fabricmc.installer.client;
 import net.fabricmc.installer.util.*;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -28,14 +29,6 @@ public class ClientInstaller {
 		System.out.println("Installing " + gameVersion + " with fabric " + loaderVersion);
 
 		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, gameVersion);
-
-		MinecraftLaunchJson launchJson = Utils.getLaunchMeta(loaderVersion);
-		launchJson.id = profileName;
-		launchJson.inheritsFrom = gameVersion;
-
-		//Adds loader and the mappings
-		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + gameVersion, Reference.mavenServerUrl));
-		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.LOADER_NAME + ":" + loaderVersion, Reference.mavenServerUrl));
 
 		Path versionsDir = mcDir.resolve("versions");
 		Path profileDir = versionsDir.resolve(profileName);
@@ -56,7 +49,8 @@ public class ClientInstaller {
 		Path dummyJar = profileDir.resolve(profileName + ".jar");
 		Files.createFile(dummyJar);
 
-		Utils.writeToFile(profileJson, launchJson.toString());
+		URL profileUrl = new URL(String.format("%s/v2/versions/loader/%s/%s/profile/json", Reference.metaServerUrl, gameVersion, loaderVersion));
+		Utils.downloadFile(profileUrl, profileJson.toFile());
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.done"));
 

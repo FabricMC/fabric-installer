@@ -67,11 +67,10 @@ public class Main {
 		setDebugLevel(Level.SEVERE);
 
 		//Can be used if you wish to re-host or provide custom versions. Ensure you include the trailing /
-		argumentParser.ifPresent("mavenurl", s -> Reference.mavenServerUrl = s);
-		final String metaUrl = argumentParser.getOrDefault("metaurl", () -> "https://meta.fabricmc.net/");
+		argumentParser.ifPresent("metaurl", s -> Reference.metaServerUrl = s);
 
-		GAME_VERSION_META = new MetaHandler(metaUrl + "v2/versions/game");
-		LOADER_META = new MetaHandler(metaUrl + "v2/versions/loader");
+		GAME_VERSION_META = new MetaHandler(Reference.metaServerUrl + "v2/versions/game");
+		LOADER_META = new MetaHandler(Reference.metaServerUrl + "v2/versions/loader");
 
 		//Default to the help command in a headless environment
 		if(GraphicsEnvironment.isHeadless() && command == null){

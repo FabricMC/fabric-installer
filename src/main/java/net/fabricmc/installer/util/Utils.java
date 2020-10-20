@@ -119,12 +119,6 @@ public class Utils {
 		}
 	}
 
-	public static MinecraftLaunchJson getLaunchMeta(String loaderVersion) throws IOException {
-		String url = String.format("%s/%s/%s/%s/%3$s-%4$s.json", Reference.mavenServerUrl, Reference.PACKAGE, Reference.LOADER_NAME, loaderVersion);
-
-		return new MinecraftLaunchJson(Json.read(readTextFile(new URL(url))));
-	}
-
 	public static String getProfileIcon() {
 
 		try (InputStream is = Utils.class.getClassLoader().getResourceAsStream("profile_icon.png")) {
