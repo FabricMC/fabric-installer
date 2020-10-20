@@ -18,12 +18,13 @@ package net.fabricmc.installer.client;
 
 import net.fabricmc.installer.util.*;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ClientInstaller {
 
-	public static String install(File mcDir, String gameVersion, String loaderVersion, InstallerProgress progress) throws IOException {
+	public static String install(Path mcDir, String gameVersion, String loaderVersion, InstallerProgress progress) throws IOException {
 		System.out.println("Installing " + gameVersion + " with fabric " + loaderVersion);
 
 		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, gameVersion);
@@ -36,12 +37,12 @@ public class ClientInstaller {
 		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + gameVersion, Reference.mavenServerUrl));
 		launchJson.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.LOADER_NAME + ":" + loaderVersion, Reference.mavenServerUrl));
 
-		File versionsDir = new File(mcDir, "versions");
-		File profileDir = new File(versionsDir, profileName);
-		File profileJson = new File(profileDir, profileName + ".json");
+		Path versionsDir = mcDir.resolve("versions");
+		Path profileDir = versionsDir.resolve(profileName);
+		Path profileJson = profileDir.resolve(profileName + ".json");
 
-		if (!profileDir.exists()) {
-			profileDir.mkdirs();
+		if (!Files.exists(profileDir)) {
+			Files.createDirectories(profileDir);
 		}
 
 		/*
@@ -52,10 +53,10 @@ public class ClientInstaller {
 		(mappings and loader). The launcher will also accept any jar with the same name as the profile, it doesnt care if its empty
 
 		 */
-		File dummyJar = new File(profileDir, profileName + ".jar");
-		dummyJar.createNewFile();
+		Path dummyJar = profileDir.resolve(profileName + ".jar");
+		Files.createFile(dummyJar);
 
-		Utils.writeToFile(profileJson, Utils.GSON.toJson(launchJson));
+		Utils.writeToFile(profileJson, launchJson.toString());
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.done"));
 

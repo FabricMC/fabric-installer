@@ -16,17 +16,12 @@
 
 package net.fabricmc.installer.util;
 
-import com.google.gson.reflect.TypeToken;
+import mjson.Json;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,13 +36,16 @@ public class MetaHandler extends CompletableHandler<List<MetaHandler.GameVersion
 
 	public void load() throws IOException {
 		URL url = new URL(metaUrl);
-		URLConnection conn = url.openConnection();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-			String json = reader.lines().collect(Collectors.joining("\n"));
-			Type type = new TypeToken<ArrayList<GameVersion>>() {}.getType();
-			versions = Utils.GSON.fromJson(json, type);
-			complete(versions);
-		}
+		List<GameVersion> gameVersions = new LinkedList<>();
+
+		Json json = Json.read(Utils.readTextFile(url));
+
+		this.versions = json.asJsonList()
+				.stream()
+				.map(GameVersion::new)
+				.collect(Collectors.toList());
+
+		complete(versions);
 	}
 
 	public List<GameVersion> getVersions() {
@@ -66,6 +64,11 @@ public class MetaHandler extends CompletableHandler<List<MetaHandler.GameVersion
 	public static class GameVersion {
 		String version;
 		boolean stable;
+
+		public GameVersion(Json json) {
+			version = json.at("version").asString();
+			stable = json.at("stable").asBoolean();
+		}
 
 		public String getVersion() {
 			return version;

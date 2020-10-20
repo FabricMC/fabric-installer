@@ -16,9 +16,7 @@
 
 package net.fabricmc.installer.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import mjson.Json;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,28 +36,28 @@ public class MinecraftLaunchJson {
 	public List<Library> libraries = new ArrayList<>();
 
 	//Used for reading the fabric-launch.json and populating the minecraft format
-	public MinecraftLaunchJson(JsonObject jsonObject) {
+	public MinecraftLaunchJson(Json jsonObject) {
 
-		if (!jsonObject.get("mainClass").isJsonObject()) {
-			mainClass = jsonObject.get("mainClass").getAsString();
+		if (!jsonObject.at("mainClass").isObject()) {
+			mainClass = jsonObject.at("mainClass").asString();
 		} else {
-			mainClass = jsonObject.get("mainClass").getAsJsonObject().get("client").getAsString();
+			mainClass = jsonObject.at("mainClass").at("client").asString();
 			//Done like this as this object is written to a vanilla profile json
-			mainClassServer = jsonObject.get("mainClass").getAsJsonObject().get("server").getAsString();
+			mainClassServer = jsonObject.at("mainClass").at("server").asString();
 		}
 
 		if (jsonObject.has("launchwrapper")) {
-			String clientTweaker = jsonObject.get("launchwrapper").getAsJsonObject().get("tweakers").getAsJsonObject().get("client").getAsJsonArray().get(0).getAsString();
+			String clientTweaker = jsonObject.at("launchwrapper").at("tweakers").at("client").at(0).asString();
 
 			arguments.game.add("--tweakClass");
 			arguments.game.add(clientTweaker);
 		}
 
 		String[] validSides = new String[]{"common", "server"};
-		JsonObject librariesObject = jsonObject.getAsJsonObject("libraries");
+		Json librariesObject = jsonObject.at("libraries");
 		for (String side : validSides) {
-			JsonArray librariesArray = librariesObject.getAsJsonArray(side);
-			librariesArray.forEach(jsonElement -> libraries.add(new Library(jsonElement)));
+			Json librariesArray = librariesObject.at(side);
+			librariesArray.asJsonList().forEach(jsonElement -> libraries.add(new Library(jsonElement)));
 		}
 	}
 
@@ -73,11 +71,10 @@ public class MinecraftLaunchJson {
 			this.url = url;
 		}
 
-		private Library(JsonElement jsonElement) {
-			JsonObject jsonObject = (JsonObject) jsonElement;
-			name = jsonObject.get("name").getAsString();
-			if (jsonObject.has("url")) {
-				url = jsonObject.get("url").getAsString();
+		private Library(Json json) {
+			name = json.at("name").asString();
+			if (json.has("url")) {
+				url = json.at("url").asString();
 			}
 		}
 

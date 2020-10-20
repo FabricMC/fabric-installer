@@ -21,7 +21,7 @@ apply plugin: 'edu.sc.seis.launch4j'
 apply plugin: "com.github.ben-manes.versions"
 
 sourceCompatibility = 1.8
-version = '0.6.1'
+version = '0.7.0'
 archivesBaseName = "fabric-installer"
 
 // Fetch build number from Jenkins
@@ -39,14 +39,16 @@ repositories {
 }
 
 dependencies {
-	implementation 'com.google.code.gson:gson:2.8.6'
+	implementation ('org.sharegov:mjson:1.4.1') {
+		transitive false
+	}
 	testImplementation 'junit:junit:4.13'
 }
 
 shadowJar {
-	relocate 'com.google', 'net.fabricmc.installer.repackage.com.google'
 	minimize()
 	classifier = null
+	exclude('icon.ico')
 }
 
 build.dependsOn shadowJar
