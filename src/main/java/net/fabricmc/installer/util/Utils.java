@@ -146,7 +146,7 @@ public class Utils {
                 JOptionPane.showMessageDialog(null,
                         "The Minecraft launcher is open! Please close it before installing fabric!");
             }
-            System.exit(0);
+            System.exit(1);
         }
     }
 
