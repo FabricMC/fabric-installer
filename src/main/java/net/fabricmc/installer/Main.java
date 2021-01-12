@@ -57,7 +57,7 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 			if (showGui) {
-				JOptionPane.showMessageDialog(null, "Please make sure the Minecraft launcher is closed!");
+				JOptionPane.showMessageDialog(null, "Failed to check if the Minecraft launcher is open! Please make sure it's closed so fabric can be installed properly.", "Minecraft Launcher Warning", JOptionPane.WARNING_MESSAGE);
 			}
 		}
 		System.out.println("Loading Fabric Installer: " + Main.class.getPackage().getImplementationVersion());
