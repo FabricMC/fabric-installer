@@ -21,7 +21,6 @@ import mjson.Json;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,6 @@ public class MetaHandler extends CompletableHandler<List<MetaHandler.GameVersion
 
 	public void load() throws IOException {
 		URL url = new URL(metaUrl);
-		List<GameVersion> gameVersions = new LinkedList<>();
 
 		Json json = Json.read(Utils.readTextFile(url));
 

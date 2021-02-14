@@ -107,15 +107,11 @@ public class Utils {
 		Files.write(path, string.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public static void downloadFile(URL url, File file) throws IOException {
-		if (!file.getParentFile().isDirectory()) {
-			if (!file.mkdirs()) {
-				throw new IOException("Could not create directory for " + file.getAbsolutePath() + "!");
-			}
-		}
+	public static void downloadFile(URL url, Path path) throws IOException {
+		Files.createDirectories(path.getParent());
 
 		try (InputStream in = url.openStream()) {
-			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 

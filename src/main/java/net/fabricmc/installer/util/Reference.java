@@ -21,4 +21,8 @@ public class Reference {
 
 	public static String metaServerUrl = "https://meta.fabricmc.net/";
 	public static String fabricApiUrl = "https://www.curseforge.com/minecraft/mc-mods/fabric-api/";
+
+	public static String getMetaServerEndpoint(String path) {
+		return metaServerUrl + path;
+	}
 }

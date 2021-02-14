@@ -59,8 +59,7 @@ public class ServerInstaller {
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.download.libraries"));
 
-		//TODO use a server specific url here
-		URL profileUrl = new URL(String.format("%s/v2/versions/loader/%s/%s/profile/json", Reference.metaServerUrl, gameVersion, loaderVersion));
+		URL profileUrl = new URL(Reference.getMetaServerEndpoint(String.format("v2/versions/loader/%s/%s/server/json", gameVersion, loaderVersion)));
 		Json json = Json.read(Utils.readTextFile(profileUrl));
 
 		List<File> libraryFiles = new ArrayList<>();
@@ -70,7 +69,7 @@ public class ServerInstaller {
 
 			progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.download.library.entry")).format(new Object[]{library.name}));
 			File libraryFile = new File(libsDir, library.getFileName());
-			Utils.downloadFile(new URL(library.getURL()), libraryFile);
+			Utils.downloadFile(new URL(library.getURL()), libraryFile.toPath());
 			libraryFiles.add(libraryFile);
 		}
 

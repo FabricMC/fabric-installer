@@ -47,10 +47,12 @@ public class ClientInstaller {
 
 		 */
 		Path dummyJar = profileDir.resolve(profileName + ".jar");
+		Files.deleteIfExists(dummyJar);
 		Files.createFile(dummyJar);
 
-		URL profileUrl = new URL(String.format("%s/v2/versions/loader/%s/%s/profile/json", Reference.metaServerUrl, gameVersion, loaderVersion));
-		Utils.downloadFile(profileUrl, profileJson.toFile());
+
+		URL profileUrl = new URL(Reference.getMetaServerEndpoint(String.format("v2/versions/loader/%s/%s/profile/json", gameVersion, loaderVersion)));
+		Utils.downloadFile(profileUrl, profileJson);
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.done"));
 
