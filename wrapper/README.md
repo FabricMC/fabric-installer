@@ -1,0 +1,1 @@
+# Fabric installer wrapper

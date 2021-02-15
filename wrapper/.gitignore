@@ -1,0 +1,9 @@
+# Ignore everything
+/*
+
+!/src
+!/third-party
+
+!CMakeLists.txt
+!README.md
+!.gitignore

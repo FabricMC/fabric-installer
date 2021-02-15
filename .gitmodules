@@ -1,0 +1,6 @@
+[submodule "wrapper/third-party/tinyfiledialogs"]
+	path = wrapper/third-party/tinyfiledialogs
+	url = git@github.com:native-toolkit/tinyfiledialogs.git
+[submodule "wrapper/third-party/cmake-bin2h"]
+	path = wrapper/third-party/cmake-bin2h
+	url = git@github.com:sivachandran/cmake-bin2h.git
