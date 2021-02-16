@@ -7,7 +7,7 @@ import sequtils
 import strutils
 
 # Statically includes the installer binary
-const installerBinary: seq[char] = toSeq(staticRead("/build/libs/fabric-installer-0.6.1.jar"))
+const installerBinary: seq[char] = toSeq(staticRead("/build/libs/fabric-installer-wrapper.jar"))
 
 type JavaException* = IOError
 

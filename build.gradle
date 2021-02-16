@@ -73,6 +73,16 @@ launch4j {
 
 tasks.build.dependsOn 'createExe'
 
+task wrapperJar(type: Copy, dependsOn: jar) {
+	afterEvaluate {
+		from("${project.buildDir}/libs/$archivesBaseName-${version}.jar")
+		into("${project.buildDir}/libs/")
+		rename { fn -> "$archivesBaseName-wrapper.jar" }
+	}
+}
+
+tasks.build.dependsOn 'wrapperJar'
+
 apply from: 'https://github.com/FabricMC/fabric-docs/raw/master/gradle/license.gradle'
 
 publishing {
