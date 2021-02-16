@@ -70,7 +70,7 @@ when isMainModule:
     echo "Fabric installer bootstrap"
 
     when not defined windows:
-        echo "Only windows is currenly supported"
+        echo "Only windows is currently supported"
         system.quit(-1)
 
     var path = ""
