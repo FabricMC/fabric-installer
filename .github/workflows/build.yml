@@ -10,8 +10,7 @@ jobs:
         with:
           nim-version: '1.4.2'
       - run: .\gradlew.bat build --stacktrace
-      - run: nimble install -Y
-      - run: nimble build -d:release
+      - run: nimble build -Y -d:release
       - uses: actions/upload-artifact@v2
         with:
           name: Artifacts
