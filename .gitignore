@@ -19,5 +19,9 @@
 !/l4j-manifest.xml
 !/LICENSE
 !/README.md
+
+# Native Wrapper
+
 !/wrapper.nim
 !/wrapper.nimble
+!/nim.cfg

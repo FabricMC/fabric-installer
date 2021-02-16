@@ -3,9 +3,11 @@ import osproc
 import streams
 import strformat
 import dialogs
+import sequtils
+import strutils
 
 # Statically includes the installer binary
-const installerBinary = staticRead("/build/libs/fabric-installer-0.7.0.jar")
+const installerBinary: seq[char] = toSeq(staticRead("/build/libs/fabric-installer-0.6.1.jar"))
 
 type JavaException* = IOError
 
@@ -13,7 +15,7 @@ proc javaEnvPath(): string =
     if not os.existsEnv("JAVA_HOME"):
         return ""
 
-    return os.getEnv("JAVA_HOME") & "java.exe"
+    return os.getEnv("JAVA_HOME") & "javaw.exe"
 
 proc isValidJavaPath(path: string): bool =
     try:
@@ -30,10 +32,10 @@ proc isValidJavaPath(path: string): bool =
 
 proc findJavaPath(): string =
     const JREPaths = [
-        "C:\\Program Files (x86)\\Minecraft\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe",  # New location for mojang's "legacy" (8) installation of java
-        "C:\\Program Files (x86)\\Minecraft\\runtime\\jre-x64\\bin\\java.exe",                              # The old default jre included with mc
+        "C:\\Program Files (x86)\\Minecraft\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\javaw.exe", # New location for mojang's "legacy" (8) installation of java
+        "C:\\Program Files (x86)\\Minecraft\\runtime\\jre-x64\\bin\\javaw.exe",                             # The old default jre included with mc
         javaEnvPath(),                                                                                      # JAVA_HOME environment varible
-        "java",                                                                                             # Java on the path
+        "javaw",                                                                                            # Java on the path
         ]
 
     for path in JREPaths:
@@ -42,10 +44,15 @@ proc findJavaPath(): string =
 
     raise JavaException.newException("Failed to find a valid installation of java")
 
+proc toString(str: seq[char]): string =
+  result = newStringOfCap(len(str))
+  for ch in str:
+    add(result, ch)
+
 proc runInstaller(path: string): void =
     let tempInstallerPath = os.getTempDir() & "fabric-installer.jar"
     echo "Writing fabric installer jar to " & tempInstallerPath
-    writeFile(tempInstallerPath, installerBinary)
+    writeFile(tempInstallerPath, toString(installerBinary))
 
     let process = osproc.startProcess(
          command = path,
@@ -79,7 +86,7 @@ when isMainModule:
         path = findJavaPath()
     except JavaException as e:
         echo e.msg
-        dialogs.error(nil, "The Fabric installer could not find java installed on your computer.")
+        dialogs.error(nil, "The Fabric installer could not find java installed on your computer. Please visit the fabric wiki at https://fabricmc.net/wiki/ for help installing java.")
         system.quit(-1)
 
     runInstaller(path)
