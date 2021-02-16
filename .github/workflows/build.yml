@@ -6,9 +6,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
-      - run: choco install nim
+      - uses: jiro4989/setup-nim-action@v1
+        with:
+          nim-version: '1.4.2'
       - run: .\gradlew.bat build --stacktrace
-      - run: nimble install
+      - run: nimble install -d:release
       - run: nimble build
       - uses: actions/upload-artifact@v2
         with:
