@@ -38,8 +38,11 @@ shadowJar {
 	exclude('icon.ico')
 }
 
+def bootstrapVersion = "0.1.1"
+def bootstrapArch = "i686"
+
 task downloadBootstrap(type: Download) {
-	src 'https://maven.fabricmc.net/net/fabricmc/fabric-installer-native-bootstrap/windows-i686/0.1.0/windows-i686-0.1.0.exe'
+	src "https://maven.fabricmc.net/net/fabricmc/fabric-installer-native-bootstrap/windows-${bootstrapArch}/${bootstrapVersion}/windows-${bootstrapArch}-${bootstrapVersion}.exe"
 	dest project.buildDir
 }
 
