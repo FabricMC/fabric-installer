@@ -4,6 +4,7 @@ plugins {
 	id "com.github.johnrengelman.shadow" version "6.1.0"
 	id "org.cadixdev.licenser" version "0.5.0"
 	id "de.undercouch.download" version "4.1.1"
+	id "me.modmuss50.remotesign" version "0.1.0"
 }
 
 sourceCompatibility = 1.8
@@ -57,7 +58,12 @@ task nativeExe(dependsOn: [shadowJar, downloadBootstrap], type: FileOutput) {
 	doLast {
 		output.createNewFile()
 		output.setBytes downloadBootstrap.outputFiles.first().readBytes()
-		output.append shadowJar.archiveFile.get().getAsFile().readBytes()
+
+		if (ENV.SIGNING_SERVER) {
+			output.append signShadowJar.archiveFile.get().getAsFile().readBytes()
+		} else {
+			output.append shadowJar.archiveFile.get().getAsFile().readBytes()
+		}
 	}
 }
 build.dependsOn nativeExe
@@ -69,6 +75,22 @@ jar {
                 'Main-Class': 'net.fabricmc.installer.Main'
     }
 	enabled = false
+}
+
+if (ENV.SIGNING_SERVER) {
+	remoteSign {
+		requestUrl ENV.SIGNING_SERVER
+		pgpAuthKey ENV.SIGNING_PGP_KEY
+		jarAuthKey ENV.SIGNING_JAR_KEY
+
+		sign (shadowJar)
+
+		afterEvaluate {
+			sign publishing.publications.mavenJava
+		}
+	}
+
+	nativeExe.dependsOn signShadowJar
 }
 
 license {
@@ -83,8 +105,13 @@ publishing {
 			artifactId project.archivesBaseName
 			version project.version
 
+			if (ENV.SIGNING_SERVER) {
+				artifact signShadowJar
+			} else {
+				artifact shadowJar
+			}
+
 			artifact nativeExe.output
-			artifact shadowJar
 		}
 	}
 	repositories {
