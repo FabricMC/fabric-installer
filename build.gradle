@@ -1,56 +1,72 @@
-buildscript {
-	repositories {
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
-		jcenter()
-	}
-	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:6.0.0'
-		classpath 'edu.sc.seis.gradle:launch4j:2.4.6'
-		classpath "com.github.ben-manes:gradle-versions-plugin:0.28.0"
-	}
+plugins {
+	id 'java'
+	id 'maven-publish'
+	id "com.github.johnrengelman.shadow" version "6.1.0"
+	id "org.cadixdev.licenser" version "0.5.0"
+	id "de.undercouch.download" version "4.1.1"
+	id "me.modmuss50.remotesign" version "0.1.0"
 }
-
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'maven-publish'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'edu.sc.seis.launch4j'
-apply plugin: "com.github.ben-manes.versions"
 
 sourceCompatibility = 1.8
-version = '0.6.1'
+version = '0.7.0'
 archivesBaseName = "fabric-installer"
 
-// Fetch build number from Jenkins
 def ENV = System.getenv()
-if (ENV.BUILD_NUMBER) {
-    version = version + "." + "${System.getenv().BUILD_NUMBER}"
-}
+version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
 repositories {
     mavenCentral()
-    maven {
-        name = 'fabric'
-        url = 'https://maven.fabricmc.net/'
-    }
 }
 
 dependencies {
-	implementation 'com.google.code.gson:gson:2.8.6'
-	testImplementation 'junit:junit:4.13'
+	implementation ('org.sharegov:mjson:1.4.1') {
+		transitive false
+	}
+	testImplementation 'junit:junit:4.13.2'
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
+
+	if (JavaVersion.current().isJava9Compatible()) {
+		it.options.release = 8
+	}
 }
 
 shadowJar {
-	relocate 'com.google', 'net.fabricmc.installer.repackage.com.google'
 	minimize()
-	classifier = null
+	archiveClassifier.set(null)
+	exclude('icon.ico')
 }
 
-build.dependsOn shadowJar
+def bootstrapVersion = "0.1.1"
+def bootstrapArch = "i686"
 
+task downloadBootstrap(type: Download) {
+	src "https://maven.fabricmc.net/net/fabricmc/fabric-installer-native-bootstrap/windows-${bootstrapArch}/${bootstrapVersion}/windows-${bootstrapArch}-${bootstrapVersion}.exe"
+	dest project.buildDir
+}
+
+task nativeExe(dependsOn: [shadowJar, downloadBootstrap], type: FileOutput) {
+	output = file("${projectDir}/build/libs/${archivesBaseName}-${project.version}.exe")
+	outputs.upToDateWhen { false }
+
+	doFirst {
+		output.delete()
+	}
+
+	doLast {
+		output.createNewFile()
+		output.setBytes downloadBootstrap.outputFiles.first().readBytes()
+
+		if (ENV.SIGNING_SERVER) {
+			output.append signShadowJar.archiveFile.get().getAsFile().readBytes()
+		} else {
+			output.append shadowJar.archiveFile.get().getAsFile().readBytes()
+		}
+	}
+}
+build.dependsOn nativeExe
 
 jar {
     manifest {
@@ -61,19 +77,26 @@ jar {
 	enabled = false
 }
 
-launch4j {
-    mainClassName = 'net.fabricmc.installer.Main'
-    icon = "${projectDir}/src/main/resources/icon.ico"
-	outfile = "${archivesBaseName}-${project.version}.exe"
-	productName = 'Fabric installer'
-	companyName = "Fabric Team"
-	copyright = "Apache License Version 2.0"
-	manifest = "${projectDir}/l4j-manifest.xml" // https://docs.microsoft.com/en-us/windows/desktop/sbscs/application-manifests This helps with
+if (ENV.SIGNING_SERVER) {
+	remoteSign {
+		requestUrl ENV.SIGNING_SERVER
+		pgpAuthKey ENV.SIGNING_PGP_KEY
+		jarAuthKey ENV.SIGNING_JAR_KEY
+
+		sign (shadowJar)
+
+		afterEvaluate {
+			sign publishing.publications.mavenJava
+		}
+	}
+
+	nativeExe.dependsOn signShadowJar
 }
 
-tasks.build.dependsOn 'createExe'
-
-apply from: 'https://github.com/FabricMC/fabric-docs/raw/master/gradle/license.gradle'
+license {
+	header rootProject.file("HEADER")
+	include "**/*.java"
+}
 
 publishing {
 	publications {
@@ -82,19 +105,43 @@ publishing {
 			artifactId project.archivesBaseName
 			version project.version
 
-			artifact (file("${projectDir}/build/launch4j/${archivesBaseName}-${project.version}.exe"))
-			artifact (file("${projectDir}/build/libs/${archivesBaseName}-${project.version}.jar"))
+			if (ENV.SIGNING_SERVER) {
+				artifact signShadowJar
+			} else {
+				artifact shadowJar
+			}
+
+			artifact nativeExe.output
 		}
 	}
 	repositories {
 		maven {
-			url "http://mavenupload.modmuss50.me/"
-			if (project.hasProperty('mavenPass')) {
+			if (ENV.MAVEN_URL) {
+				url ENV.MAVEN_URL
 				credentials {
-					username 'buildslave'
-					password project.getProperty('mavenPass')
+					username ENV.MAVEN_USERNAME
+					password ENV.MAVEN_PASSWORD
 				}
 			}
 		}
 	}
+}
+
+// A task to ensure that the version being released has not already been released.
+task checkVersion {
+	doFirst {
+		def xml = new URL("https://maven.fabricmc.net/net/fabricmc/fabric-installer/maven-metadata.xml").text
+		def metadata = new XmlSlurper().parseText(xml)
+		def versions = metadata.versioning.versions.version*.text();
+		if (versions.contains(version)) {
+			throw new RuntimeException("${version} has already been released!")
+		}
+	}
+}
+
+publish.mustRunAfter checkVersion
+
+class FileOutput extends DefaultTask {
+	@OutputFile
+	File output
 }

@@ -67,7 +67,7 @@ public class ServerHandler extends Handler {
 			File serverJarTmp = new File(file, "server.jar.tmp");
 			Files.deleteIfExists(serverJar.toPath());
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
-			Utils.downloadFile(new URL(LauncherMeta.getLauncherMeta().getVersion(gameVersion).getVersionMeta().downloads.get("server").url), serverJarTmp);
+			Utils.downloadFile(new URL(LauncherMeta.getLauncherMeta().getVersion(gameVersion).getVersionMeta().downloads.get("server").url), serverJarTmp.toPath());
 			Files.move(serverJarTmp.toPath(), serverJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.done"));
 		}

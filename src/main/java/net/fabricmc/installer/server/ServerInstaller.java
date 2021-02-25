@@ -16,6 +16,7 @@
 
 package net.fabricmc.installer.server;
 
+import mjson.Json;
 import net.fabricmc.installer.util.*;
 
 import java.io.BufferedReader;
@@ -57,30 +58,31 @@ public class ServerInstaller {
 		}
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.download.libraries"));
-		MinecraftLaunchJson meta = Utils.getLaunchMeta(loaderVersion);
 
-		//We add fabric-loader as a lib so it can be downloaded and loaded in the same way as the other libs
-		meta.libraries.add(new MinecraftLaunchJson.Library("net.fabricmc:fabric-loader:" + loaderVersion, Reference.mavenServerUrl));
-		meta.libraries.add(new MinecraftLaunchJson.Library(Reference.PACKAGE.replaceAll("/", ".") + ":" + Reference.MAPPINGS_NAME + ":" + gameVersion, Reference.mavenServerUrl));
+		URL profileUrl = new URL(Reference.getMetaServerEndpoint(String.format("v2/versions/loader/%s/%s/server/json", gameVersion, loaderVersion)));
+		Json json = Json.read(Utils.readTextFile(profileUrl));
 
 		List<File> libraryFiles = new ArrayList<>();
 
-		for (MinecraftLaunchJson.Library library : meta.libraries) {
+		for (Json libraryJson : json.at("libraries").asJsonList()) {
+			Library library = new Library(libraryJson);
+
 			progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.download.library.entry")).format(new Object[]{library.name}));
 			File libraryFile = new File(libsDir, library.getFileName());
-			Utils.downloadFile(new URL(library.getURL()), libraryFile);
+			Utils.downloadFile(new URL(library.getURL()), libraryFile.toPath());
 			libraryFiles.add(libraryFile);
 		}
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.generating.launch.jar"));
 
 		File launchJar = new File(dir, "fabric-server-launch.jar");
-		makeLaunchJar(launchJar, meta, libraryFiles, progress);
+		String mainClass = json.at("mainClass").asString();
+		makeLaunchJar(launchJar, mainClass, libraryFiles, progress);
 
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getName()}));
 	}
 
-	private static void makeLaunchJar(File file, MinecraftLaunchJson meta, List<File> libraryFiles, InstallerProgress progress) throws IOException {
+	private static void makeLaunchJar(File file, String mainclass, List<File> libraryFiles, InstallerProgress progress) throws IOException {
 		if (file.exists()) {
 			if (!file.delete()) {
 				throw new IOException("Could not delete file: " + file.getAbsolutePath());
@@ -105,7 +107,7 @@ public class ServerInstaller {
 
 			addedEntries.add("fabric-server-launch.properties");
 			zipOutputStream.putNextEntry(new ZipEntry("fabric-server-launch.properties"));
-			zipOutputStream.write(("launch.mainClass=" + meta.mainClassServer + "\n").getBytes(StandardCharsets.UTF_8));
+			zipOutputStream.write(("launch.mainClass=" + mainclass + "\n").getBytes(StandardCharsets.UTF_8));
 			zipOutputStream.closeEntry();
 
 			Map<String, Set<String>> services = new HashMap<>();

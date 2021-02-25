@@ -16,23 +16,31 @@
 
 package net.fabricmc.installer.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import java.io.*;
+import mjson.Json;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Locale;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class Utils {
 
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("lang/installer", Locale.getDefault(), new ResourceBundle.Control() {
 		@Override
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
@@ -81,39 +89,30 @@ public class Utils {
 		return dir;
 	}
 
+	public static Reader urlReader(URL url) throws IOException {
+		return new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
+	}
+
 	public static String readTextFile(URL url) throws IOException {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+		try (BufferedReader reader = new BufferedReader(urlReader(url))) {
 			return reader.lines().collect(Collectors.joining("\n"));
 		}
 	}
 
-	public static void writeToFile(File file, String string) throws FileNotFoundException {
-		try (PrintStream printStream = new PrintStream(new FileOutputStream(file))) {
-			printStream.print(string);
-		}
+	public static String readString(Path path) throws IOException {
+		return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 	}
 
-	public static String readFile(File file) throws IOException {
-		return new String(Files.readAllBytes(file.toPath()));
+	public static void writeToFile(Path path, String string) throws IOException {
+		Files.write(path, string.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public static void downloadFile(URL url, File file) throws IOException {
-		if (!file.getParentFile().isDirectory()) {
-			if (!file.mkdirs()) {
-				throw new IOException("Could not create directory for " + file.getAbsolutePath() + "!");
-			}
-		}
+	public static void downloadFile(URL url, Path path) throws IOException {
+		Files.createDirectories(path.getParent());
 
 		try (InputStream in = url.openStream()) {
-			Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		}
-	}
-
-	public static MinecraftLaunchJson getLaunchMeta(String loaderVersion) throws IOException {
-		String url = String.format("%s/%s/%s/%s/%3$s-%4$s.json", Reference.mavenServerUrl, Reference.PACKAGE, Reference.LOADER_NAME, loaderVersion);
-		String fabricInstallMeta = Utils.readTextFile(new URL(url));
-		JsonObject installMeta = Utils.GSON.fromJson(fabricInstallMeta, JsonObject.class);
-		return new MinecraftLaunchJson(installMeta);
 	}
 
 	public static String getProfileIcon() {

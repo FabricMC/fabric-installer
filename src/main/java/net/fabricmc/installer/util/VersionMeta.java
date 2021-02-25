@@ -16,17 +16,34 @@
 
 package net.fabricmc.installer.util;
 
+import mjson.Json;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class VersionMeta {
 
-	public String id;
-	public Map<String, Download> downloads;
+	public final String id;
+	public final Map<String, Download> downloads;
+
+	public VersionMeta(Json json) {
+		id = json.at("id").asString();
+		downloads = new HashMap<>();
+		for (Map.Entry<String, Json> entry : json.at("downloads").asJsonMap().entrySet()) {
+			downloads.put(entry.getKey(), new Download(entry.getValue()));
+		}
+	}
 
 	public static class Download {
-		public String sha1;
-		public long size;
-		public String url;
+		public final String sha1;
+		public final long size;
+		public final String url;
+
+		public Download(Json json) {
+			sha1 = json.at("sha1").asString();
+			size = json.at("size").asLong();
+			url = json.at("url").asString();
+		}
 	}
 
 

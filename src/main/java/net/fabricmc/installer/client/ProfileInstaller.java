@@ -16,51 +16,51 @@
 
 package net.fabricmc.installer.client;
 
-import com.google.gson.JsonObject;
+import mjson.Json;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 
 public class ProfileInstaller {
 
-	public static void setupProfile(File path, String name, String gameVersion) throws IOException {
-		File launcherProfiles = new File(path, "launcher_profiles.json");
-		if (!launcherProfiles.exists()) {
+	public static void setupProfile(Path path, String name, String gameVersion) throws IOException {
+		Path launcherProfiles = path.resolve("launcher_profiles.json");
+		if (!Files.exists(launcherProfiles)) {
 			System.out.println("Could not find launcher_profiles");
 			return;
 		}
 
 		System.out.println("Creating profile");
 
-		String json = Utils.readFile(launcherProfiles);
-		JsonObject jsonObject = Utils.GSON.fromJson(json, JsonObject.class);
-		JsonObject profiles = jsonObject.getAsJsonObject("profiles");
+		Json jsonObject = Json.read(Utils.readString(launcherProfiles));
+
+		Json profiles = jsonObject.at("profiles");
 		String profileName = Reference.LOADER_NAME + "-" + gameVersion;
 
-		JsonObject profile;
+		Json profile;
 		if (profiles.has(profileName)) {
-			profile = profiles.get(profileName).getAsJsonObject();
+			profile = profiles.at(profileName);
 		} else {
 			profile = createProfile(profileName);
 		}
 
-		profile.addProperty("lastVersionId", name);
-		profiles.add(profileName, profile);
+		profile.set("lastVersionId", name);
+		profiles.set(profileName, profile);
 
-		Utils.writeToFile(launcherProfiles, Utils.GSON.toJson(jsonObject));
-
+		Utils.writeToFile(launcherProfiles, jsonObject.toString());
 	}
 
-	private static JsonObject createProfile(String name) {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("name", name);
-		jsonObject.addProperty("type", "custom");
-		jsonObject.addProperty("created", Utils.ISO_8601.format(new Date()));
-		jsonObject.addProperty("lastUsed", Utils.ISO_8601.format(new Date()));
-		jsonObject.addProperty("icon", Utils.getProfileIcon());
+	private static Json createProfile(String name) {
+		Json jsonObject = Json.object();
+		jsonObject.set("name", name);
+		jsonObject.set("type", "custom");
+		jsonObject.set("created", Utils.ISO_8601.format(new Date()));
+		jsonObject.set("lastUsed", Utils.ISO_8601.format(new Date()));
+		jsonObject.set("icon", Utils.getProfileIcon());
 		return jsonObject;
 	}
 
