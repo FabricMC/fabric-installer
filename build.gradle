@@ -86,7 +86,7 @@ if (ENV.SIGNING_SERVER) {
 		sign (shadowJar)
 
 		afterEvaluate {
-			sign publishing.publications.mavenJava
+			sign publishing.publications.maven
 		}
 	}
 
