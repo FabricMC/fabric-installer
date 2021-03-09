@@ -86,7 +86,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void installCli(ArgumentParser args) throws Exception {
-		Path path = Paths.get(args.get("dir"));
+		Path path = Paths.get(args.getOrDefault("dir", () -> Utils.findDefaultInstallDir().getAbsolutePath()));
 		if (!Files.exists(path)) {
 			throw new FileNotFoundException("Launcher directory not found at " + path.toString());
 		}
@@ -103,7 +103,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public String cliHelp() {
-		return "-dir <install dir, required> -mcversion <minecraft version, default latest> -loader <loader version, default latest>";
+		return "-dir <install dir> -mcversion <minecraft version, default latest> -loader <loader version, default latest>";
 	}
 
 	@Override
