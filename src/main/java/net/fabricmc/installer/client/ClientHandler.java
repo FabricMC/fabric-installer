@@ -87,7 +87,7 @@ public class ClientHandler extends Handler {
 	@Override
 	public void installCli(ArgumentParser args) throws Exception {
 		Path path = Paths.get(args.get("dir"));
-		if (Files.exists(path)) {
+		if (!Files.exists(path)) {
 			throw new FileNotFoundException("Launcher directory not found at " + path.toString());
 		}
 
