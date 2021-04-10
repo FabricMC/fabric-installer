@@ -8,7 +8,7 @@ plugins {
 }
 
 sourceCompatibility = 1.8
-version = '0.7.2'
+version = '0.7.3'
 archivesBaseName = "fabric-installer"
 
 def ENV = System.getenv()
@@ -39,7 +39,7 @@ shadowJar {
 	exclude('icon.ico')
 }
 
-def bootstrapVersion = "0.1.1"
+def bootstrapVersion = "0.1.2"
 def bootstrapArch = "i686"
 
 task downloadBootstrap(type: Download) {
