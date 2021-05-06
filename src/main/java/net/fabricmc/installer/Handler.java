@@ -16,15 +16,30 @@
 
 package net.fabricmc.installer;
 
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.function.Consumer;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Utils;
-
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.util.function.Consumer;
 
 public abstract class Handler implements InstallerProgress {
 
@@ -141,23 +156,6 @@ public abstract class Handler implements InstallerProgress {
 		statusLabel.setForeground(UIManager.getColor("Label.foreground"));
 	}
 
-	private void appendException(StringBuilder errorMessage, String prefix, String name, Throwable e) {
-		String prefixAppend = "  ";
-
-		errorMessage.append(prefix).append(name).append(": ").append(e.getLocalizedMessage()).append('\n');
-		for (StackTraceElement traceElement : e.getStackTrace()) {
-			errorMessage.append(prefix).append("- ").append(traceElement).append('\n');
-		}
-
-		if (e.getCause() != null) {
-			appendException(errorMessage, prefix + prefixAppend, Utils.BUNDLE.getString("prompt.exception.caused.by"), e.getCause());
-		}
-
-		for (Throwable ec : e.getSuppressed()) {
-			appendException(errorMessage, prefix + prefixAppend, Utils.BUNDLE.getString("prompt.exception.suppressed"), ec);
-		}
-	}
-
 	protected String buildEditorPaneStyle() {
 		JLabel label = new JLabel();
 		Font font = label.getFont();
@@ -165,17 +163,24 @@ public abstract class Handler implements InstallerProgress {
 		return String.format(
 				"font-family:%s;font-weight:%s;font-size:%dpt;background-color: rgb(%d,%d,%d);",
 				font.getFamily(), (font.isBold() ? "bold" : "normal"), font.getSize(), color.getRed(), color.getGreen(), color.getBlue()
-		);
+				);
 	}
 
 	@Override
 	public void error(Throwable throwable) {
-		StringBuilder errorMessage = new StringBuilder();
-		appendException(errorMessage, "", Utils.BUNDLE.getString("prompt.exception"), throwable);
+		StringWriter sw = new StringWriter(800);
 
-		System.err.println(errorMessage);
+		try (PrintWriter pw = new PrintWriter(sw)) {
+			throwable.printStackTrace(pw);
+		}
 
-		JEditorPane textPane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + errorMessage.toString().replace("\n", "<br>") + "</body></html>");
+		String st = sw.toString().trim();
+		System.err.println(st);
+
+		String html = String.format("<html><body style=\"%s\">%s</body></html>",
+				buildEditorPaneStyle(),
+				st.replace(System.lineSeparator(), "<br>").replace("\t", "&ensp;"));
+		JEditorPane textPane = new JEditorPane("text/html", html);
 		textPane.setEditable(false);
 
 		statusLabel.setText(throwable.getLocalizedMessage());
@@ -186,7 +191,7 @@ public abstract class Handler implements InstallerProgress {
 				textPane,
 				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
-		);
+				);
 	}
 
 	protected void addRow(Container parent, Consumer<JPanel> consumer) {
