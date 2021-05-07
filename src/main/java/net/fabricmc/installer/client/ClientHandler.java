@@ -16,21 +16,26 @@
 
 package net.fabricmc.installer.client;
 
+import java.awt.Desktop;
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
+
+import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
+
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
-
-import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
-import java.awt.*;
-import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.MessageFormat;
 
 public class ClientHandler extends Handler {
 
@@ -86,7 +91,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void installCli(ArgumentParser args) throws Exception {
-		Path path = Paths.get(args.getOrDefault("dir", () -> Utils.findDefaultInstallDir().getAbsolutePath()));
+		Path path = Paths.get(args.getOrDefault("dir", () -> Utils.findDefaultInstallDir().toString()));
 		if (!Files.exists(path)) {
 			throw new FileNotFoundException("Launcher directory not found at " + path.toString());
 		}
@@ -115,7 +120,7 @@ public class ClientHandler extends Handler {
 	public void setupPane2(JPanel pane, InstallerGui installerGui) {
 		addRow(pane, jPanel -> jPanel.add(createProfile = new JCheckBox(Utils.BUNDLE.getString("option.create.profile"), true)));
 
-		installLocation.setText(Utils.findDefaultInstallDir().getAbsolutePath());
+		installLocation.setText(Utils.findDefaultInstallDir().toString());
 	}
 
 }
