@@ -55,34 +55,24 @@ public class Utils {
 		}
 	});
 
-	public static Path findDefaultUserDir() {
-		String home = System.getProperty("user.home", ".");
+	public static Path findDefaultInstallDir() {
 		String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 		Path dir;
 
 		if (os.contains("win") && System.getenv("APPDATA") != null) {
-			dir = Paths.get(System.getenv("APPDATA")).toAbsolutePath().normalize();
+			dir = Paths.get(System.getenv("APPDATA")).resolve(".minecraft");
 		} else {
-			Path homeDir = Paths.get(home).toAbsolutePath().normalize();
+			String home = System.getProperty("user.home", ".");
+			Path homeDir = Paths.get(home);
 
 			if (os.contains("mac")) {
-				dir = homeDir.resolve("Library").resolve("Application Support");
+				dir = homeDir.resolve("Library").resolve("Application Support").resolve("minecraft");
 			} else {
-				dir = homeDir;
+				dir = homeDir.resolve(".minecraft");
 			}
 		}
 
-		return dir;
-	}
-
-	public static Path findDefaultInstallDir() {
-		String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
-
-		if (os.contains("mac")) {
-			return findDefaultUserDir().resolve("minecraft");
-		} else {
-			return findDefaultUserDir().resolve(".minecraft");
-		}
+		return dir.toAbsolutePath().normalize();
 	}
 
 	public static Reader urlReader(URL url) throws IOException {

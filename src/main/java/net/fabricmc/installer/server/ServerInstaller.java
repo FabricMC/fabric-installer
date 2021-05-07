@@ -55,10 +55,11 @@ public class ServerInstaller {
 
 	public static void install(Path dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{String.format("%s(%s)", loaderVersion, gameVersion)}));
-		Path libsDir = Utils.findDefaultUserDir().resolve(".cache").resolve("fabric-installer").resolve("libraries");
 
-		Files.createDirectories(libsDir);
 		Files.createDirectories(dir);
+
+		Path libsDir = dir.resolve(".fabric-installer").resolve("libraries");
+		Files.createDirectories(libsDir);
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.download.libraries"));
 
