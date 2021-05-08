@@ -16,14 +16,8 @@
 
 package net.fabricmc.installer.server;
 
-import mjson.Json;
-import net.fabricmc.installer.util.*;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,8 +25,17 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -40,56 +43,53 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import mjson.Json;
+
+import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Library;
+import net.fabricmc.installer.util.Reference;
+import net.fabricmc.installer.util.Utils;
+
 public class ServerInstaller {
 	private static final String servicesDir = "META-INF/services/";
 
-	public static void install(File dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
+	public static void install(Path dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{String.format("%s(%s)", loaderVersion, gameVersion)}));
-		File libsDir = new File(Utils.findDefaultUserDir(), ".cache" + File.separator + "fabric-installer" + File.separator + "libraries");
-		if (!libsDir.exists()) {
-			if (!libsDir.mkdirs()) {
-				throw new IOException("Could not create " + libsDir.getAbsolutePath() + "!");
-			}
-		}
-		if(!dir.exists()){
-			if (!dir.mkdirs()) {
-				throw new IOException("Could not create " + dir.getAbsolutePath() + "!");
-			}
-		}
+
+		Files.createDirectories(dir);
+
+		Path libsDir = dir.resolve(".fabric-installer").resolve("libraries");
+		Files.createDirectories(libsDir);
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.download.libraries"));
 
 		URL profileUrl = new URL(Reference.getMetaServerEndpoint(String.format("v2/versions/loader/%s/%s/server/json", gameVersion, loaderVersion)));
 		Json json = Json.read(Utils.readTextFile(profileUrl));
 
-		List<File> libraryFiles = new ArrayList<>();
+		List<Path> libraryFiles = new ArrayList<>();
 
 		for (Json libraryJson : json.at("libraries").asJsonList()) {
 			Library library = new Library(libraryJson);
 
 			progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.download.library.entry")).format(new Object[]{library.name}));
-			File libraryFile = new File(libsDir, library.getFileName());
-			Utils.downloadFile(new URL(library.getURL()), libraryFile.toPath());
+			Path libraryFile = libsDir.resolve(library.getFileName());
+			Utils.downloadFile(new URL(library.getURL()), libraryFile);
 			libraryFiles.add(libraryFile);
 		}
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.generating.launch.jar"));
 
-		File launchJar = new File(dir, "fabric-server-launch.jar");
+		Path launchJar = dir.resolve("fabric-server-launch.jar");
 		String mainClass = json.at("mainClass").asString();
 		makeLaunchJar(launchJar, mainClass, libraryFiles, progress);
 
-		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getName()}));
+		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getFileName().toString()}));
 	}
 
-	private static void makeLaunchJar(File file, String mainclass, List<File> libraryFiles, InstallerProgress progress) throws IOException {
-		if (file.exists()) {
-			if (!file.delete()) {
-				throw new IOException("Could not delete file: " + file.getAbsolutePath());
-			}
-		}
+	private static void makeLaunchJar(Path file, String mainclass, List<Path> libraryFiles, InstallerProgress progress) throws IOException {
+		Files.deleteIfExists(file);
 
-		FileOutputStream outputStream = new FileOutputStream(file);
+		OutputStream outputStream = Files.newOutputStream(file);
 		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 
 		Set<String> addedEntries = new HashSet<>();
@@ -113,14 +113,12 @@ public class ServerInstaller {
 			Map<String, Set<String>> services = new HashMap<>();
 			byte[] buffer = new byte[32768];
 
-			for (File f : libraryFiles) {
-				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.generating.launch.jar.library")).format(new Object[]{f.getName()}));
+			for (Path f : libraryFiles) {
+				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.generating.launch.jar.library")).format(new Object[]{f.getFileName().toString()}));
 
 				// read service definitions (merging them), copy other files
-				try (
-						FileInputStream is = new FileInputStream(f);
-						JarInputStream jis = new JarInputStream(is)
-				) {
+				try (InputStream is = Files.newInputStream(f);
+						JarInputStream jis = new JarInputStream(is)) {
 					JarEntry entry;
 					while ((entry = jis.getNextJarEntry()) != null) {
 						if (entry.isDirectory()) continue;

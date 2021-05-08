@@ -16,10 +16,7 @@
 
 package net.fabricmc.installer.util;
 
-import mjson.Json;
-
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +25,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -57,36 +55,24 @@ public class Utils {
 		}
 	});
 
-	public static File findDefaultUserDir() {
-		String home = System.getProperty("user.home", ".");
-		String os = System.getProperty("os.name").toLowerCase();
-		File dir;
-		File homeDir = new File(home);
+	public static Path findDefaultInstallDir() {
+		String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+		Path dir;
 
 		if (os.contains("win") && System.getenv("APPDATA") != null) {
-			dir = new File(System.getenv("APPDATA"));
-		} else if (os.contains("mac")) {
-			dir = new File(homeDir, "Library" + File.separator + "Application Support");
+			dir = Paths.get(System.getenv("APPDATA")).resolve(".minecraft");
 		} else {
-			dir = homeDir;
-		}
-		return dir;
-	}
+			String home = System.getProperty("user.home", ".");
+			Path homeDir = Paths.get(home);
 
-	public static File findDefaultInstallDir() {
-		String home = System.getProperty("user.home", ".");
-		String os = System.getProperty("os.name").toLowerCase();
-		File dir;
-		File homeDir = new File(home);
-
-		if (os.contains("win") && System.getenv("APPDATA") != null) {
-			dir = new File(System.getenv("APPDATA"), ".minecraft");
-		} else if (os.contains("mac")) {
-			dir = new File(homeDir, "Library" + File.separator + "Application Support" + File.separator + "minecraft");
-		} else {
-			dir = new File(homeDir, ".minecraft");
+			if (os.contains("mac")) {
+				dir = homeDir.resolve("Library").resolve("Application Support").resolve("minecraft");
+			} else {
+				dir = homeDir.resolve(".minecraft");
+			}
 		}
-		return dir;
+
+		return dir.toAbsolutePath().normalize();
 	}
 
 	public static Reader urlReader(URL url) throws IOException {
