@@ -32,6 +32,7 @@ import javax.swing.event.HyperlinkEvent;
 
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
+import net.fabricmc.installer.launcher.MojangLauncherHelperWrapper;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Reference;
@@ -48,6 +49,15 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void install() {
+		if (MojangLauncherHelperWrapper.isMojangLauncherOpen()) {
+			showLauncherOpenMessage();
+			return;
+		}
+
+		doInstall();
+	}
+
+	private void doInstall() {
 		String gameVersion = (String) gameVersionComboBox.getSelectedItem();
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
 		System.out.println("Installing");
@@ -87,6 +97,16 @@ public class ClientHandler extends Handler {
 			}
 		});
 		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	private void showLauncherOpenMessage() {
+		int result = JOptionPane.showConfirmDialog(null, Utils.BUNDLE.getString("prompt.launcher.open.body"), Utils.BUNDLE.getString("prompt.launcher.open.tile"), JOptionPane.YES_NO_OPTION);
+
+		if (result == JOptionPane.YES_OPTION) {
+			doInstall();
+		} else {
+			buttonInstall.setEnabled(true);
+		}
 	}
 
 	@Override

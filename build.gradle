@@ -15,13 +15,26 @@ def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
 repositories {
+	maven {
+		name = 'Fabric'
+		url = 'https://maven.fabricmc.net/'
+	}
     mavenCentral()
 }
+
+def nativeLibVersion = "0.1.0"
+def nativeLibDistributions = [
+		"windows-ARM64", "windows-Win32", "windows-x64"
+]
 
 dependencies {
 	implementation ('org.sharegov:mjson:1.4.1') {
 		transitive false
 	}
+	nativeLibDistributions.each {
+		implementation "net.fabricmc.fabric-installer-native-lib:${it}:${nativeLibVersion}"
+	}
+
 	testImplementation 'junit:junit:4.13.2'
 }
 
