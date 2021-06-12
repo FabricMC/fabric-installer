@@ -1,14 +1,14 @@
 plugins {
 	id 'java'
 	id 'maven-publish'
-	id "com.github.johnrengelman.shadow" version "6.1.0"
-	id "org.cadixdev.licenser" version "0.5.0"
+	id "com.github.johnrengelman.shadow" version "7.0.0"
+	id "org.cadixdev.licenser" version "0.6.0"
 	id "de.undercouch.download" version "4.1.1"
 	id "me.modmuss50.remotesign" version "0.1.0"
 }
 
 sourceCompatibility = 1.8
-version = '0.7.3'
+version = '0.7.4'
 archivesBaseName = "fabric-installer"
 
 def ENV = System.getenv()
@@ -39,7 +39,7 @@ shadowJar {
 	exclude('icon.ico')
 }
 
-def bootstrapVersion = "0.1.2"
+def bootstrapVersion = "0.1.3"
 def bootstrapArch = "i686"
 
 task downloadBootstrap(type: Download) {
