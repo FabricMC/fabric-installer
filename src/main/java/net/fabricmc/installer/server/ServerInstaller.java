@@ -53,7 +53,7 @@ import net.fabricmc.installer.util.Utils;
 
 public class ServerInstaller {
 	private static final String servicesDir = "META-INF/services/";
-	private static final String manifestDir = "META-INF/MANIFEST.MF";
+	private static final String manifestPath = "META-INF/MANIFEST.MF";
 
 	public static void install(Path dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{String.format("%s(%s)", loaderVersion, gameVersion)}));
@@ -98,7 +98,7 @@ public class ServerInstaller {
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getFileName().toString()}));
 	}
 
-	private static void makeLaunchJar(Path file, String mainClassMeta, String mainClassManifest, List<Path> libraryFiles, InstallerProgress progress) throws IOException {
+	private static void makeLaunchJar(Path file, String launchMainClass, String jarMainClass, List<Path> libraryFiles, InstallerProgress progress) throws IOException {
 		Files.deleteIfExists(file);
 
 		OutputStream outputStream = Files.newOutputStream(file);
@@ -107,19 +107,19 @@ public class ServerInstaller {
 		Set<String> addedEntries = new HashSet<>();
 
 		{
-			addedEntries.add(manifestDir);
-			zipOutputStream.putNextEntry(new ZipEntry(manifestDir));
+			addedEntries.add(manifestPath);
+			zipOutputStream.putNextEntry(new ZipEntry(manifestPath));
 
 			Manifest manifest = new Manifest();
 			manifest.getMainAttributes().put(new Attributes.Name("Manifest-Version"), "1.0");
-			manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), mainClassManifest);
+			manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), jarMainClass);
 			manifest.write(zipOutputStream);
 
 			zipOutputStream.closeEntry();
 
 			addedEntries.add("fabric-server-launch.properties");
 			zipOutputStream.putNextEntry(new ZipEntry("fabric-server-launch.properties"));
-			zipOutputStream.write(("launch.mainClass=" + mainClassMeta + "\n").getBytes(StandardCharsets.UTF_8));
+			zipOutputStream.write(("launch.mainClass=" + launchMainClass + "\n").getBytes(StandardCharsets.UTF_8));
 			zipOutputStream.closeEntry();
 
 			Map<String, Set<String>> services = new HashMap<>();
