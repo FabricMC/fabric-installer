@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -42,16 +43,19 @@ public class NativesHelper {
         natives.put("windows-Win32", "natives/windows-Win32.dll");
         natives.put("windows-amd64", "natives/windows-x64.dll");
 
+        natives.put("macos-x86_64", "natives/macos-x86_64_arm64.dylib");
+        natives.put("macos-aarch64", "natives/macos-x86_64_arm64.dylib");
+
         return natives;
     }
 
     private static String getOS() {
-        String osName = System.getProperty("os.name").toLowerCase();
+        String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
         if (osName.contains("win")) {
             return "windows";
         } else if (osName.contains("mac")) {
-            return "osx";
+            return "macos";
         } else {
             return "linux";
         }

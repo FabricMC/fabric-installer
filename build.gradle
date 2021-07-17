@@ -22,9 +22,9 @@ repositories {
     mavenCentral()
 }
 
-def nativeLibVersion = "0.1.0"
+def nativeLibVersion = "0.1.2"
 def nativeLibDistributions = [
-		"windows-ARM64", "windows-Win32", "windows-x64"
+		"windows-ARM64", "windows-Win32", "windows-x64", "macos-x86_64_arm64"
 ]
 
 dependencies {
