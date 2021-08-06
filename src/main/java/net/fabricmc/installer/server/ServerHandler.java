@@ -65,12 +65,10 @@ public class ServerHandler extends Handler {
 		ServerInstaller.install(dir, loaderVersion, gameVersion, InstallerProgress.CONSOLE);
 
 		if(args.has("downloadMinecraft")){
-			Path serverJar = dir.resolve("server.jar");
-			Path serverJarTmp = dir.resolve("server.jar.tmp");
-			Files.deleteIfExists(serverJar);
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
-			Utils.downloadFile(new URL(LauncherMeta.getLauncherMeta().getVersion(gameVersion).getVersionMeta().downloads.get("server").url), serverJarTmp);
-			Files.move(serverJarTmp, serverJar, StandardCopyOption.REPLACE_EXISTING);
+			Path serverJar = dir.resolve("server.jar");
+			MinecraftServerDownloader downloader = new MinecraftServerDownloader(gameVersion);
+			downloader.downloadMinecraftServer(serverJar);
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.done"));
 		}
 	}

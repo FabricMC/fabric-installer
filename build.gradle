@@ -34,10 +34,32 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 shadowJar {
+	manifest {
+		attributes 'Implementation-Title': 'FabricInstaller',
+				'Implementation-Version': project.version,
+				'Main-Class': 'net.fabricmc.installer.Main'
+	}
+
 	minimize()
 	archiveClassifier.set(null)
 	exclude('icon.ico')
 }
+
+task unattendedJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+	manifest {
+		attributes 'Implementation-Title': 'FabricInstaller',
+				'Implementation-Version': project.version,
+				'Main-Class': 'net.fabricmc.installer.UnattendedMain'
+	}
+
+	minimize()
+	exclude('icon.ico')
+
+	archiveClassifier = "unattended"
+	from sourceSets.main.output
+	configurations = [project.configurations.compileClasspath]
+}
+assemble.dependsOn unattendedJar
 
 def bootstrapVersion = "0.1.3"
 def bootstrapArch = "i686"
@@ -69,11 +91,6 @@ task nativeExe(dependsOn: [shadowJar, downloadBootstrap], type: FileOutput) {
 build.dependsOn nativeExe
 
 jar {
-    manifest {
-        attributes 'Implementation-Title': 'FabricInstaller',
-                'Implementation-Version': project.version,
-                'Main-Class': 'net.fabricmc.installer.Main'
-    }
 	enabled = false
 }
 
@@ -116,6 +133,11 @@ publishing {
 			}
 
 			artifact nativeExe.output
+
+			// No point in signing as it is designed to get modified
+			artifact (unattendedJar) {
+				classifier "unattended"
+			}
 		}
 	}
 	repositories {
