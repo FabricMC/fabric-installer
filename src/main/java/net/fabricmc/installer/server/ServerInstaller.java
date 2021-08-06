@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
@@ -52,6 +53,7 @@ import net.fabricmc.installer.util.Utils;
 
 public class ServerInstaller {
 	private static final String servicesDir = "META-INF/services/";
+	private static final String manifestPath = "META-INF/MANIFEST.MF";
 
 	public static void install(Path dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{String.format("%s(%s)", loaderVersion, gameVersion)}));
@@ -67,6 +69,7 @@ public class ServerInstaller {
 		Json json = Json.read(Utils.readTextFile(profileUrl));
 
 		List<Path> libraryFiles = new ArrayList<>();
+		String mainClassManifest = null;
 
 		for (Json libraryJson : json.at("libraries").asJsonList()) {
 			Library library = new Library(libraryJson);
@@ -75,18 +78,27 @@ public class ServerInstaller {
 			Path libraryFile = libsDir.resolve(library.getFileName());
 			Utils.downloadFile(new URL(library.getURL()), libraryFile);
 			libraryFiles.add(libraryFile);
+
+			if (library.name.matches("net\\.fabricmc:fabric-loader:.*")) {
+				JarFile jarFile = new JarFile(libraryFile.toFile());
+				Manifest manifest = jarFile.getManifest();
+				mainClassManifest = manifest.getMainAttributes().getValue("Main-Class");
+			}
 		}
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.generating.launch.jar"));
 
+		final String DEFAULT_MAIN_CLASS_MANIFEST = "net.fabricmc.loader.launch.server.FabricServerLauncher";
+		mainClassManifest = (mainClassManifest == null) ? DEFAULT_MAIN_CLASS_MANIFEST : mainClassManifest;
+
 		Path launchJar = dir.resolve("fabric-server-launch.jar");
-		String mainClass = json.at("mainClass").asString();
-		makeLaunchJar(launchJar, mainClass, libraryFiles, progress);
+		String mainClassMeta = json.at("mainClass").asString();
+		makeLaunchJar(launchJar, mainClassMeta, mainClassManifest, libraryFiles, progress);
 
 		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getFileName().toString()}));
 	}
 
-	private static void makeLaunchJar(Path file, String mainclass, List<Path> libraryFiles, InstallerProgress progress) throws IOException {
+	private static void makeLaunchJar(Path file, String launchMainClass, String jarMainClass, List<Path> libraryFiles, InstallerProgress progress) throws IOException {
 		Files.deleteIfExists(file);
 
 		OutputStream outputStream = Files.newOutputStream(file);
@@ -95,19 +107,19 @@ public class ServerInstaller {
 		Set<String> addedEntries = new HashSet<>();
 
 		{
-			addedEntries.add("META-INF/MANIFEST.MF");
-			zipOutputStream.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"));
+			addedEntries.add(manifestPath);
+			zipOutputStream.putNextEntry(new ZipEntry(manifestPath));
 
 			Manifest manifest = new Manifest();
 			manifest.getMainAttributes().put(new Attributes.Name("Manifest-Version"), "1.0");
-			manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), "net.fabricmc.loader.launch.server.FabricServerLauncher");
+			manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), jarMainClass);
 			manifest.write(zipOutputStream);
 
 			zipOutputStream.closeEntry();
 
 			addedEntries.add("fabric-server-launch.properties");
 			zipOutputStream.putNextEntry(new ZipEntry("fabric-server-launch.properties"));
-			zipOutputStream.write(("launch.mainClass=" + mainclass + "\n").getBytes(StandardCharsets.UTF_8));
+			zipOutputStream.write(("launch.mainClass=" + launchMainClass + "\n").getBytes(StandardCharsets.UTF_8));
 			zipOutputStream.closeEntry();
 
 			Map<String, Set<String>> services = new HashMap<>();
