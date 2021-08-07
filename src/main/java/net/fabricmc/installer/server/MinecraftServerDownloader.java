@@ -16,42 +16,42 @@
 
 package net.fabricmc.installer.server;
 
-import net.fabricmc.installer.util.LauncherMeta;
-import net.fabricmc.installer.util.Utils;
-import net.fabricmc.installer.util.VersionMeta;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import net.fabricmc.installer.util.LauncherMeta;
+import net.fabricmc.installer.util.Utils;
+import net.fabricmc.installer.util.VersionMeta;
+
 public class MinecraftServerDownloader {
-    private final String gameVersion;
+	private final String gameVersion;
 
-    public MinecraftServerDownloader(String gameVersion) {
-        this.gameVersion = gameVersion;
-    }
+	public MinecraftServerDownloader(String gameVersion) {
+		this.gameVersion = gameVersion;
+	}
 
-    public void downloadMinecraftServer(Path serverJar) throws IOException {
-        Path serverJarTmp = serverJar.resolveSibling(serverJar.getFileName().toString() + ".tmp");
-        Files.deleteIfExists(serverJar);
-        Utils.downloadFile(new URL(getServerDownload().url), serverJarTmp);
+	public void downloadMinecraftServer(Path serverJar) throws IOException {
+		Path serverJarTmp = serverJar.resolveSibling(serverJar.getFileName().toString() + ".tmp");
+		Files.deleteIfExists(serverJar);
+		Utils.downloadFile(new URL(getServerDownload().url), serverJarTmp);
 
-        Files.move(serverJarTmp, serverJar, StandardCopyOption.REPLACE_EXISTING);
-    }
+		Files.move(serverJarTmp, serverJar, StandardCopyOption.REPLACE_EXISTING);
+	}
 
-    private VersionMeta getVersionMeta() throws IOException {
-        LauncherMeta.Version version = LauncherMeta.getLauncherMeta().getVersion(gameVersion);
+	private VersionMeta getVersionMeta() throws IOException {
+		LauncherMeta.Version version = LauncherMeta.getLauncherMeta().getVersion(gameVersion);
 
-        if (version == null) {
-            throw new RuntimeException("Failed to find version info for minecraft " + gameVersion);
-        }
+		if (version == null) {
+			throw new RuntimeException("Failed to find version info for minecraft " + gameVersion);
+		}
 
-        return version.getVersionMeta();
-    }
+		return version.getVersionMeta();
+	}
 
-    private VersionMeta.Download getServerDownload() throws IOException {
-        return getVersionMeta().downloads.get("server");
-    }
+	private VersionMeta.Download getServerDownload() throws IOException {
+		return getVersionMeta().downloads.get("server");
+	}
 }
