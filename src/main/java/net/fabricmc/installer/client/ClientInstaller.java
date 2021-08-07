@@ -16,15 +16,16 @@
 
 package net.fabricmc.installer.client;
 
-import net.fabricmc.installer.util.*;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ClientInstaller {
+import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Reference;
+import net.fabricmc.installer.util.Utils;
 
+public class ClientInstaller {
 	public static String install(Path mcDir, String gameVersion, String loaderVersion, InstallerProgress progress) throws IOException {
 		System.out.println("Installing " + gameVersion + " with fabric " + loaderVersion);
 
@@ -49,7 +50,6 @@ public class ClientInstaller {
 		Path dummyJar = profileDir.resolve(profileName + ".jar");
 		Files.deleteIfExists(dummyJar);
 		Files.createFile(dummyJar);
-
 
 		URL profileUrl = new URL(Reference.getMetaServerEndpoint(String.format("v2/versions/loader/%s/%s/profile/json", gameVersion, loaderVersion)));
 		Utils.downloadFile(profileUrl, profileJson);

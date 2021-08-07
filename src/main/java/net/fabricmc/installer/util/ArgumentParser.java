@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ArgumentParser {
-
 	private String[] args;
 	private Map<String, String> argMap;
 	//The command will be the first argument passed, and if it doesnt start with -
@@ -38,17 +37,21 @@ public class ArgumentParser {
 		if (!argMap.containsKey(argument)) {
 			throw new IllegalArgumentException(String.format("Could not find %s in the arguments", argument));
 		}
+
 		String arg = argMap.get(argument);
+
 		if (arg == null) {
 			throw new IllegalArgumentException(String.format("Could not value for %s", argument));
 		}
+
 		return arg;
 	}
 
 	public String getOrDefault(String argument, Supplier<String> stringSuppler) {
-		if(!argMap.containsKey(argument)){
+		if (!argMap.containsKey(argument)) {
 			return stringSuppler.get();
 		}
+
 		return argMap.get(argument);
 	}
 
@@ -57,7 +60,7 @@ public class ArgumentParser {
 	}
 
 	public void ifPresent(String argument, Consumer<String> consumer) {
-		if(has(argument)) {
+		if (has(argument)) {
 			consumer.accept(get(argument));
 		}
 	}
@@ -68,21 +71,27 @@ public class ArgumentParser {
 
 	private void parse() {
 		argMap = new HashMap<>();
+
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].startsWith("-")) {
 				String key = args[i].substring(1);
 				String value = null;
+
 				if (i + 1 < args.length) {
 					value = args[i + 1];
+
 					if (value.startsWith("-")) {
 						argMap.put(key, "");
 						continue;
 					}
+
 					i++;
 				}
+
 				if (argMap.containsKey(key)) {
 					throw new IllegalArgumentException(String.format("Argument %s already passed", key));
 				}
+
 				argMap.put(key, value);
 			} else if (i == 0) {
 				command = args[i];
@@ -93,5 +102,4 @@ public class ArgumentParser {
 	public static ArgumentParser create(String[] args) {
 		return new ArgumentParser(args);
 	}
-
 }

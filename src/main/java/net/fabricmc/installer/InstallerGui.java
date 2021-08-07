@@ -16,19 +16,24 @@
 
 package net.fabricmc.installer;
 
-import net.fabricmc.installer.util.Utils;
-
-import javax.swing.*;
-import javax.xml.stream.XMLStreamException;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class InstallerGui extends JFrame {
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
+import javax.xml.stream.XMLStreamException;
 
+import net.fabricmc.installer.util.Utils;
+
+public class InstallerGui extends JFrame {
 	public static InstallerGui instance;
 
 	private JTabbedPane contentPane;
@@ -71,5 +76,4 @@ public class InstallerGui extends JFrame {
 		contentPane = new JTabbedPane(JTabbedPane.TOP);
 		Main.HANDLERS.forEach(handler -> contentPane.addTab(Utils.BUNDLE.getString("tab." + handler.name().toLowerCase(Locale.ROOT)), handler.makePanel(this)));
 	}
-
 }

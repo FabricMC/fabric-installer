@@ -38,7 +38,6 @@ import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
 public class ClientHandler extends Handler {
-
 	private JCheckBox createProfile;
 
 	@Override
@@ -51,21 +50,27 @@ public class ClientHandler extends Handler {
 		String gameVersion = (String) gameVersionComboBox.getSelectedItem();
 		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
 		System.out.println("Installing");
+
 		new Thread(() -> {
 			try {
 				updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing")).format(new Object[]{loaderVersion}));
 				Path mcPath = Paths.get(installLocation.getText());
+
 				if (!Files.exists(mcPath)) {
 					throw new RuntimeException(Utils.BUNDLE.getString("progress.exception.no.launcher.directory"));
 				}
+
 				String profileName = ClientInstaller.install(mcPath, gameVersion, loaderVersion, this);
+
 				if (createProfile.isSelected()) {
 					ProfileInstaller.setupProfile(mcPath, profileName, gameVersion);
 				}
+
 				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion, gameVersion));
 			} catch (Exception e) {
 				error(e);
 			}
+
 			buttonInstall.setEnabled(true);
 		}).start();
 	}
@@ -73,6 +78,7 @@ public class ClientHandler extends Handler {
 	private void showInstalledMessage(String loaderVersion, String gameVersion) {
 		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}) + "</body></html>");
 		pane.setEditable(false);
+
 		pane.addHyperlinkListener(e -> {
 			try {
 				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -86,12 +92,14 @@ public class ClientHandler extends Handler {
 				error(throwable);
 			}
 		});
+
 		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	@Override
 	public void installCli(ArgumentParser args) throws Exception {
 		Path path = Paths.get(args.getOrDefault("dir", () -> Utils.findDefaultInstallDir().toString()));
+
 		if (!Files.exists(path)) {
 			throw new FileNotFoundException("Launcher directory not found at " + path.toString());
 		}
@@ -100,9 +108,11 @@ public class ClientHandler extends Handler {
 		String loaderVersion = getLoaderVersion(args);
 
 		String profileName = ClientInstaller.install(path, gameVersion, loaderVersion, InstallerProgress.CONSOLE);
+
 		if (args.has("noprofile")) {
 			return;
 		}
+
 		ProfileInstaller.setupProfile(path, profileName, gameVersion);
 	}
 
@@ -113,7 +123,6 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
-
 	}
 
 	@Override
@@ -122,5 +131,4 @@ public class ClientHandler extends Handler {
 
 		installLocation.setText(Utils.findDefaultInstallDir().toString());
 	}
-
 }

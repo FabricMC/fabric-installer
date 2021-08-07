@@ -39,13 +39,13 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class Utils {
-
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("lang/installer", Locale.getDefault(), new ResourceBundle.Control() {
 		@Override
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
 			final String bundleName = toBundleName(baseName, locale);
 			final String resourceName = toResourceName(bundleName, "properties");
+
 			try (InputStream stream = loader.getResourceAsStream(resourceName)) {
 				if (stream != null) {
 					try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
@@ -53,6 +53,7 @@ public class Utils {
 					}
 				}
 			}
+
 			return super.newBundle(baseName, locale, format, loader, reload);
 		}
 	});
@@ -104,7 +105,6 @@ public class Utils {
 	}
 
 	public static String getProfileIcon() {
-
 		try (InputStream is = Utils.class.getClassLoader().getResourceAsStream("profile_icon.png")) {
 			byte[] ret = new byte[4096];
 			int offset = 0;
@@ -116,10 +116,10 @@ public class Utils {
 			}
 
 			return "data:image/png;base64," + Base64.getEncoder().encodeToString(Arrays.copyOf(ret, offset));
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		return "TNT"; // Fallback to TNT icon if we cant load Fabric icon.
 	}
 
@@ -127,11 +127,11 @@ public class Utils {
 		return bytesToHex(sha1(path));
 	}
 
-	public static byte[] sha1(Path path) throws IOException  {
+	public static byte[] sha1(Path path) throws IOException {
 		MessageDigest digest = sha1Digest();
 
 		try (InputStream is = Files.newInputStream(path)) {
-			byte[] buffer = new byte[64*1024];
+			byte[] buffer = new byte[64 * 1024];
 			int len;
 
 			while ((len = is.read(buffer)) >= 0) {

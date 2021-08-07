@@ -16,6 +16,11 @@
 
 package net.fabricmc.installer;
 
+import java.awt.GraphicsEnvironment;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
@@ -23,13 +28,7 @@ import net.fabricmc.installer.util.CrashDialog;
 import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Reference;
 
-import java.awt.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
-
 	public static MetaHandler GAME_VERSION_META;
 	public static MetaHandler LOADER_META;
 
@@ -51,14 +50,14 @@ public class Main {
 		LOADER_META = new MetaHandler(Reference.getMetaServerEndpoint("v2/versions/loader"));
 
 		//Default to the help command in a headless environment
-		if(GraphicsEnvironment.isHeadless() && command == null){
+		if (GraphicsEnvironment.isHeadless() && command == null) {
 			command = "help";
 		}
 
 		if (command == null) {
 			try {
 				InstallerGui.start();
-			} catch (Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 				new CrashDialog(e);
 			}
@@ -78,12 +77,13 @@ public class Main {
 					} catch (Exception e) {
 						throw new RuntimeException("Failed to install " + handler.name(), e);
 					}
+
 					return;
 				}
 			}
+
 			//Only reached if a handler is not found
 			System.out.println("No handler found for " + args[0] + " see help");
 		}
-
 	}
 }

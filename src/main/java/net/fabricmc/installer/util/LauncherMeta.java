@@ -16,22 +16,22 @@
 
 package net.fabricmc.installer.util;
 
-import mjson.Json;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class LauncherMeta {
+import mjson.Json;
 
+public class LauncherMeta {
 	private static LauncherMeta launcherMeta = null;
 
 	public static LauncherMeta getLauncherMeta() throws IOException {
-		if(launcherMeta == null){
+		if (launcherMeta == null) {
 			launcherMeta = load();
 		}
+
 		return launcherMeta;
 	}
 
@@ -75,18 +75,18 @@ public class LauncherMeta {
 		}
 
 		public VersionMeta getVersionMeta() throws IOException {
-			if(versionMeta == null){
+			if (versionMeta == null) {
 				URL url = new URL(this.url);
 				String str = Utils.readTextFile(url);
 				Json json = Json.read(str);
 				versionMeta = new VersionMeta(json);
 			}
+
 			return versionMeta;
 		}
 	}
 
-	public Version getVersion(String version){
+	public Version getVersion(String version) {
 		return versions.stream().filter(v -> v.id.equals(version)).findFirst().orElse(null);
 	}
-
 }

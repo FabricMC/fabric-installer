@@ -44,6 +44,7 @@ public final class ServerLauncher {
 
 	public static void main(String[] args) throws Throwable {
 		LaunchData launchData;
+
 		try {
 			launchData = initialise();
 		} catch (IOException e) {
@@ -157,7 +158,7 @@ public final class ServerLauncher {
 		final Path launchJar;
 		final String mainClass;
 
-		public LaunchData(Path serverJar, Path launchJar, String mainClass) {
+		private LaunchData(Path serverJar, Path launchJar, String mainClass) {
 			this.serverJar = Objects.requireNonNull(serverJar, "serverJar");
 			this.launchJar = Objects.requireNonNull(launchJar, "launchJar");
 			this.mainClass = Objects.requireNonNull(mainClass, "mainClass");

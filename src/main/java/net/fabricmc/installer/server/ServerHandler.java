@@ -31,7 +31,6 @@ import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Utils;
 
 public class ServerHandler extends Handler {
-
 	@Override
 	public String name() {
 		return "Server";
@@ -48,6 +47,7 @@ public class ServerHandler extends Handler {
 			} catch (Exception e) {
 				error(e);
 			}
+
 			buttonInstall.setEnabled(true);
 		}).start();
 	}
@@ -55,14 +55,16 @@ public class ServerHandler extends Handler {
 	@Override
 	public void installCli(ArgumentParser args) throws Exception {
 		Path dir = Paths.get(args.getOrDefault("dir", () -> ".")).toAbsolutePath().normalize();
+
 		if (!Files.isDirectory(dir)) {
 			throw new FileNotFoundException("Server directory not found at " + dir + " or not a directory");
 		}
+
 		String loaderVersion = getLoaderVersion(args);
 		String gameVersion = getGameVersion(args);
 		ServerInstaller.install(dir, loaderVersion, gameVersion, InstallerProgress.CONSOLE);
 
-		if(args.has("downloadMinecraft")){
+		if (args.has("downloadMinecraft")) {
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
 			Path serverJar = dir.resolve("server.jar");
 			MinecraftServerDownloader downloader = new MinecraftServerDownloader(gameVersion);
@@ -80,12 +82,10 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
-
 	}
 
 	@Override
 	public void setupPane2(JPanel pane, InstallerGui installerGui) {
 		installLocation.setText(Paths.get(".").toAbsolutePath().normalize().toString());
 	}
-
 }

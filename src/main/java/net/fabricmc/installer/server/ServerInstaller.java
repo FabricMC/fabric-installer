@@ -135,6 +135,7 @@ public class ServerInstaller {
 				try (InputStream is = Files.newInputStream(f);
 						JarInputStream jis = new JarInputStream(is)) {
 					JarEntry entry;
+
 					while ((entry = jis.getNextJarEntry()) != null) {
 						if (entry.isDirectory()) continue;
 
@@ -149,6 +150,7 @@ public class ServerInstaller {
 							zipOutputStream.putNextEntry(newEntry);
 
 							int r;
+
 							while ((r = jis.read(buffer, 0, buffer.length)) >= 0) {
 								zipOutputStream.write(buffer, 0, r);
 							}

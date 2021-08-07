@@ -16,12 +16,12 @@
 
 package net.fabricmc.installer.test;
 
-import net.fabricmc.installer.util.ArgumentParser;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ArgumentTests {
+import net.fabricmc.installer.util.ArgumentParser;
 
+public class ArgumentTests {
 	@Test
 	public void test() {
 		String[] args = new String[]{"command", "-arg1", "Hello", "-arg2", "-anotherArg", "123"};
@@ -36,7 +36,6 @@ public class ArgumentTests {
 		Assert.assertFalse(handler.has("arg3"));
 
 		Assert.assertEquals(handler.getCommand().get(), "command");
-
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -61,5 +60,4 @@ public class ArgumentTests {
 
 		Assert.assertFalse(ArgumentParser.create(new String[]{"-arg1", "Hello"}).getCommand().isPresent());
 	}
-
 }

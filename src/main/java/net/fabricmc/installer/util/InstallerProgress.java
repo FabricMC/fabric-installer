@@ -17,7 +17,6 @@
 package net.fabricmc.installer.util;
 
 public interface InstallerProgress {
-
 	InstallerProgress CONSOLE = new InstallerProgress() {
 		@Override
 		public void updateProgress(String text) {
@@ -33,5 +32,4 @@ public interface InstallerProgress {
 	void updateProgress(String text);
 
 	void error(Throwable throwable);
-
 }
