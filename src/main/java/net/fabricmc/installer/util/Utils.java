@@ -27,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -121,4 +123,40 @@ public class Utils {
 		return "TNT"; // Fallback to TNT icon if we cant load Fabric icon.
 	}
 
+	public static String sha1String(Path path) throws IOException {
+		return bytesToHex(sha1(path));
+	}
+
+	public static byte[] sha1(Path path) throws IOException  {
+		MessageDigest digest = sha1Digest();
+
+		try (InputStream is = Files.newInputStream(path)) {
+			byte[] buffer = new byte[64*1024];
+			int len;
+
+			while ((len = is.read(buffer)) >= 0) {
+				digest.update(buffer, 0, len);
+			}
+		}
+
+		return digest.digest();
+	}
+
+	private static MessageDigest sha1Digest() {
+		try {
+			return MessageDigest.getInstance("SHA-1");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("Something has gone really wrong", e);
+		}
+	}
+
+	public static String bytesToHex(byte[] bytes) {
+		StringBuilder output = new StringBuilder();
+
+		for (byte b : bytes) {
+			output.append(String.format("%02x", b));
+		}
+
+		return output.toString();
+	}
 }
