@@ -129,7 +129,16 @@ public class Utils {
 
 	public static byte[] sha1(Path path) throws IOException  {
 		MessageDigest digest = sha1Digest();
-		digest.update(Files.readAllBytes(path));
+
+		try (InputStream is = Files.newInputStream(path)) {
+			byte[] buffer = new byte[64*1024];
+			int len;
+
+			while ((len = is.read(buffer)) >= 0) {
+				digest.update(buffer, 0, len);
+			}
+		}
+
 		return digest.digest();
 	}
 
@@ -141,15 +150,13 @@ public class Utils {
 		}
 	}
 
-	// Thanks https://stackoverflow.com/a/9855338
-	private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 	public static String bytesToHex(byte[] bytes) {
-		char[] hexChars = new char[bytes.length * 2];
-		for (int j = 0; j < bytes.length; j++) {
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-			hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+		StringBuilder output = new StringBuilder();
+
+		for (byte b : bytes) {
+			output.append(String.format("%02x", b));
 		}
-		return new String(hexChars);
+
+		return output.toString();
 	}
 }
