@@ -54,7 +54,7 @@ import net.fabricmc.installer.util.Utils;
 public class ServerInstaller {
 	private static final String servicesDir = "META-INF/services/";
 	private static final String manifestPath = "META-INF/MANIFEST.MF";
-	private static final String DEFAULT_LAUNCH_JAR_NAME = "fabric-server-launch.jar";
+	public static final String DEFAULT_LAUNCH_JAR_NAME = "fabric-server-launch.jar";
 
 	public static void install(Path dir, String loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		Path launchJar = dir.resolve(DEFAULT_LAUNCH_JAR_NAME);
@@ -99,8 +99,6 @@ public class ServerInstaller {
 
 		String mainClassMeta = json.at("mainClass").asString();
 		makeLaunchJar(launchJar, mainClassMeta, mainClassManifest, libraryFiles, progress);
-
-		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{launchJar.getFileName().toString()}));
 	}
 
 	private static void makeLaunchJar(Path file, String launchMainClass, String jarMainClass, List<Path> libraryFiles, InstallerProgress progress) throws IOException {

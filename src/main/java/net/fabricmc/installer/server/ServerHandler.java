@@ -17,11 +17,10 @@
 package net.fabricmc.installer.server;
 
 import java.io.FileNotFoundException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.text.MessageFormat;
 
 import javax.swing.JPanel;
 
@@ -29,7 +28,6 @@ import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
-import net.fabricmc.installer.util.LauncherMeta;
 import net.fabricmc.installer.util.Utils;
 
 public class ServerHandler extends Handler {
@@ -71,6 +69,8 @@ public class ServerHandler extends Handler {
 			downloader.downloadMinecraftServer(serverJar);
 			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.done"));
 		}
+
+		InstallerProgress.CONSOLE.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{ServerInstaller.DEFAULT_LAUNCH_JAR_NAME}));
 	}
 
 	@Override

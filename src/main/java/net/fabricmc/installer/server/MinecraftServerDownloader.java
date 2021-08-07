@@ -34,29 +34,24 @@ public class MinecraftServerDownloader {
     }
 
     public void downloadMinecraftServer(Path serverJar) throws IOException {
-        Path serverJarTmp = serverJar.getParent().resolve(serverJar.getFileName().toString() + ".tmp");
+        Path serverJarTmp = serverJar.resolveSibling(serverJar.getFileName().toString() + ".tmp");
         Files.deleteIfExists(serverJar);
-        Utils.downloadFile(new URL(getVersionMeta().downloads.get("server").url), serverJarTmp);
-
-        if (!validateServerHash(serverJarTmp)) {
-            throw new IOException("Failed to validate server jar hash");
-        }
+        Utils.downloadFile(new URL(getServerDownload().url), serverJarTmp);
 
         Files.move(serverJarTmp, serverJar, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    public boolean validateServerHash(Path serverJar) {
-        if (!Files.exists(serverJar)) {
-            return false;
+    private VersionMeta getVersionMeta() throws IOException {
+        LauncherMeta.Version version = LauncherMeta.getLauncherMeta().getVersion(gameVersion);
+
+        if (version == null) {
+            throw new RuntimeException("Failed to find version info for minecraft " + gameVersion);
         }
 
-        // TODO
-        return true;
+        return version.getVersionMeta();
     }
 
-    // TODO support experimental versions
-    // TODO cache this
-    private VersionMeta getVersionMeta() throws IOException {
-        return LauncherMeta.getLauncherMeta().getVersion(gameVersion).getVersionMeta();
+    private VersionMeta.Download getServerDownload() throws IOException {
+        return getVersionMeta().downloads.get("server");
     }
 }
