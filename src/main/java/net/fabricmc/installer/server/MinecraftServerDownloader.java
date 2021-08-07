@@ -34,11 +34,28 @@ public class MinecraftServerDownloader {
 	}
 
 	public void downloadMinecraftServer(Path serverJar) throws IOException {
+		if (isServerJarValid(serverJar)) {
+			System.out.println("Existing server jar valid, not downloading");
+			return;
+		}
+
 		Path serverJarTmp = serverJar.resolveSibling(serverJar.getFileName().toString() + ".tmp");
 		Files.deleteIfExists(serverJar);
 		Utils.downloadFile(new URL(getServerDownload().url), serverJarTmp);
 
+		if (!isServerJarValid(serverJarTmp)) {
+			throw new IOException("Failed to validate downloaded server jar");
+		}
+
 		Files.move(serverJarTmp, serverJar, StandardCopyOption.REPLACE_EXISTING);
+	}
+
+	private boolean isServerJarValid(Path serverJar) throws IOException {
+		if (!Files.exists(serverJar)) {
+			return false;
+		}
+
+		return Utils.sha1String(serverJar).equalsIgnoreCase(getServerDownload().sha1);
 	}
 
 	private VersionMeta getVersionMeta() throws IOException {

@@ -27,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -121,4 +123,33 @@ public class Utils {
 		return "TNT"; // Fallback to TNT icon if we cant load Fabric icon.
 	}
 
+	public static String sha1String(Path path) throws IOException {
+		return bytesToHex(sha1(path));
+	}
+
+	public static byte[] sha1(Path path) throws IOException  {
+		MessageDigest digest = sha1Digest();
+		digest.update(Files.readAllBytes(path));
+		return digest.digest();
+	}
+
+	private static MessageDigest sha1Digest() {
+		try {
+			return MessageDigest.getInstance("SHA-1");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("Something has gone really wrong", e);
+		}
+	}
+
+	// Thanks https://stackoverflow.com/a/9855338
+	private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+	public static String bytesToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		for (int j = 0; j < bytes.length; j++) {
+			int v = bytes[j] & 0xFF;
+			hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+			hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+		}
+		return new String(hexChars);
+	}
 }
