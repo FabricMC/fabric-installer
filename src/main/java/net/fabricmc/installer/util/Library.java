@@ -17,16 +17,25 @@
 package net.fabricmc.installer.util;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import mjson.Json;
 
 public class Library {
 	public final String name;
 	public final String url;
+	public final Path inputPath;
+
+	public Library(String name, String url, Path inputPath) {
+		this.name = name;
+		this.url = url;
+		this.inputPath = inputPath;
+	}
 
 	public Library(Json json) {
 		name = json.at("name").asString();
 		url = json.at("url").asString();
+		inputPath = null;
 	}
 
 	public String getURL() {

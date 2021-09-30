@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
+import net.fabricmc.installer.LoaderVersion;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Utils;
@@ -39,7 +40,9 @@ public class ServerHandler extends Handler {
 	@Override
 	public void install() {
 		String gameVersion = (String) gameVersionComboBox.getSelectedItem();
-		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
+		LoaderVersion loaderVersion = queryLoaderVersion();
+		if (loaderVersion == null) return;
+
 		new Thread(() -> {
 			try {
 				ServerInstaller.install(Paths.get(installLocation.getText()).toAbsolutePath(), loaderVersion, gameVersion, this);
@@ -60,7 +63,7 @@ public class ServerHandler extends Handler {
 			throw new FileNotFoundException("Server directory not found at " + dir + " or not a directory");
 		}
 
-		String loaderVersion = getLoaderVersion(args);
+		LoaderVersion loaderVersion = new LoaderVersion(getLoaderVersion(args));
 		String gameVersion = getGameVersion(args);
 		ServerInstaller.install(dir, loaderVersion, gameVersion, InstallerProgress.CONSOLE);
 
