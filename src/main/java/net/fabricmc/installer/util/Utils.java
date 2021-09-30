@@ -92,6 +92,26 @@ public class Utils {
 		return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 	}
 
+	public static String readString(InputStream is) throws IOException {
+		byte[] data = new byte[Math.max(1000, is.available())];
+		int offset = 0;
+		int len;
+
+		while ((len = is.read(data, offset, data.length - offset)) >= 0) {
+			offset += len;
+
+			if (offset == data.length) {
+				int next = is.read();
+				if (next < 0) break;
+
+				data = Arrays.copyOf(data, data.length * 2);
+				data[offset++] = (byte) next;
+			}
+		}
+
+		return new String(data, 0, offset, StandardCharsets.UTF_8);
+	}
+
 	public static void writeToFile(Path path, String string) throws IOException {
 		Files.write(path, string.getBytes(StandardCharsets.UTF_8));
 	}

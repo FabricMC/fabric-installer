@@ -20,21 +20,30 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Consumer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import mjson.Json;
 
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
@@ -42,10 +51,12 @@ import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Utils;
 
 public abstract class Handler implements InstallerProgress {
+	private static final String SELECT_CUSTOM_ITEM = "(select custom)";
+
 	public JButton buttonInstall;
 
 	public JComboBox<String> gameVersionComboBox;
-	public JComboBox<String> loaderVersionComboBox;
+	private JComboBox<String> loaderVersionComboBox;
 	public JTextField installLocation;
 	public JButton selectFolderButton;
 	public JLabel statusLabel;
@@ -130,6 +141,8 @@ public abstract class Handler implements InstallerProgress {
 				}
 			}
 
+			loaderVersionComboBox.addItem(SELECT_CUSTOM_ITEM);
+
 			//If no stable versions are found, default to the latest version
 			if (stableIndex == -1) {
 				stableIndex = 0;
@@ -156,6 +169,48 @@ public abstract class Handler implements InstallerProgress {
 		gameVersionComboBox.setSelectedIndex(0);
 	}
 
+	protected LoaderVersion queryLoaderVersion() {
+		String ret = (String) loaderVersionComboBox.getSelectedItem();
+
+		if (!ret.equals(SELECT_CUSTOM_ITEM)) {
+			return new LoaderVersion(ret);
+		} else {
+			// ask user for loader jar
+
+			JFileChooser chooser = new JFileChooser();
+			chooser.setCurrentDirectory(new File("."));
+			chooser.setDialogTitle("Select Fabric Loader JAR");
+			chooser.setFileFilter(new FileNameExtensionFilter("Java Archive", "jar"));
+			chooser.setAcceptAllFileFilterUsed(false);
+
+			if (chooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) {
+				return null;
+			}
+
+			File file = chooser.getSelectedFile();
+
+			// determine loader version from fabric.mod.json
+
+			try (ZipFile zf = new ZipFile(file)) {
+				ZipEntry entry = zf.getEntry("fabric.mod.json");
+				if (entry == null) throw new FileNotFoundException("fabric.mod.json");
+
+				String modJsonContent;
+
+				try (InputStream is = zf.getInputStream(entry)) {
+					modJsonContent = Utils.readString(is);
+				}
+
+				String version = Json.read(modJsonContent).at("version").asString();
+
+				return new LoaderVersion(version, file.toPath());
+			} catch (IOException e) {
+				error(e);
+				return null;
+			}
+		}
+	}
+
 	@Override
 	public void updateProgress(String text) {
 		statusLabel.setText(text);
@@ -169,7 +224,7 @@ public abstract class Handler implements InstallerProgress {
 		return String.format(
 				"font-family:%s;font-weight:%s;font-size:%dpt;background-color: rgb(%d,%d,%d);",
 				font.getFamily(), (font.isBold() ? "bold" : "normal"), font.getSize(), color.getRed(), color.getGreen(), color.getBlue()
-		);
+				);
 	}
 
 	@Override
@@ -192,12 +247,10 @@ public abstract class Handler implements InstallerProgress {
 		statusLabel.setText(throwable.getLocalizedMessage());
 		statusLabel.setForeground(Color.RED);
 
-		JOptionPane.showMessageDialog(
-				pane,
+		JOptionPane.showMessageDialog(pane,
 				textPane,
 				Utils.BUNDLE.getString("prompt.exception.occurrence"),
-				JOptionPane.ERROR_MESSAGE
-		);
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 	protected void addRow(Container parent, Consumer<JPanel> consumer) {

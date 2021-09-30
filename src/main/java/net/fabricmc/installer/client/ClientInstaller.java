@@ -21,15 +21,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import net.fabricmc.installer.LoaderVersion;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
 public class ClientInstaller {
-	public static String install(Path mcDir, String gameVersion, String loaderVersion, InstallerProgress progress) throws IOException {
-		System.out.println("Installing " + gameVersion + " with fabric " + loaderVersion);
+	public static String install(Path mcDir, String gameVersion, LoaderVersion loaderVersion, InstallerProgress progress) throws IOException {
+		System.out.println("Installing " + gameVersion + " with fabric " + loaderVersion.name);
 
-		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion, gameVersion);
+		String profileName = String.format("%s-%s-%s", Reference.LOADER_NAME, loaderVersion.name, gameVersion);
 
 		Path versionsDir = mcDir.resolve("versions");
 		Path profileDir = versionsDir.resolve(profileName);
@@ -51,7 +52,7 @@ public class ClientInstaller {
 		Files.deleteIfExists(dummyJar);
 		Files.createFile(dummyJar);
 
-		URL profileUrl = new URL(Reference.getMetaServerEndpoint(String.format("v2/versions/loader/%s/%s/profile/json", gameVersion, loaderVersion)));
+		URL profileUrl = new URL(Reference.getMetaServerEndpoint(String.format("v2/versions/loader/%s/%s/profile/json", gameVersion, loaderVersion.name)));
 		Utils.downloadFile(profileUrl, profileJson);
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.done"));
