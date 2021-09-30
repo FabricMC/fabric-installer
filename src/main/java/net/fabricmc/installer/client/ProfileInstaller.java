@@ -16,19 +16,20 @@
 
 package net.fabricmc.installer.client;
 
-import mjson.Json;
-import net.fabricmc.installer.util.Reference;
-import net.fabricmc.installer.util.Utils;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 
-public class ProfileInstaller {
+import mjson.Json;
 
+import net.fabricmc.installer.util.Reference;
+import net.fabricmc.installer.util.Utils;
+
+public class ProfileInstaller {
 	public static void setupProfile(Path path, String name, String gameVersion) throws IOException {
 		Path launcherProfiles = path.resolve("launcher_profiles.json");
+
 		if (!Files.exists(launcherProfiles)) {
 			System.out.println("Could not find launcher_profiles");
 			return;
@@ -42,6 +43,7 @@ public class ProfileInstaller {
 		String profileName = Reference.LOADER_NAME + "-" + gameVersion;
 
 		Json profile;
+
 		if (profiles.has(profileName)) {
 			profile = profiles.at(profileName);
 		} else {
@@ -63,5 +65,4 @@ public class ProfileInstaller {
 		jsonObject.set("icon", Utils.getProfileIcon());
 		return jsonObject;
 	}
-
 }

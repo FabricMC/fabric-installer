@@ -42,7 +42,6 @@ import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Utils;
 
 public abstract class Handler implements InstallerProgress {
-
 	public JButton buttonInstall;
 
 	public JComboBox<String> gameVersionComboBox;
@@ -121,17 +120,21 @@ public abstract class Handler implements InstallerProgress {
 
 		Main.LOADER_META.onComplete(versions -> {
 			int stableIndex = -1;
+
 			for (int i = 0; i < versions.size(); i++) {
 				MetaHandler.GameVersion version = versions.get(i);
 				loaderVersionComboBox.addItem(version.getVersion());
+
 				if (version.isStable()) {
 					stableIndex = i;
 				}
 			}
+
 			//If no stable versions are found, default to the latest version
 			if (stableIndex == -1) {
 				stableIndex = 0;
 			}
+
 			loaderVersionComboBox.setSelectedIndex(stableIndex);
 			statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
 		});
@@ -141,12 +144,15 @@ public abstract class Handler implements InstallerProgress {
 
 	private void updateGameVersions() {
 		gameVersionComboBox.removeAllItems();
+
 		for (MetaHandler.GameVersion version : Main.GAME_VERSION_META.getVersions()) {
 			if (!snapshotCheckBox.isSelected() && !version.isStable()) {
 				continue;
 			}
+
 			gameVersionComboBox.addItem(version.getVersion());
 		}
+
 		gameVersionComboBox.setSelectedIndex(0);
 	}
 
@@ -163,7 +169,7 @@ public abstract class Handler implements InstallerProgress {
 		return String.format(
 				"font-family:%s;font-weight:%s;font-size:%dpt;background-color: rgb(%d,%d,%d);",
 				font.getFamily(), (font.isBold() ? "bold" : "normal"), font.getSize(), color.getRed(), color.getGreen(), color.getBlue()
-				);
+		);
 	}
 
 	@Override
@@ -191,7 +197,7 @@ public abstract class Handler implements InstallerProgress {
 				textPane,
 				Utils.BUNDLE.getString("prompt.exception.occurrence"),
 				JOptionPane.ERROR_MESSAGE
-				);
+		);
 	}
 
 	protected void addRow(Container parent, Consumer<JPanel> consumer) {
@@ -203,11 +209,13 @@ public abstract class Handler implements InstallerProgress {
 	protected String getGameVersion(ArgumentParser args) {
 		return args.getOrDefault("mcversion", () -> {
 			System.out.println("Using latest game version");
+
 			try {
 				Main.GAME_VERSION_META.load();
 			} catch (IOException e) {
 				throw new RuntimeException("Failed to load latest versions", e);
 			}
+
 			return Main.GAME_VERSION_META.getLatestVersion(args.has("snapshot")).getVersion();
 		});
 	}
@@ -215,13 +223,14 @@ public abstract class Handler implements InstallerProgress {
 	protected String getLoaderVersion(ArgumentParser args) {
 		return args.getOrDefault("loader", () -> {
 			System.out.println("Using latest loader version");
+
 			try {
 				Main.LOADER_META.load();
 			} catch (IOException e) {
 				throw new RuntimeException("Failed to load latest versions", e);
 			}
+
 			return Main.LOADER_META.getLatestVersion(false).getVersion();
 		});
 	}
-
 }
