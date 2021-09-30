@@ -32,6 +32,7 @@ import javax.swing.event.HyperlinkEvent;
 
 import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
+import net.fabricmc.installer.LoaderVersion;
 import net.fabricmc.installer.launcher.MojangLauncherHelperWrapper;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
@@ -58,12 +59,14 @@ public class ClientHandler extends Handler {
 
 	private void doInstall() {
 		String gameVersion = (String) gameVersionComboBox.getSelectedItem();
-		String loaderVersion = (String) loaderVersionComboBox.getSelectedItem();
+		LoaderVersion loaderVersion = queryLoaderVersion();
+		if (loaderVersion == null) return;
+
 		System.out.println("Installing");
 
 		new Thread(() -> {
 			try {
-				updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing")).format(new Object[]{loaderVersion}));
+				updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing")).format(new Object[]{loaderVersion.name}));
 				Path mcPath = Paths.get(installLocation.getText());
 
 				if (!Files.exists(mcPath)) {
@@ -76,7 +79,7 @@ public class ClientHandler extends Handler {
 					ProfileInstaller.setupProfile(mcPath, profileName, gameVersion);
 				}
 
-				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion, gameVersion));
+				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion.name, gameVersion));
 			} catch (Exception e) {
 				error(e);
 			}
@@ -125,7 +128,7 @@ public class ClientHandler extends Handler {
 		}
 
 		String gameVersion = getGameVersion(args);
-		String loaderVersion = getLoaderVersion(args);
+		LoaderVersion loaderVersion = new LoaderVersion(getLoaderVersion(args));
 
 		String profileName = ClientInstaller.install(path, gameVersion, loaderVersion, InstallerProgress.CONSOLE);
 

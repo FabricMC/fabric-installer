@@ -67,7 +67,7 @@ public final class ServerLauncher {
 	private static LaunchData initialise() throws IOException {
 		Properties properties = readProperties();
 
-		String loaderVersion = Objects.requireNonNull(properties.getProperty("fabric-loader-version"), "no loader-version specified in " + INSTALL_CONFIG_NAME);
+		LoaderVersion loaderVersion = new LoaderVersion(Objects.requireNonNull(properties.getProperty("fabric-loader-version"), "no loader-version specified in " + INSTALL_CONFIG_NAME));
 		String gameVersion = Objects.requireNonNull(properties.getProperty("game-version"), "no game-version specified in " + INSTALL_CONFIG_NAME);
 
 		// 0.12 or higher is required
@@ -76,7 +76,7 @@ public final class ServerLauncher {
 		// Vanilla server jar
 		Path serverJar = SERVER_DIR.resolve(String.format("%s-server.jar", gameVersion));
 		// Includes the mc version as this jar contains intermediary
-		Path serverLaunchJar = SERVER_DIR.resolve(String.format("fabric-loader-server-%s-minecraft-%s.jar", loaderVersion, gameVersion));
+		Path serverLaunchJar = SERVER_DIR.resolve(String.format("fabric-loader-server-%s-minecraft-%s.jar", loaderVersion.name, gameVersion));
 
 		if (Files.exists(serverJar) && Files.exists(serverLaunchJar)) {
 			try {
@@ -133,8 +133,8 @@ public final class ServerLauncher {
 		}
 	}
 
-	private static void validateLoaderVersion(String loaderVersion) {
-		String[] versionSplit = loaderVersion.split("\\.");
+	private static void validateLoaderVersion(LoaderVersion loaderVersion) {
+		String[] versionSplit = loaderVersion.name.split("\\.");
 
 		// future 1.x versions
 		if (Integer.parseInt(versionSplit[0]) > 0) {
