@@ -17,12 +17,11 @@
 package net.fabricmc.installer.launcher;
 
 public class MojangLauncherHelperWrapper {
+	public static boolean isMojangLauncherOpen() {
+		if (NativesHelper.loadSafelyIfCompatible()) {
+			return MojangLauncherHelper.isMojangLauncherOpen();
+		}
 
-    public static boolean isMojangLauncherOpen() {
-        if (NativesHelper.loadSafelyIfCompatible()) {
-            return MojangLauncherHelper.isMojangLauncherOpen();
-        }
-
-        return false;
-    }
+		return false;
+	}
 }
