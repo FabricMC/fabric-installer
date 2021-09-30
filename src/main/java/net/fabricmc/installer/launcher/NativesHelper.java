@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class NativesHelper {
-	private static final String OS_ID = getOS() + "-" + System.getProperty("os.arch");
+	private static final String OS_ID = getOS() + "-" + System.getProperty("os.arch").toLowerCase(Locale.ROOT);
 	private static final Map<String, String> NATIVES_MAP = getNativesMap();
 
 	private static boolean loaded = false;
@@ -40,7 +40,7 @@ public class NativesHelper {
 		Map<String, String> natives = new HashMap<>();
 
 		natives.put("windows-arm64", "natives/windows-ARM64.dll");
-		natives.put("windows-Win32", "natives/windows-Win32.dll");
+		natives.put("windows-win32", "natives/windows-Win32.dll");
 		natives.put("windows-amd64", "natives/windows-x64.dll");
 
 		natives.put("macos-x86_64", "natives/macos-x86_64_arm64.dylib");
