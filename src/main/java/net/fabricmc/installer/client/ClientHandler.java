@@ -82,9 +82,9 @@ public class ClientHandler extends Handler {
 				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion.name, gameVersion));
 			} catch (Exception e) {
 				error(e);
+			} finally {
+				buttonInstall.setEnabled(true);
 			}
-
-			buttonInstall.setEnabled(true);
 		}).start();
 	}
 
