@@ -201,7 +201,7 @@ public class ServerPostInstallDialog extends JDialog {
 				while ((len = inputStream.read(buffer, 0, 1024)) >= 0) {
 					downloaded += len;
 
-					final String labelText = String.format("Downloading %d/%d MB", downloaded / MB, finalSize / MB);
+					final String labelText = new MessageFormat(Utils.BUNDLE.getString("prompt.server.downloading")).format(new Object[] {downloaded / MB, finalSize / MB});
 					SwingUtilities.invokeLater(() -> color(serverJarLabel, Color.BLUE).setText(labelText));
 
 					bufferedOutputStream.write(buffer, 0, len);
