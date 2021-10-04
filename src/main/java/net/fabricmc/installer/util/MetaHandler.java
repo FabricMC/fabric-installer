@@ -50,12 +50,17 @@ public class MetaHandler extends CompletableHandler<List<MetaHandler.GameVersion
 	}
 
 	public GameVersion getLatestVersion(boolean snapshot) {
-		if (snapshot) {
-			return versions.get(0);
-		} else {
-			return versions.stream()
-					.filter(GameVersion::isStable).findFirst().orElse(null);
+		if (versions.isEmpty()) throw new RuntimeException("no versions available at "+metaUrl);
+
+		if (!snapshot) {
+			for (GameVersion version : versions) {
+				if (version.isStable()) return version;
+			}
+
+			// nothing found, fall back to snapshot versions
 		}
+
+		return versions.get(0);
 	}
 
 	public static class GameVersion {
