@@ -73,6 +73,8 @@ task serverJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar)
 
 	minimize()
 	exclude('icon.ico')
+	exclude('*.png')
+	exclude('natives/*')
 
 	archiveClassifier = "server"
 	from sourceSets.main.output
