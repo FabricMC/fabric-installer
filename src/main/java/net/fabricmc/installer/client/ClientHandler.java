@@ -75,20 +75,28 @@ public class ClientHandler extends Handler {
 					throw new RuntimeException(Utils.BUNDLE.getString("progress.exception.no.launcher.directory"));
 				}
 
-				String profileName = ClientInstaller.install(mcPath, gameVersion, loaderVersion, this);
+				final ProfileInstaller profileInstaller = new ProfileInstaller(mcPath);
+				ProfileInstaller.LauncherType launcherType = null;
 
 				if (createProfile.isSelected()) {
-					final ProfileInstaller profileInstaller = new ProfileInstaller(mcPath);
-
 					List<ProfileInstaller.LauncherType> types = profileInstaller.getInstalledLauncherTypes();
-					ProfileInstaller.LauncherType launcherType;
 
 					if (types.size() == 1) {
 						launcherType = types.get(0);
 					} else {
 						launcherType = showLauncherTypeSelection();
-					}
 
+						if (launcherType == null) {
+							// canceled
+							statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
+							return;
+						}
+					}
+				}
+
+				String profileName = ClientInstaller.install(mcPath, gameVersion, loaderVersion, this);
+
+				if (createProfile.isSelected()) {
 					if (launcherType == null) {
 						throw new RuntimeException(Utils.BUNDLE.getString("progress.exception.no.launcher.profile"));
 					}
@@ -138,6 +146,10 @@ public class ClientHandler extends Handler {
 				options,
 				options[0]
 		);
+
+		if (result == JOptionPane.CLOSED_OPTION) {
+			return null;
+		}
 
 		return result == JOptionPane.YES_OPTION ? ProfileInstaller.LauncherType.MICROSOFT_STORE : ProfileInstaller.LauncherType.WIN32;
 	}
