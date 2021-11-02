@@ -16,10 +16,14 @@
 
 package net.fabricmc.installer.client;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import mjson.Json;
 
@@ -27,12 +31,23 @@ import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
 public class ProfileInstaller {
-	public static void setupProfile(Path path, String name, String gameVersion) throws IOException {
-		Path launcherProfiles = path.resolve("launcher_profiles.json");
+	private final Path mcDir;
+
+	public ProfileInstaller(Path mcDir) {
+		this.mcDir = mcDir;
+	}
+
+	public List<LauncherType> getInstalledLauncherTypes() {
+		return Arrays.stream(LauncherType.values())
+				.filter(launcherType -> Files.exists(mcDir.resolve(launcherType.profileJsonName)))
+				.collect(Collectors.toList());
+	}
+
+	public void setupProfile(String name, String gameVersion, LauncherType launcherType) throws IOException {
+		Path launcherProfiles = mcDir.resolve(launcherType.profileJsonName);
 
 		if (!Files.exists(launcherProfiles)) {
-			System.out.println("Could not find launcher_profiles");
-			return;
+			throw new FileNotFoundException("Could not find " + launcherType.profileJsonName);
 		}
 
 		System.out.println("Creating profile");
@@ -64,5 +79,16 @@ public class ProfileInstaller {
 		jsonObject.set("lastUsed", Utils.ISO_8601.format(new Date()));
 		jsonObject.set("icon", Utils.getProfileIcon());
 		return jsonObject;
+	}
+
+	public enum LauncherType {
+		WIN32("launcher_profiles.json"),
+		MICROSOFT_STORE("launcher_profiles_microsoft_store.json");
+
+		public final String profileJsonName;
+
+		LauncherType(String profileJsonName) {
+			this.profileJsonName = profileJsonName;
+		}
 	}
 }
