@@ -81,7 +81,9 @@ public class ClientHandler extends Handler {
 				if (createProfile.isSelected()) {
 					List<ProfileInstaller.LauncherType> types = profileInstaller.getInstalledLauncherTypes();
 
-					if (types.size() == 1) {
+					if (types.size() == 0) {
+						throw new RuntimeException(Utils.BUNDLE.getString("progress.exception.no.launcher.profile"));
+					} else if (types.size() == 1) {
 						launcherType = types.get(0);
 					} else {
 						launcherType = showLauncherTypeSelection();
