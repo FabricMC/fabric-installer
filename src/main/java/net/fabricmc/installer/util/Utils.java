@@ -36,6 +36,8 @@ import java.util.Base64;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -121,6 +123,14 @@ public class Utils {
 
 		try (InputStream in = url.openStream()) {
 			Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
+		} catch (Throwable t) {
+			try {
+				Files.deleteIfExists(path);
+			} catch (Throwable t2) {
+				t.addSuppressed(t2);
+			}
+
+			throw t;
 		}
 	}
 
@@ -178,5 +188,68 @@ public class Utils {
 		}
 
 		return output.toString();
+	}
+
+	/**
+	 * Simple semver-like version comparison.
+	 *
+	 * @return <0,0,>0 if versionA is less/same/greater than versionB
+	 */
+	public static int compareVersions(String versionA, String versionB) {
+		Pattern pattern = Pattern.compile("(\\d+(?:\\.\\d+)*)(?:-([^+]+))?(?:\\+.*)?");
+		Matcher matcherA = pattern.matcher(versionA);
+		Matcher matcherB = pattern.matcher(versionB);
+		if (!matcherA.matches() || !matcherB.matches()) return versionA.compareTo(versionB);
+
+		int cmp = compareVersionGroups(matcherA.group(1), matcherB.group(1)); // compare version core
+		if (cmp != 0) return cmp;
+
+		boolean aHasPreRelease = matcherA.group(2) != null;
+		boolean bHasPreRelease = matcherB.group(2) != null;
+
+		if (aHasPreRelease != bHasPreRelease) { // compare pre-release presence
+			return aHasPreRelease ? -1 : 1;
+		}
+
+		if (aHasPreRelease) {
+			cmp = compareVersionGroups(matcherA.group(2), matcherB.group(2)); // compare pre-release
+			if (cmp != 0) return cmp;
+		}
+
+		return 0;
+	}
+
+	private static int compareVersionGroups(String groupA, String groupB) {
+		String[] partsA = groupA.split("\\.");
+		String[] partsB = groupB.split("\\.");
+
+		for (int i = 0; i < Math.min(partsA.length, partsB.length); i++) {
+			String partA = partsA[i];
+			String partB = partsB[i];
+
+			try {
+				int a = Integer.parseInt(partA);
+
+				try {
+					int b = Integer.parseInt(partB);
+					int cmp = Integer.compare(a, b); // both numeric, compare int value
+					if (cmp != 0) return cmp;
+				} catch (NumberFormatException e) {
+					return -1; // only a numeric
+				}
+			} catch (NumberFormatException e) {
+				try {
+					Integer.parseInt(partB);
+					return 1; // only b numeric
+				} catch (NumberFormatException e2) {
+					// ignore
+				}
+			}
+
+			int cmp = partA.compareTo(partB); // neither numeric, compare lexicographically
+			if (cmp != 0) return cmp;
+		}
+
+		return Integer.compare(partsA.length, partsB.length); // compare part count
 	}
 }
