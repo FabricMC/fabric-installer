@@ -62,15 +62,16 @@ import net.fabricmc.installer.util.LauncherMeta;
 import net.fabricmc.installer.util.Utils;
 
 public class ServerPostInstallDialog extends JDialog {
+	private static final String launchCommand = "java -Xmx2G -jar fabric-server-launch.jar nogui";
 	private static final int MB = 1000000;
 
-	private JPanel panel = new JPanel();
+	private final JPanel panel = new JPanel();
 
-	private ServerHandler serverHandler;
-	private String minecraftVersion;
-	private Path installDir;
-	private Path minecraftJar;
-	private Path minecraftJarTmp;
+	private final ServerHandler serverHandler;
+	private final String minecraftVersion;
+	private final Path installDir;
+	private final Path minecraftJar;
+	private final Path minecraftJarTmp;
 
 	private JLabel serverJarLabel;
 	private JButton downloadButton;
@@ -105,7 +106,7 @@ public class ServerPostInstallDialog extends JDialog {
 
 		addRow(panel, panel -> panel.add(fontSize(new JLabel(Utils.BUNDLE.getString("prompt.server.info.command")), 15)));
 		addRow(panel, panel -> {
-			JTextField textField = new JTextField("java -jar fabric-server-launch.jar");
+			JTextField textField = new JTextField(launchCommand);
 			textField.setHorizontalAlignment(JTextField.CENTER);
 			panel.add(textField);
 		});
@@ -222,8 +223,6 @@ public class ServerPostInstallDialog extends JDialog {
 	}
 
 	private void generateLaunchScripts() {
-		String launchCommand = "java -jar fabric-server-launch.jar";
-
 		Map<Path, String> launchScripts = new HashMap<>();
 		launchScripts.put(installDir.resolve("start.bat"), launchCommand + "\npause");
 		launchScripts.put(installDir.resolve("start.sh"), "#!/usr/bin/env bash\n" + launchCommand);
