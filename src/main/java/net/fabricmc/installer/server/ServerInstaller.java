@@ -43,6 +43,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -71,7 +72,7 @@ public class ServerInstaller {
 
 		Files.createDirectories(dir);
 
-		Path libsDir = dir.resolve(".fabric-installer").resolve("libraries");
+		Path libsDir = dir.resolve("libraries");
 		Files.createDirectories(libsDir);
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.download.libraries"));
@@ -134,10 +135,12 @@ public class ServerInstaller {
 
 		progress.updateProgress(Utils.BUNDLE.getString("progress.generating.launch.jar"));
 
-		makeLaunchJar(launchJar, mainClassMeta, mainClassManifest, libraryFiles, progress);
+		boolean shadeLibraries = Utils.compareVersions(loaderVersion.name, "0.12.5") <= 0; // FabricServerLauncher in Fabric Loader 0.12.5 and earlier requires shading the libs into the launch jar
+		makeLaunchJar(launchJar, mainClassMeta, mainClassManifest, libraryFiles, shadeLibraries, progress);
 	}
 
-	private static void makeLaunchJar(Path file, String launchMainClass, String jarMainClass, List<Path> libraryFiles, InstallerProgress progress) throws IOException {
+	private static void makeLaunchJar(Path file, String launchMainClass, String jarMainClass, List<Path> libraryFiles,
+			boolean shadeLibraries, InstallerProgress progress) throws IOException {
 		Files.deleteIfExists(file);
 
 		try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(file))) {
@@ -147,8 +150,17 @@ public class ServerInstaller {
 			zipOutputStream.putNextEntry(new ZipEntry(manifestPath));
 
 			Manifest manifest = new Manifest();
-			manifest.getMainAttributes().put(new Attributes.Name("Manifest-Version"), "1.0");
-			manifest.getMainAttributes().put(new Attributes.Name("Main-Class"), jarMainClass);
+			Attributes mainAttributes = manifest.getMainAttributes();
+
+			mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+			mainAttributes.put(Attributes.Name.MAIN_CLASS, jarMainClass);
+
+			if (!shadeLibraries) {
+				mainAttributes.put(Attributes.Name.CLASS_PATH, libraryFiles.stream()
+						.map(f -> file.getParent().relativize(f).normalize().toString())
+						.collect(Collectors.joining(" ")));
+			}
+
 			manifest.write(zipOutputStream);
 
 			zipOutputStream.closeEntry();
@@ -158,51 +170,53 @@ public class ServerInstaller {
 			zipOutputStream.write(("launch.mainClass=" + launchMainClass + "\n").getBytes(StandardCharsets.UTF_8));
 			zipOutputStream.closeEntry();
 
-			Map<String, Set<String>> services = new HashMap<>();
-			byte[] buffer = new byte[32768];
+			if (shadeLibraries) {
+				Map<String, Set<String>> services = new HashMap<>();
+				byte[] buffer = new byte[32768];
 
-			for (Path f : libraryFiles) {
-				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.generating.launch.jar.library")).format(new Object[]{f.getFileName().toString()}));
+				for (Path f : libraryFiles) {
+					progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.generating.launch.jar.library")).format(new Object[]{f.getFileName().toString()}));
 
-				// read service definitions (merging them), copy other files
-				try (JarInputStream jis = new JarInputStream(Files.newInputStream(f))) {
-					JarEntry entry;
+					// read service definitions (merging them), copy other files
+					try (JarInputStream jis = new JarInputStream(Files.newInputStream(f))) {
+						JarEntry entry;
 
-					while ((entry = jis.getNextJarEntry()) != null) {
-						if (entry.isDirectory()) continue;
+						while ((entry = jis.getNextJarEntry()) != null) {
+							if (entry.isDirectory()) continue;
 
-						String name = entry.getName();
+							String name = entry.getName();
 
-						if (name.startsWith(servicesDir) && name.indexOf('/', servicesDir.length()) < 0) { // service definition file
-							parseServiceDefinition(name, jis, services);
-						} else if (SIGNATURE_FILE_PATTERN.matcher(name).matches()) {
-							// signature file, ignore
-						} else if (!addedEntries.add(name)) {
-							System.out.printf("duplicate file: %s%n", name);
-						} else {
-							JarEntry newEntry = new JarEntry(name);
-							zipOutputStream.putNextEntry(newEntry);
+							if (name.startsWith(servicesDir) && name.indexOf('/', servicesDir.length()) < 0) { // service definition file
+								parseServiceDefinition(name, jis, services);
+							} else if (SIGNATURE_FILE_PATTERN.matcher(name).matches()) {
+								// signature file, ignore
+							} else if (!addedEntries.add(name)) {
+								System.out.printf("duplicate file: %s%n", name);
+							} else {
+								JarEntry newEntry = new JarEntry(name);
+								zipOutputStream.putNextEntry(newEntry);
 
-							int r;
+								int r;
 
-							while ((r = jis.read(buffer, 0, buffer.length)) >= 0) {
-								zipOutputStream.write(buffer, 0, r);
+								while ((r = jis.read(buffer, 0, buffer.length)) >= 0) {
+									zipOutputStream.write(buffer, 0, r);
+								}
+
+								zipOutputStream.closeEntry();
 							}
-
-							zipOutputStream.closeEntry();
 						}
 					}
 				}
-			}
 
-			// write service definitions
-			for (Map.Entry<String, Set<String>> entry : services.entrySet()) {
-				JarEntry newEntry = new JarEntry(entry.getKey());
-				zipOutputStream.putNextEntry(newEntry);
+				// write service definitions
+				for (Map.Entry<String, Set<String>> entry : services.entrySet()) {
+					JarEntry newEntry = new JarEntry(entry.getKey());
+					zipOutputStream.putNextEntry(newEntry);
 
-				writeServiceDefinition(entry.getValue(), zipOutputStream);
+					writeServiceDefinition(entry.getValue(), zipOutputStream);
 
-				zipOutputStream.closeEntry();
+					zipOutputStream.closeEntry();
+				}
 			}
 		}
 	}
