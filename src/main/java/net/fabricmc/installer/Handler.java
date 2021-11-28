@@ -21,14 +21,10 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Consumer;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -42,8 +38,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import mjson.Json;
 
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
@@ -191,19 +185,8 @@ public abstract class Handler implements InstallerProgress {
 
 			// determine loader version from fabric.mod.json
 
-			try (ZipFile zf = new ZipFile(file)) {
-				ZipEntry entry = zf.getEntry("fabric.mod.json");
-				if (entry == null) throw new FileNotFoundException("fabric.mod.json");
-
-				String modJsonContent;
-
-				try (InputStream is = zf.getInputStream(entry)) {
-					modJsonContent = Utils.readString(is);
-				}
-
-				String version = Json.read(modJsonContent).at("version").asString();
-
-				return new LoaderVersion(version, file.toPath());
+			try {
+				return new LoaderVersion(file.toPath());
 			} catch (IOException e) {
 				error(e);
 				return null;

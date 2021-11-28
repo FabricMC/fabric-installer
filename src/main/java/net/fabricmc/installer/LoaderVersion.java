@@ -16,7 +16,17 @@
 
 package net.fabricmc.installer;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipError;
+import java.util.zip.ZipFile;
+
+import mjson.Json;
+
+import net.fabricmc.installer.util.Utils;
 
 public final class LoaderVersion {
 	public final String name;
@@ -27,8 +37,22 @@ public final class LoaderVersion {
 		this.path = null;
 	}
 
-	public LoaderVersion(String name, Path path) {
-		this.name = name;
+	public LoaderVersion(Path path) throws IOException {
+		try (ZipFile zf = new ZipFile(path.toFile())) {
+			ZipEntry entry = zf.getEntry("fabric.mod.json");
+			if (entry == null) throw new FileNotFoundException("fabric.mod.json");
+
+			String modJsonContent;
+
+			try (InputStream is = zf.getInputStream(entry)) {
+				modJsonContent = Utils.readString(is);
+			}
+
+			this.name = Json.read(modJsonContent).at("version").asString();
+		} catch (ZipError e) {
+			throw new IOException(e);
+		}
+
 		this.path = path;
 	}
 }

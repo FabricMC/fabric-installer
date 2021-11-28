@@ -40,7 +40,7 @@ import net.fabricmc.installer.util.Utils;
 
 public final class ServerLauncher {
 	private static final String INSTALL_CONFIG_NAME = "install.properties";
-	private static final Path SERVER_DIR = Paths.get(".fabric", "server").toAbsolutePath();
+	private static final Path DATA_DIR = Paths.get(".fabric", "server");
 
 	public static void main(String[] args) throws Throwable {
 		LaunchData launchData;
@@ -56,6 +56,7 @@ public final class ServerLauncher {
 		// Set the game jar path to bypass loader's own lookup
 		System.setProperty("fabric.gameJarPath", launchData.serverJar.toAbsolutePath().toString());
 
+		@SuppressWarnings("resource")
 		URLClassLoader launchClassLoader = new URLClassLoader(new URL[]{launchData.launchJar.toUri().toURL()});
 
 		// Use method handle to keep the stacktrace clean
@@ -67,16 +68,27 @@ public final class ServerLauncher {
 	private static LaunchData initialise() throws IOException {
 		Properties properties = readProperties();
 
-		LoaderVersion loaderVersion = new LoaderVersion(Objects.requireNonNull(properties.getProperty("fabric-loader-version"), "no loader-version specified in " + INSTALL_CONFIG_NAME));
+		String customLoaderPath = System.getProperty("fabric.customLoaderPath"); // intended for testing and development
+		LoaderVersion loaderVersion;
+
+		if (customLoaderPath == null) {
+			loaderVersion = new LoaderVersion(Objects.requireNonNull(properties.getProperty("fabric-loader-version"), "no loader-version specified in " + INSTALL_CONFIG_NAME));
+		} else {
+			loaderVersion = new LoaderVersion(Paths.get(customLoaderPath));
+		}
+
 		String gameVersion = Objects.requireNonNull(properties.getProperty("game-version"), "no game-version specified in " + INSTALL_CONFIG_NAME);
 
 		// 0.12 or higher is required
 		validateLoaderVersion(loaderVersion);
 
+		Path baseDir = Paths.get(".").toAbsolutePath().normalize();
+		Path dataDir = baseDir.resolve(DATA_DIR);
+
 		// Vanilla server jar
-		Path serverJar = SERVER_DIR.resolve(String.format("%s-server.jar", gameVersion));
+		Path serverJar = dataDir.resolve(String.format("%s-server.jar", gameVersion));
 		// Includes the mc version as this jar contains intermediary
-		Path serverLaunchJar = SERVER_DIR.resolve(String.format("fabric-loader-server-%s-minecraft-%s.jar", loaderVersion.name, gameVersion));
+		Path serverLaunchJar = dataDir.resolve(String.format("fabric-loader-server-%s-minecraft-%s.jar", loaderVersion.name, gameVersion));
 
 		if (Files.exists(serverJar) && Files.exists(serverLaunchJar)) {
 			try {
@@ -89,8 +101,8 @@ public final class ServerLauncher {
 			}
 		}
 
-		Files.createDirectories(SERVER_DIR);
-		ServerInstaller.install(SERVER_DIR, loaderVersion, gameVersion, InstallerProgress.CONSOLE, serverLaunchJar);
+		Files.createDirectories(dataDir);
+		ServerInstaller.install(baseDir, loaderVersion, gameVersion, InstallerProgress.CONSOLE, serverLaunchJar);
 
 		InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
 		MinecraftServerDownloader downloader = new MinecraftServerDownloader(gameVersion);
@@ -134,19 +146,9 @@ public final class ServerLauncher {
 	}
 
 	private static void validateLoaderVersion(LoaderVersion loaderVersion) {
-		String[] versionSplit = loaderVersion.name.split("\\.");
-
-		// future 1.x versions
-		if (Integer.parseInt(versionSplit[0]) > 0) {
-			return;
+		if (Utils.compareVersions(loaderVersion.name, "0.12") < 0) { // loader version below 0.12
+			throw new UnsupportedOperationException("Fabric loader 0.12 or higher is required for unattended server installs. Please use a newer fabric loader version, or the full installer.");
 		}
-
-		// 0.12.x or newer
-		if (Integer.parseInt(versionSplit[1]) >= 12) {
-			return;
-		}
-
-		throw new UnsupportedOperationException("Fabric loader 0.12 or higher is required for unattended server installs. Please use a newer fabric loader version, or the full installer.");
 	}
 
 	private static URL getConfigFromResources() {
