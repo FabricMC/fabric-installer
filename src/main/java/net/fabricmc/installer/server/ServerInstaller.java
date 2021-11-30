@@ -113,7 +113,7 @@ public class ServerInstaller {
 		List<Path> libraryFiles = new ArrayList<>();
 
 		for (Library library : libraries) {
-			Path libraryFile = libsDir.resolve(library.getFileName());
+			Path libraryFile = libsDir.resolve(library.getPath());
 
 			if (library.inputPath == null) {
 				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.download.library.entry")).format(new Object[]{library.name}));
@@ -157,7 +157,7 @@ public class ServerInstaller {
 
 			if (!shadeLibraries) {
 				mainAttributes.put(Attributes.Name.CLASS_PATH, libraryFiles.stream()
-						.map(f -> file.getParent().relativize(f).normalize().toString())
+						.map(f -> file.getParent().relativize(f).normalize().toString().replace("\\", "/"))
 						.collect(Collectors.joining(" ")));
 			}
 
