@@ -50,13 +50,4 @@ public class Library {
 		String path = parts[0].replace(".", File.separator) + File.separator + parts[1] + File.separator + parts[2] + File.separator + parts[1] + "-" + parts[2] + ".jar";
 		return path.replaceAll(" ", "_");
 	}
-
-	public File getFile(File baseDir) {
-		return new File(baseDir, getPath());
-	}
-
-	public String getFileName() {
-		String path = getPath();
-		return path.substring(path.lastIndexOf("\\") + 1);
-	}
 }
