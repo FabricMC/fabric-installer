@@ -55,18 +55,22 @@ public class ProfileInstaller {
 		Json jsonObject = Json.read(Utils.readString(launcherProfiles));
 
 		Json profiles = jsonObject.at("profiles");
+
+		if (profiles == null) {
+			profiles = Json.object();
+			jsonObject.set("profiles", profiles);
+		}
+
 		String profileName = Reference.LOADER_NAME + "-" + gameVersion;
 
-		Json profile;
+		Json profile = profiles.at(profileName);
 
-		if (profiles.has(profileName)) {
-			profile = profiles.at(profileName);
-		} else {
+		if (profile == null) {
 			profile = createProfile(profileName);
+			profiles.set(profileName, profile);
 		}
 
 		profile.set("lastVersionId", name);
-		profiles.set(profileName, profile);
 
 		Utils.writeToFile(launcherProfiles, jsonObject.toString());
 	}
