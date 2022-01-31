@@ -21,14 +21,19 @@ import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipError;
@@ -90,14 +95,28 @@ public final class ServerLauncher {
 		// Includes the mc version as this jar contains intermediary
 		Path serverLaunchJar = dataDir.resolve(String.format("fabric-loader-server-%s-minecraft-%s.jar", loaderVersion.name, gameVersion));
 
-		if (Files.exists(serverJar) && Files.exists(serverLaunchJar)) {
+		if (Files.exists(serverJar) && Files.exists(serverLaunchJar)) { // install exists, verify libs exist and determine main class
 			try {
-				String mainClass = readMainClass(serverLaunchJar);
-				// All seems good, no need to reinstall
-				return new LaunchData(serverJar, serverLaunchJar, mainClass);
+				List<Path> classPath = new ArrayList<>();
+				String mainClass = readManifest(serverLaunchJar, classPath);
+				boolean allPresent = true;
+
+				for (Path file : classPath) {
+					if (!Files.exists(file)) {
+						allPresent = false;
+						break;
+					}
+				}
+
+				if (allPresent) {
+					// All seems good, no need to reinstall
+					return new LaunchData(serverJar, serverLaunchJar, mainClass);
+				} else {
+					System.err.println("Detected incomplete install, reinstalling");
+				}
 			} catch (IOException | ZipError e) {
 				// Wont throw here, will try to reinstall
-				System.err.println("Failed to read main class from server launch jar: " + e.getMessage());
+				System.err.println("Failed to analyze or verify existing install: " + e.getMessage());
 			}
 		}
 
@@ -108,7 +127,7 @@ public final class ServerLauncher {
 		MinecraftServerDownloader downloader = new MinecraftServerDownloader(gameVersion);
 		downloader.downloadMinecraftServer(serverJar);
 
-		String mainClass = readMainClass(serverLaunchJar);
+		String mainClass = readManifest(serverLaunchJar, null);
 
 		return new LaunchData(serverJar, serverLaunchJar, mainClass);
 	}
@@ -132,13 +151,31 @@ public final class ServerLauncher {
 	}
 
 	// Find the mainclass of a jar file
-	private static String readMainClass(Path path) throws IOException {
+	private static String readManifest(Path path, List<Path> classPathOut) throws IOException {
 		try (JarFile jarFile = new JarFile(path.toFile())) {
 			Manifest manifest = jarFile.getManifest();
-			String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+			String mainClass = manifest.getMainAttributes().getValue(Attributes.Name.MAIN_CLASS);
 
 			if (mainClass == null) {
 				throw new IOException("Jar does not have a Main-Class attribute");
+			}
+
+			if (classPathOut != null) {
+				String cp = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
+
+				StringTokenizer tokenizer = new StringTokenizer(cp);
+				URL baseUrl = path.toUri().toURL();
+
+				while (tokenizer.hasMoreTokens()) {
+					String token = tokenizer.nextToken();
+					URL url = new URL(baseUrl, token);
+
+					try {
+						classPathOut.add(Paths.get(url.toURI()));
+					} catch (URISyntaxException e) {
+						throw new IOException(String.format("invalid class path entry in %s manifest: %s", path, token));
+					}
+				}
 			}
 
 			return mainClass;
