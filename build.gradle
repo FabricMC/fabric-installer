@@ -2,9 +2,9 @@ plugins {
 	id 'java'
 	id 'maven-publish'
 	id "checkstyle"
-	id "com.github.johnrengelman.shadow" version "7.0.0"
+	id "com.github.johnrengelman.shadow" version "7.1.2"
 	id "org.cadixdev.licenser" version "0.6.1"
-	id "de.undercouch.download" version "4.1.2"
+	id "de.undercouch.download" version "5.0.1"
 	id "me.modmuss50.remotesign" version "0.1.0"
 }
 
@@ -49,7 +49,7 @@ tasks.withType(JavaCompile).configureEach {
 
 checkstyle {
 	configFile = project.file("checkstyle.xml")
-	toolVersion = "8.45"
+	toolVersion = "9.3"
 }
 
 shadowJar {

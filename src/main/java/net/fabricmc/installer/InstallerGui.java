@@ -16,6 +16,7 @@
 
 package net.fabricmc.installer;
 
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +67,7 @@ public class InstallerGui extends JFrame {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		InstallerGui dialog = new InstallerGui();
 		instance = dialog;
+		dialog.setMinimumSize(new Dimension(550, 0));
 		dialog.pack();
 		dialog.setTitle(Utils.BUNDLE.getString("installer.title"));
 		dialog.setLocationRelativeTo(null);

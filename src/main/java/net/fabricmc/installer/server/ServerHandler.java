@@ -16,12 +16,20 @@
 
 package net.fabricmc.installer.server;
 
+import java.awt.Cursor;
+import java.awt.Desktop;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.fabricmc.installer.Handler;
@@ -29,6 +37,7 @@ import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.LoaderVersion;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
 public class ServerHandler extends Handler {
@@ -85,6 +94,22 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, InstallerGui installerGui) {
+		JLabel label = new JLabel(String.format("<html><a href=\"\">%s</a></html>", Utils.BUNDLE.getString("prompt.server.launcher")));
+		label.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		label.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+					try {
+						Desktop.getDesktop().browse(new URI(Reference.serverLauncherUrl));
+					} catch (IOException | URISyntaxException ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+		});
+
+		addRow(pane, jPanel -> jPanel.add(label));
 	}
 
 	@Override

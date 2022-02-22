@@ -16,11 +16,13 @@
 
 package net.fabricmc.installer.client;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,6 +75,20 @@ public class ProfileInstaller {
 		profile.set("lastVersionId", name);
 
 		Utils.writeToFile(launcherProfiles, jsonObject.toString());
+		clearDotFabricDir();
+	}
+
+	private void clearDotFabricDir() throws IOException {
+		Path dotFabric = mcDir.resolve(".fabric");
+
+		if (Files.notExists(dotFabric)) {
+			return;
+		}
+
+		Files.walk(dotFabric)
+				.sorted(Comparator.reverseOrder()) // Sort the files before the dirs
+				.map(Path::toFile)
+				.forEach(File::delete); // Don't worry too much if it's unable to delete
 	}
 
 	private static Json createProfile(String name) {
