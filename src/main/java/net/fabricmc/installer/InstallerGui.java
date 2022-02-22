@@ -67,6 +67,7 @@ public class InstallerGui extends JFrame {
 		InstallerGui dialog = new InstallerGui();
 		instance = dialog;
 		dialog.pack();
+		dialog.setMinimumSize(dialog.getPreferredSize());
 		dialog.setTitle(Utils.BUNDLE.getString("installer.title"));
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
