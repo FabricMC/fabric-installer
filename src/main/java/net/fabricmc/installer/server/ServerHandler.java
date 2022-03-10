@@ -16,6 +16,7 @@
 
 package net.fabricmc.installer.server;
 
+import java.awt.GridBagConstraints;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,11 +85,7 @@ public class ServerHandler extends Handler {
 	}
 
 	@Override
-	public void setupPane1(JPanel pane, InstallerGui installerGui) {
-	}
-
-	@Override
-	public void setupPane2(JPanel pane, InstallerGui installerGui) {
+	public void setupPane2(JPanel pane, GridBagConstraints c, InstallerGui installerGui) {
 		installLocation.setText(Paths.get(".").toAbsolutePath().normalize().toString());
 	}
 }
