@@ -17,6 +17,7 @@
 package net.fabricmc.installer;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -28,11 +29,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -50,6 +51,9 @@ import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.Utils;
 
 public abstract class Handler implements InstallerProgress {
+	protected static final int HORIZONTAL_SPACING = 4;
+	protected static final int VERTICAL_SPACING = 6;
+
 	private static final String SELECT_CUSTOM_ITEM = "(select custom)";
 
 	public JButton buttonInstall;
@@ -82,13 +86,14 @@ public abstract class Handler implements InstallerProgress {
 		pane.setBorder(new EmptyBorder(4, 4, 4, 4));
 
 		GridBagConstraints c = new GridBagConstraints();
-		c.insets = new Insets(2, 2, 2, 2);
+		c.insets = new Insets(VERTICAL_SPACING, HORIZONTAL_SPACING, VERTICAL_SPACING, HORIZONTAL_SPACING);
 		c.gridx = c.gridy = 0;
 
 		setupPane1(pane, c, installerGui);
 
 		addRow(pane, c, "prompt.game.version",
 				gameVersionComboBox = new JComboBox<>(),
+				createSpacer(),
 				snapshotCheckBox = new JCheckBox(Utils.BUNDLE.getString("option.show.snapshots")));
 		snapshotCheckBox.setSelected(false);
 		snapshotCheckBox.addActionListener(e -> {
@@ -240,15 +245,19 @@ public abstract class Handler implements InstallerProgress {
 				JOptionPane.ERROR_MESSAGE);
 	}
 
-	protected void addRow(Container parent, GridBagConstraints c, String label, JComponent... components) {
+	protected void addRow(Container parent, GridBagConstraints c, String label, Component... components) {
 		addRow(parent, c, false, label, components);
 	}
 
-	protected void addLastRow(Container parent, GridBagConstraints c, String label, JComponent... components) {
+	protected void addLastRow(Container parent, GridBagConstraints c, String label, Component... components) {
 		addRow(parent, c, true, label, components);
 	}
 
-	private void addRow(Container parent, GridBagConstraints c, boolean last, String label, JComponent... components) {
+	protected static Component createSpacer() {
+		return Box.createRigidArea(new Dimension(4, 0));
+	}
+
+	private void addRow(Container parent, GridBagConstraints c, boolean last, String label, Component... components) {
 		if (label != null) {
 			c.gridwidth = 1;
 			c.anchor = GridBagConstraints.LINE_END;
@@ -270,7 +279,7 @@ public abstract class Handler implements InstallerProgress {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
-		for (JComponent comp : components) {
+		for (Component comp : components) {
 			panel.add(comp);
 		}
 
