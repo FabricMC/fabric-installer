@@ -16,6 +16,7 @@
 
 package net.fabricmc.installer;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
@@ -66,7 +67,13 @@ public class InstallerGui extends JFrame {
 
 	public static void start() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException, XMLStreamException {
 		//This will make people happy
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		String lafCls = UIManager.getSystemLookAndFeelClassName();
+		UIManager.setLookAndFeel(lafCls);
+
+		if (lafCls.endsWith("AquaLookAndFeel")) { // patch osx tab text color bug JDK-8251377
+			UIManager.put("TabbedPane.foreground", Color.BLACK);
+		}
+
 		InstallerGui dialog = new InstallerGui();
 		dialog.updateSize(true);
 		dialog.setTitle(Utils.BUNDLE.getString("installer.title"));
