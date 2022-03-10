@@ -36,7 +36,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -168,8 +167,7 @@ public abstract class Handler implements InstallerProgress {
 
 		gameVersionComboBox.setSelectedIndex(0);
 
-		JFrame frame = (JFrame) pane.getRootPane().getParent();
-		frame.pack();
+		InstallerGui.instance.updateSize(false);
 	}
 
 	protected LoaderVersion queryLoaderVersion() {
