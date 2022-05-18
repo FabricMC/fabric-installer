@@ -95,17 +95,19 @@ public class ServerHandler extends Handler {
 
 	@Override
 	public void setupPane1(JPanel pane, GridBagConstraints c, InstallerGui installerGui) {
+		if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+			return;
+		}
+
 		JLabel label = new JLabel(String.format("<html><a href=\"\">%s</a></html>", Utils.BUNDLE.getString("prompt.server.launcher")));
 		label.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		label.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-					try {
-						Desktop.getDesktop().browse(new URI(Reference.serverLauncherUrl));
-					} catch (IOException | URISyntaxException ex) {
-						ex.printStackTrace();
-					}
+				try {
+					Desktop.getDesktop().browse(new URI(Reference.serverLauncherUrl));
+				} catch (IOException | URISyntaxException ex) {
+					ex.printStackTrace();
 				}
 			}
 		});
