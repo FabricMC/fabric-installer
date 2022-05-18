@@ -21,6 +21,7 @@ public class Reference {
 
 	public static String metaServerUrl = "https://meta.fabricmc.net/";
 	public static String fabricApiUrl = "https://www.curseforge.com/minecraft/mc-mods/fabric-api/";
+	public static String serverLauncherUrl = "https://fabricmc.net/use/server/";
 	public static String minecraftLauncherManifest = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
 	public static String experimentalVersionsManifest = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
 
