@@ -25,10 +25,11 @@ public class Reference {
 
 	public static final String DEFAULT_MAVEN_SERVER = "https://maven.fabricmc.net/";
 
-	private static final FabricServices[] FABRIC_SERVICES = new FabricServices[]{
+	private static final FabricServices[] FABRIC_SERVICES = {
 			new FabricServices(
 					"https://meta.fabricmc.net/", DEFAULT_MAVEN_SERVER
 			),
+			// Do not use these fallback servers to interact with our web services. They can and will be unavailable at times, with limited throughput.
 			new FabricServices(
 					"https://meta2.fabricmc.net/", "https://maven2.fabricmc.net/"
 			),
