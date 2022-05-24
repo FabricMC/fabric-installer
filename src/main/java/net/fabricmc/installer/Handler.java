@@ -292,12 +292,6 @@ public abstract class Handler implements InstallerProgress {
 		return args.getOrDefault("mcversion", () -> {
 			System.out.println("Using latest game version");
 
-			try {
-				Main.GAME_VERSION_META.load();
-			} catch (IOException e) {
-				throw new RuntimeException("Failed to load latest versions", e);
-			}
-
 			return Main.GAME_VERSION_META.getLatestVersion(args.has("snapshot")).getVersion();
 		});
 	}
@@ -305,12 +299,6 @@ public abstract class Handler implements InstallerProgress {
 	protected String getLoaderVersion(ArgumentParser args) {
 		return args.getOrDefault("loader", () -> {
 			System.out.println("Using latest loader version");
-
-			try {
-				Main.LOADER_META.load();
-			} catch (IOException e) {
-				throw new RuntimeException("Failed to load latest versions", e);
-			}
 
 			return Main.LOADER_META.getLatestVersion(false).getVersion();
 		});

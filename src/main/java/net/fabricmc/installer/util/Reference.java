@@ -19,13 +19,47 @@ package net.fabricmc.installer.util;
 public class Reference {
 	public static final String LOADER_NAME = "fabric-loader";
 
-	public static String metaServerUrl = "https://meta.fabricmc.net/";
-	public static String fabricApiUrl = "https://www.curseforge.com/minecraft/mc-mods/fabric-api/";
-	public static String serverLauncherUrl = "https://fabricmc.net/use/server/";
-	public static String minecraftLauncherManifest = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
-	public static String experimentalVersionsManifest = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
+	public static final String FABRIC_API_URL = "https://www.curseforge.com/minecraft/mc-mods/fabric-api/";
+	public static final String SERVER_LAUNCHER_URL = "https://fabricmc.net/use/server/";
+	public static final String MINECRAFT_LAUNCHER_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
+
+	public static final String DEFAULT_MAVEN_SERVER = "https://maven.fabricmc.net/";
+
+	private static final FabricServices[] FABRIC_SERVICES = new FabricServices[]{
+			new FabricServices(
+					"https://meta.fabricmc.net/", DEFAULT_MAVEN_SERVER
+			),
+			new FabricServices(
+					"https://meta2.fabricmc.net/", "https://maven2.fabricmc.net/"
+			),
+			new FabricServices(
+					"https://meta3.fabricmc.net/", "https://maven3.fabricmc.net/"
+			)
+	};
+
+	private static int activeService = 0;
+
+	public static FabricServices getActiveService() {
+		return FABRIC_SERVICES[activeService];
+	}
 
 	public static String getMetaServerEndpoint(String path) {
-		return metaServerUrl + path;
+		return getActiveService().getMetaUrl() + path;
+	}
+
+	public static String getExperimentalVersionsManifestUrl() {
+		return getActiveService().getMavenUrl() + "net/minecraft/experimental_versions.json";
+	}
+
+	public static boolean switchToNextFallback() {
+		if (activeService == FABRIC_SERVICES.length - 1) {
+			// Nothing else to fallback to
+			return false;
+		}
+
+		activeService++;
+		System.out.println("Switching to fallback service");
+		System.out.println(getActiveService());
+		return true;
 	}
 }

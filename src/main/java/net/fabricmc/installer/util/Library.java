@@ -42,6 +42,12 @@ public class Library {
 		String path;
 		String[] parts = this.name.split(":", 3);
 		path = parts[0].replace(".", "/") + "/" + parts[1] + "/" + parts[2] + "/" + parts[1] + "-" + parts[2] + ".jar";
+
+		// Bit of a hack, lets ensure we use the active maven to download the library from.
+		if (url.equals(Reference.DEFAULT_MAVEN_SERVER)) {
+			return Reference.getActiveService().getMavenUrl() + path;
+		}
+
 		return url + path;
 	}
 
