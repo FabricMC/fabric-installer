@@ -20,6 +20,7 @@ import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
@@ -35,6 +36,15 @@ public class Main {
 	public static final List<Handler> HANDLERS = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
+		String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+
+		// Use the operating system cert store
+		if (osName.contains("win")) {
+			System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
+		} else if (osName.contains("mac")) {
+			System.setProperty("javax.net.ssl.trustStoreType", "KeychainStore");
+		}
+
 		System.out.println("Loading Fabric Installer: " + Main.class.getPackage().getImplementationVersion());
 
 		HANDLERS.add(new ClientHandler());
