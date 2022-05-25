@@ -16,6 +16,8 @@
 
 package net.fabricmc.installer.util;
 
+import java.util.Locale;
+
 public enum OperatingSystem {
 	WINDOWS,
 	MACOS,
@@ -24,7 +26,7 @@ public enum OperatingSystem {
 	public static final OperatingSystem CURRENT = getCurrent();
 
 	private static OperatingSystem getCurrent() {
-		String osName = System.getProperty("os.name").toLowerCase();
+		String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
 		if (osName.contains("win")) {
 			return WINDOWS;
