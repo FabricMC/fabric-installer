@@ -9,7 +9,7 @@ plugins {
 }
 
 sourceCompatibility = 1.8
-version = '0.10.2'
+version = '0.11.0'
 archivesBaseName = "fabric-installer"
 
 def ENV = System.getenv()
