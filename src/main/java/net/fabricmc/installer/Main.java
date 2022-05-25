@@ -26,6 +26,7 @@ import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.CrashDialog;
 import net.fabricmc.installer.util.MetaHandler;
+import net.fabricmc.installer.util.OperatingSystem;
 import net.fabricmc.installer.util.Reference;
 
 public class Main {
@@ -35,6 +36,11 @@ public class Main {
 	public static final List<Handler> HANDLERS = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
+		if (OperatingSystem.CURRENT == OperatingSystem.WINDOWS) {
+			// Use the operating system cert store
+			System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
+		}
+
 		System.out.println("Loading Fabric Installer: " + Main.class.getPackage().getImplementationVersion());
 
 		HANDLERS.add(new ClientHandler());
