@@ -26,8 +26,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import net.fabricmc.installer.util.OperatingSystem;
+
 public class NativesHelper {
-	private static final String OS_ID = getOS() + "-" + System.getProperty("os.arch").toLowerCase(Locale.ROOT);
+	private static final String OS_ID = OperatingSystem.CURRENT.name().toLowerCase(Locale.ROOT) + "-" + System.getProperty("os.arch").toLowerCase(Locale.ROOT);
 	private static final Map<String, String> NATIVES_MAP = getNativesMap();
 
 	private static boolean loaded = false;
@@ -47,18 +49,6 @@ public class NativesHelper {
 		natives.put("macos-aarch64", "natives/macos-x86_64_arm64.dylib");
 
 		return natives;
-	}
-
-	private static String getOS() {
-		String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-
-		if (osName.contains("win")) {
-			return "windows";
-		} else if (osName.contains("mac")) {
-			return "macos";
-		} else {
-			return "linux";
-		}
 	}
 
 	public static boolean loadSafelyIfCompatible() {

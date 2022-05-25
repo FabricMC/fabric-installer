@@ -61,16 +61,15 @@ public class Utils {
 	});
 
 	public static Path findDefaultInstallDir() {
-		String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 		Path dir;
 
-		if (os.contains("win") && System.getenv("APPDATA") != null) {
+		if (OperatingSystem.CURRENT == OperatingSystem.WINDOWS && System.getenv("APPDATA") != null) {
 			dir = Paths.get(System.getenv("APPDATA")).resolve(".minecraft");
 		} else {
 			String home = System.getProperty("user.home", ".");
 			Path homeDir = Paths.get(home);
 
-			if (os.contains("mac")) {
+			if (OperatingSystem.CURRENT == OperatingSystem.MACOS) {
 				dir = homeDir.resolve("Library").resolve("Application Support").resolve("minecraft");
 			} else {
 				dir = homeDir.resolve(".minecraft");
