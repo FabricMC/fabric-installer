@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Locale;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -211,7 +212,7 @@ public abstract class Handler implements InstallerProgress {
 		JLabel label = new JLabel();
 		Font font = label.getFont();
 		Color color = label.getBackground();
-		return String.format(
+		return String.format(Locale.ENGLISH,
 				"font-family:%s;font-weight:%s;font-size:%dpt;background-color: rgb(%d,%d,%d);",
 				font.getFamily(), (font.isBold() ? "bold" : "normal"), font.getSize(), color.getRed(), color.getGreen(), color.getBlue()
 				);

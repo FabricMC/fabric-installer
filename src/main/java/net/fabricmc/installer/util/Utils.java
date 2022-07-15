@@ -183,7 +183,7 @@ public class Utils {
 		StringBuilder output = new StringBuilder();
 
 		for (byte b : bytes) {
-			output.append(String.format("%02x", b));
+			output.append(String.format(Locale.ENGLISH, "%02x", b));
 		}
 
 		return output.toString();
