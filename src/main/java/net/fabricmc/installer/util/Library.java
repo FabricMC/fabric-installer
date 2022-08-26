@@ -42,6 +42,7 @@ public class Library {
 		String path;
 		String[] parts = this.name.split(":", 3);
 		path = parts[0].replace(".", "/") + "/" + parts[1] + "/" + parts[2] + "/" + parts[1] + "-" + parts[2] + ".jar";
+
 		return url + path;
 	}
 

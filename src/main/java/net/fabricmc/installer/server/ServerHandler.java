@@ -105,7 +105,7 @@ public class ServerHandler extends Handler {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					Desktop.getDesktop().browse(new URI(Reference.serverLauncherUrl));
+					Desktop.getDesktop().browse(new URI(Reference.SERVER_LAUNCHER_URL));
 				} catch (IOException | URISyntaxException ex) {
 					ex.printStackTrace();
 				}

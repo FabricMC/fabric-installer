@@ -25,9 +25,9 @@ import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.CrashDialog;
+import net.fabricmc.installer.util.FabricService;
 import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.OperatingSystem;
-import net.fabricmc.installer.util.Reference;
 
 public class Main {
 	public static MetaHandler GAME_VERSION_META;
@@ -50,10 +50,15 @@ public class Main {
 		String command = argumentParser.getCommand().orElse(null);
 
 		//Can be used if you wish to re-host or provide custom versions. Ensure you include the trailing /
-		argumentParser.ifPresent("metaurl", s -> Reference.metaServerUrl = s);
+		String metaUrl = argumentParser.has("metaurl") ? argumentParser.get("metaurl") : null;
+		String mavenUrl = argumentParser.has("mavenurl") ? argumentParser.get("mavenurl") : null;
 
-		GAME_VERSION_META = new MetaHandler(Reference.getMetaServerEndpoint("v2/versions/game"));
-		LOADER_META = new MetaHandler(Reference.getMetaServerEndpoint("v2/versions/loader"));
+		if (metaUrl != null || mavenUrl != null) {
+			FabricService.setFixed(metaUrl, mavenUrl);
+		}
+
+		GAME_VERSION_META = new MetaHandler("v2/versions/game");
+		LOADER_META = new MetaHandler("v2/versions/loader");
 
 		//Default to the help command in a headless environment
 		if (GraphicsEnvironment.isHeadless() && command == null) {
@@ -70,12 +75,12 @@ public class Main {
 		} else if (command.equals("help")) {
 			System.out.println("help - Opens this menu");
 			HANDLERS.forEach(handler -> System.out.printf("%s %s\n", handler.name().toLowerCase(), handler.cliHelp()));
-
-			LOADER_META.load();
-			GAME_VERSION_META.load();
+			loadMetadata();
 
 			System.out.printf("\nLatest Version: %s\nLatest Loader: %s\n", GAME_VERSION_META.getLatestVersion(argumentParser.has("snapshot")).getVersion(), Main.LOADER_META.getLatestVersion(false).getVersion());
 		} else {
+			loadMetadata();
+
 			for (Handler handler : HANDLERS) {
 				if (command.equalsIgnoreCase(handler.name())) {
 					try {
@@ -90,6 +95,15 @@ public class Main {
 
 			//Only reached if a handler is not found
 			System.out.println("No handler found for " + args[0] + " see help");
+		}
+	}
+
+	public static void loadMetadata() {
+		try {
+			LOADER_META.load();
+			GAME_VERSION_META.load();
+		} catch (Throwable t) {
+			throw new RuntimeException("Unable to load metadata", t);
 		}
 	}
 }

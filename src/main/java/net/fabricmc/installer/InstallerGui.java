@@ -35,6 +35,7 @@ import javax.xml.stream.XMLStreamException;
 
 import net.fabricmc.installer.util.Utils;
 
+@SuppressWarnings("serial")
 public class InstallerGui extends JFrame {
 	public static InstallerGui instance;
 
@@ -49,8 +50,7 @@ public class InstallerGui extends JFrame {
 
 		instance = this;
 
-		Main.GAME_VERSION_META.load();
-		Main.LOADER_META.load();
+		Main.loadMetadata();
 	}
 
 	public static void selectInstallLocation(Supplier<String> initalDir, Consumer<String> selectedDir) {

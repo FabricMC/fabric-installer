@@ -17,7 +17,6 @@
 package net.fabricmc.installer.util;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,17 +36,14 @@ public class LauncherMeta {
 
 	private static LauncherMeta load() throws IOException {
 		List<Version> versions = new ArrayList<>();
-		versions.addAll(getVersionsFromUrl(Reference.minecraftLauncherManifest));
-		versions.addAll(getVersionsFromUrl(Reference.experimentalVersionsManifest));
+		versions.addAll(getVersionsFromUrl(Reference.MINECRAFT_LAUNCHER_MANIFEST));
+		versions.addAll(getVersionsFromUrl(Reference.EXPERIMENTAL_LAUNCHER_MANIFEST));
 
 		return new LauncherMeta(versions);
 	}
 
-	private static List<Version> getVersionsFromUrl(String urlStr) throws IOException {
-		URL url = new URL(urlStr);
-
-		String str = Utils.readTextFile(url);
-		Json json = Json.read(str);
+	private static List<Version> getVersionsFromUrl(String url) throws IOException {
+		Json json = FabricService.queryJsonSubstitutedMaven(url);
 
 		List<Version> versions = json.at("versions").asJsonList()
 				.stream()
@@ -76,9 +72,7 @@ public class LauncherMeta {
 
 		public VersionMeta getVersionMeta() throws IOException {
 			if (versionMeta == null) {
-				URL url = new URL(this.url);
-				String str = Utils.readTextFile(url);
-				Json json = Json.read(str);
+				Json json = FabricService.queryJsonSubstitutedMaven(url);
 				versionMeta = new VersionMeta(json);
 			}
 

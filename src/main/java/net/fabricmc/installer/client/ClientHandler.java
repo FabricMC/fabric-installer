@@ -117,7 +117,7 @@ public class ClientHandler extends Handler {
 	}
 
 	private void showInstalledMessage(String loaderVersion, String gameVersion) {
-		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.fabricApiUrl}) + "</body></html>");
+		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.FABRIC_API_URL}) + "</body></html>");
 		pane.setEditable(false);
 
 		pane.addHyperlinkListener(e -> {
