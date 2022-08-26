@@ -16,11 +16,10 @@
 
 package net.fabricmc.installer.util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -38,7 +37,6 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Utils {
 	public static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -79,13 +77,9 @@ public class Utils {
 		return dir.toAbsolutePath().normalize();
 	}
 
-	public static Reader urlReader(URL url) throws IOException {
-		return new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
-	}
-
-	public static String readTextFile(URL url) throws IOException {
-		try (BufferedReader reader = new BufferedReader(urlReader(url))) {
-			return reader.lines().collect(Collectors.joining("\n"));
+	public static String readString(URL url) throws IOException {
+		try (InputStream is = openUrl(url)) {
+			return readString(is);
 		}
 	}
 
@@ -118,9 +112,8 @@ public class Utils {
 	}
 
 	public static void downloadFile(URL url, Path path) throws IOException {
-		Files.createDirectories(path.getParent());
-
-		try (InputStream in = url.openStream()) {
+		try (InputStream in = openUrl(url)) {
+			Files.createDirectories(path.getParent());
 			Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
 		} catch (Throwable t) {
 			try {
@@ -131,6 +124,21 @@ public class Utils {
 
 			throw t;
 		}
+	}
+
+	private static final int HTTP_TIMEOUT_MS = 8000;
+
+	private static InputStream openUrl(URL url) throws IOException {
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+		conn.setConnectTimeout(HTTP_TIMEOUT_MS);
+		conn.setReadTimeout(HTTP_TIMEOUT_MS);
+		conn.connect();
+
+		int responseCode = conn.getResponseCode();
+		if (responseCode < 200 || responseCode >= 300) throw new IOException("HTTP request to "+url+" failed: "+responseCode);
+
+		return conn.getInputStream();
 	}
 
 	public static String getProfileIcon() {

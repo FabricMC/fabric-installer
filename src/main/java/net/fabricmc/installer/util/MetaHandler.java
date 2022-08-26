@@ -17,7 +17,6 @@
 package net.fabricmc.installer.util;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,9 +32,7 @@ public class MetaHandler extends CompletableHandler<List<MetaHandler.GameVersion
 	}
 
 	public void load() throws IOException {
-		URL url = new URL(Reference.getMetaServerEndpoint(metaPath));
-
-		Json json = Json.read(Utils.readTextFile(url));
+		Json json = FabricService.queryMetaJson(metaPath);
 
 		this.versions = json.asJsonList()
 				.stream()

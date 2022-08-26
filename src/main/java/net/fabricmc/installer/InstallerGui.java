@@ -35,6 +35,7 @@ import javax.xml.stream.XMLStreamException;
 
 import net.fabricmc.installer.util.Utils;
 
+@SuppressWarnings("serial")
 public class InstallerGui extends JFrame {
 	public static InstallerGui instance;
 

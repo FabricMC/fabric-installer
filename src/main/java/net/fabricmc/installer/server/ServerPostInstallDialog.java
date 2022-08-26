@@ -23,7 +23,6 @@ import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +60,7 @@ import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.util.LauncherMeta;
 import net.fabricmc.installer.util.Utils;
 
+@SuppressWarnings("serial")
 public class ServerPostInstallDialog extends JDialog {
 	private static final String launchCommand = "java -Xmx2G -jar fabric-server-launch.jar nogui";
 	private static final int MB = 1000000;
@@ -190,26 +190,21 @@ public class ServerPostInstallDialog extends JDialog {
 				HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
 				int finalSize = httpConnection.getContentLength();
 
-				BufferedInputStream inputStream = new BufferedInputStream(httpConnection.getInputStream());
+				try (BufferedInputStream inputStream = new BufferedInputStream(httpConnection.getInputStream());
+						OutputStream outputStream = Files.newOutputStream(minecraftJarTmp)) {
+					byte[] buffer = new byte[4096];
+					long downloaded = 0;
+					int len;
 
-				OutputStream outputStream = Files.newOutputStream(minecraftJarTmp);
-				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream, 1024);
+					while ((len = inputStream.read(buffer, 0, buffer.length)) >= 0) {
+						downloaded += len;
 
-				byte[] buffer = new byte[1024];
-				long downloaded = 0;
-				int len;
+						final String labelText = new MessageFormat(Utils.BUNDLE.getString("prompt.server.downloading")).format(new Object[] {downloaded / MB, finalSize / MB});
+						SwingUtilities.invokeLater(() -> color(serverJarLabel, Color.BLUE).setText(labelText));
 
-				while ((len = inputStream.read(buffer, 0, 1024)) >= 0) {
-					downloaded += len;
-
-					final String labelText = new MessageFormat(Utils.BUNDLE.getString("prompt.server.downloading")).format(new Object[] {downloaded / MB, finalSize / MB});
-					SwingUtilities.invokeLater(() -> color(serverJarLabel, Color.BLUE).setText(labelText));
-
-					bufferedOutputStream.write(buffer, 0, len);
+						outputStream.write(buffer, 0, len);
+					}
 				}
-
-				bufferedOutputStream.close();
-				inputStream.close();
 
 				Files.move(minecraftJarTmp, minecraftJar, StandardCopyOption.REPLACE_EXISTING);
 

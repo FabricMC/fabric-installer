@@ -25,9 +25,9 @@ import net.fabricmc.installer.client.ClientHandler;
 import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.CrashDialog;
+import net.fabricmc.installer.util.FabricService;
 import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.OperatingSystem;
-import net.fabricmc.installer.util.Reference;
 
 public class Main {
 	public static MetaHandler GAME_VERSION_META;
@@ -50,8 +50,12 @@ public class Main {
 		String command = argumentParser.getCommand().orElse(null);
 
 		//Can be used if you wish to re-host or provide custom versions. Ensure you include the trailing /
-		// TODO add back or remove?
-		//argumentParser.ifPresent("metaurl", s -> Reference.metaServerUrl = s);
+		String metaUrl = argumentParser.has("metaurl") ? argumentParser.get("metaurl") : null;
+		String mavenUrl = argumentParser.has("mavenurl") ? argumentParser.get("mavenurl") : null;
+
+		if (metaUrl != null || mavenUrl != null) {
+			FabricService.setFixed(metaUrl, mavenUrl);
+		}
 
 		GAME_VERSION_META = new MetaHandler("v2/versions/game");
 		LOADER_META = new MetaHandler("v2/versions/loader");
@@ -95,23 +99,11 @@ public class Main {
 	}
 
 	public static void loadMetadata() {
-		RuntimeException exception = new RuntimeException("Unable to load metadata");
-
-		while (true) {
-			try {
-				LOADER_META.load();
-				GAME_VERSION_META.load();
-
-				// We successfully loaded, no need to try again.
-				break;
-			} catch (Throwable t) {
-				exception.addSuppressed(t);
-
-				if (!Reference.switchToNextFallback()) {
-					// Nothing left to fallback to, must crash.
-					throw exception;
-				}
-			}
+		try {
+			LOADER_META.load();
+			GAME_VERSION_META.load();
+		} catch (Throwable t) {
+			throw new RuntimeException("Unable to load metadata", t);
 		}
 	}
 }
