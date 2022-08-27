@@ -41,7 +41,7 @@ public class NativesHelper {
 	private static Map<String, String> getNativesMap() {
 		Map<String, String> natives = new HashMap<>();
 
-		natives.put("windows-arm64", "natives/windows-ARM64.dll");
+		natives.put("windows-aarch64", "natives/windows-ARM64.dll");
 		natives.put("windows-win32", "natives/windows-Win32.dll");
 		natives.put("windows-amd64", "natives/windows-x64.dll");
 
