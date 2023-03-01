@@ -91,11 +91,18 @@ public final class ServerLauncher {
 		Path dataDir = baseDir.resolve(DATA_DIR);
 
 		// Vanilla server jar
-		Path serverJar = dataDir.resolve(String.format("%s-server.jar", gameVersion));
+		String customServerJar = System.getProperty("fabric.installer.server.gameJar", null);
+		Path serverJar = customServerJar == null ? dataDir.resolve(String.format("%s-server.jar", gameVersion)) : Paths.get(customServerJar);
 		// Includes the mc version as this jar contains intermediary
 		Path serverLaunchJar = dataDir.resolve(String.format("fabric-loader-server-%s-minecraft-%s.jar", loaderVersion.name, gameVersion));
 
-		if (Files.exists(serverJar) && Files.exists(serverLaunchJar)) { // install exists, verify libs exist and determine main class
+		if (!Files.exists(serverJar)) {
+			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
+			MinecraftServerDownloader downloader = new MinecraftServerDownloader(gameVersion);
+			downloader.downloadMinecraftServer(serverJar);
+		}
+
+		if (Files.exists(serverLaunchJar)) { // install exists, verify libs exist and determine main class
 			try {
 				List<Path> classPath = new ArrayList<>();
 				String mainClass = readManifest(serverLaunchJar, classPath);
@@ -122,10 +129,6 @@ public final class ServerLauncher {
 
 		Files.createDirectories(dataDir);
 		ServerInstaller.install(baseDir, loaderVersion, gameVersion, InstallerProgress.CONSOLE, serverLaunchJar);
-
-		InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
-		MinecraftServerDownloader downloader = new MinecraftServerDownloader(gameVersion);
-		downloader.downloadMinecraftServer(serverJar);
 
 		String mainClass = readManifest(serverLaunchJar, null);
 
