@@ -36,6 +36,7 @@ public class Main {
 	public static final List<Handler> HANDLERS = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
+		System.setProperty("awt.useSystemAAFontSettings","on");
 		if (OperatingSystem.CURRENT == OperatingSystem.WINDOWS) {
 			// Use the operating system cert store
 			System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
