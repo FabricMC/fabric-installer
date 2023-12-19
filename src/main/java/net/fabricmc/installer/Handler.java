@@ -24,8 +24,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
@@ -36,14 +34,12 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
@@ -53,8 +49,6 @@ import net.fabricmc.installer.util.Utils;
 public abstract class Handler implements InstallerProgress {
 	protected static final int HORIZONTAL_SPACING = 4;
 	protected static final int VERTICAL_SPACING = 6;
-
-	private static final String SELECT_CUSTOM_ITEM = "(select custom)";
 
 	public JButton buttonInstall;
 
@@ -80,6 +74,10 @@ public abstract class Handler implements InstallerProgress {
 	public void setupPane1(JPanel pane, GridBagConstraints c, InstallerGui installerGui) { }
 
 	public void setupPane2(JPanel pane, GridBagConstraints c, InstallerGui installerGui) { }
+
+	public boolean isLoaderVersionSupported(String version) {
+		return true;
+	}
 
 	public JPanel makePanel(InstallerGui installerGui) {
 		pane = new JPanel(new GridBagLayout());
@@ -134,14 +132,17 @@ public abstract class Handler implements InstallerProgress {
 
 			for (int i = 0; i < versions.size(); i++) {
 				MetaHandler.GameVersion version = versions.get(i);
+
+				if (!isLoaderVersionSupported(version.getVersion())) {
+					continue;
+				}
+
 				loaderVersionComboBox.addItem(version.getVersion());
 
 				if (version.isStable()) {
 					stableIndex = i;
 				}
 			}
-
-			loaderVersionComboBox.addItem(SELECT_CUSTOM_ITEM);
 
 			//If no stable versions are found, default to the latest version
 			if (stableIndex == -1) {
@@ -173,33 +174,7 @@ public abstract class Handler implements InstallerProgress {
 
 	protected LoaderVersion queryLoaderVersion() {
 		String ret = (String) loaderVersionComboBox.getSelectedItem();
-
-		if (!ret.equals(SELECT_CUSTOM_ITEM)) {
-			return new LoaderVersion(ret);
-		} else {
-			// ask user for loader jar
-
-			JFileChooser chooser = new JFileChooser();
-			chooser.setCurrentDirectory(new File("."));
-			chooser.setDialogTitle("Select Fabric Loader JAR");
-			chooser.setFileFilter(new FileNameExtensionFilter("Java Archive", "jar"));
-			chooser.setAcceptAllFileFilterUsed(false);
-
-			if (chooser.showOpenDialog(null) != JFileChooser.APPROVE_OPTION) {
-				return null;
-			}
-
-			File file = chooser.getSelectedFile();
-
-			// determine loader version from fabric.mod.json
-
-			try {
-				return new LoaderVersion(file.toPath());
-			} catch (IOException e) {
-				error(e);
-				return null;
-			}
-		}
+		return new LoaderVersion(ret);
 	}
 
 	@Override

@@ -49,6 +49,15 @@ public final class FabricService {
 		return invokeWithFallbacks((service, arg) -> Json.read(Utils.readString(new URL(service.maven + arg))), path);
 	}
 
+	public static void downloadServerLauncher(String loaderVersion, String minecraftVersion, Path out) throws IOException {
+		String path = "v2/versions/loader/" + minecraftVersion + "/" + loaderVersion + "/stable/server/jar";
+
+		invokeWithFallbacks((service, arg) -> {
+			Utils.downloadFile(new URL(service.meta + arg), out);
+			return null;
+		}, path);
+	}
+
 	/**
 	 * Download url to file, substituting Fabric Maven with fallbacks or overrides.
 	 */
