@@ -149,7 +149,7 @@ public class ClientHandler extends Handler {
 				pane,
 				Utils.BUNDLE.getString("prompt.install.successful.title"),
 				JOptionPane.INFORMATION_MESSAGE,
-				new ImageIcon(iconImage.getScaledInstance(128, 128, Image.SCALE_DEFAULT))
+				new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT))
 		);
 	}
 
