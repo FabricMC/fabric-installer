@@ -18,9 +18,11 @@ package net.fabricmc.installer;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -46,7 +48,9 @@ public class InstallerGui extends JFrame {
 		setContentPane(contentPane);
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setIconImage(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png")));
+		Image iconImage = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
+		setIconImage(iconImage);
+		setTaskBarImage(iconImage);
 
 		instance = this;
 
@@ -94,5 +98,18 @@ public class InstallerGui extends JFrame {
 	private void initComponents() {
 		contentPane = new JTabbedPane(JTabbedPane.TOP);
 		Main.HANDLERS.forEach(handler -> contentPane.addTab(Utils.BUNDLE.getString("tab." + handler.name().toLowerCase(Locale.ROOT)), handler.makePanel(this)));
+	}
+
+	private static void setTaskBarImage(Image image) {
+		try {
+			// Only supported in Java 9 +
+			Class<?> taskbarClass = Class.forName("java.awt.Taskbar");
+			Method getTaskbar = taskbarClass.getDeclaredMethod("getTaskbar");
+			Method setIconImage = taskbarClass.getDeclaredMethod("setIconImage", Image.class);
+			Object taskbar = getTaskbar.invoke(null);
+			setIconImage.invoke(taskbar, image);
+		} catch (Exception e) {
+			// Ignored, running on Java 8
+		}
 	}
 }
