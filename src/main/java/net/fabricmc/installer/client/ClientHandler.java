@@ -16,8 +16,11 @@
 
 package net.fabricmc.installer.client;
 
+import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.GridBagConstraints;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
@@ -39,6 +43,7 @@ import net.fabricmc.installer.LoaderVersion;
 import net.fabricmc.installer.launcher.MojangLauncherHelperWrapper;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.NoopCaret;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
@@ -107,7 +112,7 @@ public class ClientHandler extends Handler {
 					profileInstaller.setupProfile(profileName, gameVersion, launcherType);
 				}
 
-				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion.name, gameVersion));
+				SwingUtilities.invokeLater(() -> showInstalledMessage(loaderVersion.name, gameVersion, mcPath.resolve("mods")));
 			} catch (Exception e) {
 				error(e);
 			} finally {
@@ -116,14 +121,18 @@ public class ClientHandler extends Handler {
 		}).start();
 	}
 
-	private void showInstalledMessage(String loaderVersion, String gameVersion) {
+	private void showInstalledMessage(String loaderVersion, String gameVersion, Path modsDirectory) {
 		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.FABRIC_API_URL}) + "</body></html>");
+		pane.setBackground(new Color(0, 0, 0, 0));
 		pane.setEditable(false);
+		pane.setCaret(new NoopCaret());
 
 		pane.addHyperlinkListener(e -> {
 			try {
 				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-					if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+					if (e.getDescription().equals("fabric://mods")) {
+						Desktop.getDesktop().open(modsDirectory.toFile());
+					} else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
 						Desktop.getDesktop().browse(e.getURL().toURI());
 					} else {
 						throw new UnsupportedOperationException("Failed to open " + e.getURL().toString());
@@ -134,7 +143,14 @@ public class ClientHandler extends Handler {
 			}
 		});
 
-		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE);
+		final Image iconImage = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
+		JOptionPane.showMessageDialog(
+				null,
+				pane,
+				Utils.BUNDLE.getString("prompt.install.successful.title"),
+				JOptionPane.INFORMATION_MESSAGE,
+				new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT))
+		);
 	}
 
 	private ProfileInstaller.LauncherType showLauncherTypeSelection() {
