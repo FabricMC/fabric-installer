@@ -45,17 +45,8 @@ public class ClientInstaller {
 			Files.createDirectories(profileDir);
 		}
 
-		/*
-
-		This is a fun meme
-
-		The vanilla launcher assumes the profile name is the same name as a maven artifact, how ever our profile name is a combination of 2
-		(mappings and loader). The launcher will also accept any jar with the same name as the profile, it doesnt care if its empty
-
-		 */
-		Path dummyJar = profileDir.resolve(profileName + ".jar");
-		Files.deleteIfExists(dummyJar);
-		Files.createFile(dummyJar);
+		Path profileJar = profileDir.resolve(profileName + ".jar");
+		Files.deleteIfExists(profileJar);
 
 		Json json = FabricService.queryMetaJson(String.format("v2/versions/loader/%s/%s/profile/json", gameVersion, loaderVersion.name));
 		Files.write(profileJson, json.toString().getBytes(StandardCharsets.UTF_8));
