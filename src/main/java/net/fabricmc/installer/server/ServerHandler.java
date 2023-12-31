@@ -37,6 +37,7 @@ import net.fabricmc.installer.Handler;
 import net.fabricmc.installer.InstallerGui;
 import net.fabricmc.installer.LoaderVersion;
 import net.fabricmc.installer.util.ArgumentParser;
+import net.fabricmc.installer.util.FabricService;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
@@ -55,7 +56,8 @@ public class ServerHandler extends Handler {
 
 		new Thread(() -> {
 			try {
-				ServerInstaller.install(Paths.get(installLocation.getText()).toAbsolutePath(), loaderVersion, gameVersion, this);
+				Path launcherJar = Paths.get(installLocation.getText()).resolve(ServerInstaller.DEFAULT_LAUNCH_JAR_NAME);
+				FabricService.downloadServerLauncher(loaderVersion.name, gameVersion, launcherJar);
 				ServerPostInstallDialog.show(this);
 			} catch (Exception e) {
 				error(e);
@@ -77,20 +79,15 @@ public class ServerHandler extends Handler {
 		String gameVersion = getGameVersion(args);
 		ServerInstaller.install(dir, loaderVersion, gameVersion, InstallerProgress.CONSOLE);
 
-		if (args.has("downloadMinecraft")) {
-			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.download.minecraft"));
-			Path serverJar = dir.resolve("server.jar");
-			MinecraftServerDownloader downloader = new MinecraftServerDownloader(gameVersion);
-			downloader.downloadMinecraftServer(serverJar);
-			InstallerProgress.CONSOLE.updateProgress(Utils.BUNDLE.getString("progress.done"));
-		}
+		Path launcherJar = dir.resolve(ServerInstaller.DEFAULT_LAUNCH_JAR_NAME);
+		FabricService.downloadServerLauncher(loaderVersion.name, gameVersion, launcherJar);
 
 		InstallerProgress.CONSOLE.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.done.start.server")).format(new Object[]{ServerInstaller.DEFAULT_LAUNCH_JAR_NAME}));
 	}
 
 	@Override
 	public String cliHelp() {
-		return "-dir <install dir, default current dir> -mcversion <minecraft version, default latest> -loader <loader version, default latest> -downloadMinecraft";
+		return "-dir <install dir, default current dir> -mcversion <minecraft version, default latest> -loader <loader version, default latest>";
 	}
 
 	@Override
@@ -118,5 +115,10 @@ public class ServerHandler extends Handler {
 	@Override
 	public void setupPane2(JPanel pane, GridBagConstraints c, InstallerGui installerGui) {
 		installLocation.setText(Paths.get(".").toAbsolutePath().normalize().toString());
+	}
+
+	@Override
+	public boolean isLoaderVersionSupported(String version) {
+		return Utils.compareVersions(version, "0.12.0") >= 0;
 	}
 }
