@@ -1,0 +1,3 @@
+files:
+  - source: src/main/resources/lang/installer.properties
+    translation: src/main/resources/lang/installer_%locale_with_underscore%.properties

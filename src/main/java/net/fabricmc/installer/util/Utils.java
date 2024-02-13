@@ -44,7 +44,7 @@ public class Utils {
 		@Override
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload) throws IllegalAccessException, InstantiationException, IOException {
 			final String bundleName = toBundleName(baseName, locale);
-			final String resourceName = toResourceName(bundleName, "properties");
+			final String resourceName = toResourceName(bundleName, "properties").toLowerCase(Locale.ROOT);
 
 			try (InputStream stream = loader.getResourceAsStream(resourceName)) {
 				if (stream != null) {
