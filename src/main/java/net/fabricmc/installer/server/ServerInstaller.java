@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -61,13 +62,35 @@ public class ServerInstaller {
 	public static final String DEFAULT_LAUNCH_JAR_NAME = "fabric-server-launch.jar";
 	private static final Pattern SIGNATURE_FILE_PATTERN = Pattern.compile("META-INF/[^/]+\\.(SF|DSA|RSA|EC)");
 
-	public static void install(Path dir, LoaderVersion loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
+	public static void install(Path dir
+			, LoaderVersion loaderVersion
+			, String gameVersion
+			, InstallerProgress progress) throws IOException {
+
+		Scanner sc = new Scanner(System.in);
 		Path launchJar = dir.resolve(DEFAULT_LAUNCH_JAR_NAME);
-		install(dir, loaderVersion, gameVersion, progress, launchJar);
+		String RESPONSE_TO_OPTION;
+		if (isSudo()) {
+			System.out.println("WARNING: Running this installer with sudo might cause issues with the application.");
+			System.out.print("Do you really want to continue? (y/n): ");
+			RESPONSE_TO_OPTION = sc.nextLine().trim(); // Use nextLine to capture the entire line
+
+			if (RESPONSE_TO_OPTION.equalsIgnoreCase("y")) {
+				install(dir, loaderVersion, gameVersion, progress, launchJar);
+			} else if (RESPONSE_TO_OPTION.equalsIgnoreCase("n")){
+				throw new RuntimeException("Installation aborted by the user.");
+			} else {
+				System.out.println("Invalid Response!!");
+			}
+		} else {
+			install(dir, loaderVersion, gameVersion, progress, launchJar);
+		}
+
 	}
 
 	public static void install(Path dir, LoaderVersion loaderVersion, String gameVersion, InstallerProgress progress, Path launchJar) throws IOException {
-		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server")).format(new Object[]{String.format("%s(%s)", loaderVersion.name, gameVersion)}));
+		progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.installing.server"))
+				.format(new Object[]{String.format("%s(%s)", loaderVersion.name, gameVersion)}));
 
 		Files.createDirectories(dir);
 
@@ -80,7 +103,9 @@ public class ServerInstaller {
 		String mainClassMeta;
 
 		if (loaderVersion.path == null) { // loader jar unavailable, grab everything from meta
-			Json json = FabricService.queryMetaJson(String.format("v2/versions/loader/%s/%s/server/json", gameVersion, loaderVersion.name));
+			Json json = FabricService.queryMetaJson(String.format("v2/versions/loader/%s/%s/server/json"
+					, gameVersion
+					, loaderVersion.name));
 
 			for (Json libraryJson : json.at("libraries").asJsonList()) {
 				libraries.add(new Library(libraryJson));
@@ -88,8 +113,10 @@ public class ServerInstaller {
 
 			mainClassMeta = json.at("mainClass").asString();
 		} else { // loader jar available, generate library list from it
-			libraries.add(new Library(String.format("net.fabricmc:fabric-loader:%s", loaderVersion.name), null, loaderVersion.path));
-			libraries.add(new Library(String.format("net.fabricmc:intermediary:%s", gameVersion), "https://maven.fabricmc.net/", null));
+			libraries.add(new Library(String.format("net.fabricmc:fabric-loader:%s", loaderVersion.name)
+					, null, loaderVersion.path));
+			libraries.add(new Library(String.format("net.fabricmc:intermediary:%s", gameVersion)
+					, "https://maven.fabricmc.net/", null));
 
 			try (ZipFile zf = new ZipFile(loaderVersion.path.toFile())) {
 				ZipEntry entry = zf.getEntry("fabric-installer.json");
@@ -115,7 +142,8 @@ public class ServerInstaller {
 			Path libraryFile = libsDir.resolve(library.getPath());
 
 			if (library.inputPath == null) {
-				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.download.library.entry")).format(new Object[]{library.name}));
+				progress.updateProgress(new MessageFormat(Utils.BUNDLE.getString("progress.download.library.entry"))
+						.format(new Object[]{library.name}));
 				FabricService.downloadSubstitutedMaven(library.getURL(), libraryFile);
 			} else {
 				Files.createDirectories(libraryFile.getParent());
@@ -247,5 +275,9 @@ public class ServerInstaller {
 		}
 
 		writer.flush();
+	}
+	public static boolean isSudo() {
+		String user = System.getProperty("user.name");
+		return "root".equals(user);
 	}
 }
