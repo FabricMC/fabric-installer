@@ -75,7 +75,11 @@ public class ProfileInstaller {
 		Utils.writeToFile(launcherProfiles, jsonObject.toString());
 
 		// Create the mods directory
-		Files.createDirectories(mcDir.resolve("mods"));
+		Path modsDir = mcDir.resolve("mods");
+
+		if (Files.notExists(modsDir)) {
+			Files.createDirectories(modsDir);
+		}
 	}
 
 	private static Json createProfile(String name) {
