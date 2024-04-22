@@ -35,7 +35,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -56,36 +55,21 @@ import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Library;
 import net.fabricmc.installer.util.Utils;
 
+import javax.swing.*;
+
 public class ServerInstaller {
 	private static final String servicesDir = "META-INF/services/";
 	private static final String manifestPath = "META-INF/MANIFEST.MF";
 	public static final String DEFAULT_LAUNCH_JAR_NAME = "fabric-server-launch.jar";
 	private static final Pattern SIGNATURE_FILE_PATTERN = Pattern.compile("META-INF/[^/]+\\.(SF|DSA|RSA|EC)");
 
-	public static void install(Path dir
-			, LoaderVersion loaderVersion
-			, String gameVersion
-			, InstallerProgress progress) throws IOException {
-
-		Scanner sc = new Scanner(System.in);
+	public static void install(Path dir, LoaderVersion loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		Path launchJar = dir.resolve(DEFAULT_LAUNCH_JAR_NAME);
-		String RESPONSE_TO_OPTION;
-		if (isSudo()) {
-			System.out.println("WARNING: Running this installer with sudo might cause issues with the application.");
-			System.out.print("Do you really want to continue? (y/n): ");
-			RESPONSE_TO_OPTION = sc.nextLine().trim(); // Use nextLine to capture the entire line
-
-			if (RESPONSE_TO_OPTION.equalsIgnoreCase("y")) {
-				install(dir, loaderVersion, gameVersion, progress, launchJar);
-			} else if (RESPONSE_TO_OPTION.equalsIgnoreCase("n")){
-				throw new RuntimeException("Installation aborted by the user.");
-			} else {
-				System.out.println("Invalid Response!!");
-			}
-		} else {
-			install(dir, loaderVersion, gameVersion, progress, launchJar);
+		boolean RESPONSE_TO_OPTION = proceedWithSudoInstall();
+		if (isSudo() && !RESPONSE_TO_OPTION) {
+			return;
 		}
-
+		install(dir, loaderVersion, gameVersion, progress, launchJar);
 	}
 
 	public static void install(Path dir, LoaderVersion loaderVersion, String gameVersion, InstallerProgress progress, Path launchJar) throws IOException {
@@ -276,8 +260,20 @@ public class ServerInstaller {
 
 		writer.flush();
 	}
-	public static boolean isSudo() {
+	private static boolean isSudo() {
 		String user = System.getProperty("user.name");
 		return "root".equals(user);
+	}
+	private static boolean proceedWithSudoInstall() {
+		int response = JOptionPane.showConfirmDialog(null,
+				"WARNING: Running this installer with sudo might cause issues with the application. Do you really want to continue?",
+				"Warning",
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.WARNING_MESSAGE);
+		if (response == JOptionPane.NO_OPTION) {
+			throw new RuntimeException("Installation aborted by the user.");
+		} else {
+			return response == JOptionPane.YES_OPTION;
+		}
 	}
 }
