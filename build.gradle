@@ -113,6 +113,10 @@ build.dependsOn nativeExe
 
 jar {
 	enabled = false
+
+	manifest {
+		attributes('Enable-Native-Access': 'ALL-UNNAMED')
+	}
 }
 
 if (ENV.SIGNING_SERVER) {
