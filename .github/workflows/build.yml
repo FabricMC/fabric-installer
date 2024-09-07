@@ -1,24 +1,20 @@
 name: Build
 on: [push, pull_request]
 
-concurrency:
-  group: build-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build:
     strategy:
       matrix:
-        java: [8-jdk, 11-jdk, 16-jdk, 17-jdk]
-    runs-on: ubuntu-20.04
+        java: [8-jdk, 11-jdk, 17-jdk, 21-jdk]
+    runs-on: ubuntu-24.04
     container:
-      image: openjdk:${{ matrix.java }}
+      image: eclipse-temurin:${{ matrix.java }}
       options: --user root
     steps:
-      - uses: actions/checkout@v1
-      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v3
       - run: ./gradlew build --stacktrace
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: Artifacts
+          name: Artifacts ${{ matrix.java }}
           path: build/libs/
