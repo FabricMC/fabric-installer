@@ -131,7 +131,7 @@ public class ClientHandler extends Handler {
 			try {
 				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
 					if (e.getDescription().equals("fabric://mods")) {
-						Desktop.getDesktop().open(modsDirectory.toFile());
+						Desktop.getDesktop().open(modsDirectory.toRealPath().toFile());
 					} else if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
 						Desktop.getDesktop().browse(e.getURL().toURI());
 					} else {
