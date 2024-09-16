@@ -2,15 +2,13 @@ plugins {
 	id 'java'
 	id 'maven-publish'
 	id "checkstyle"
-	id "com.github.johnrengelman.shadow" version "7.0.0"
-	id "org.cadixdev.licenser" version "0.6.1"
-	id "de.undercouch.download" version "4.1.2"
-	id "me.modmuss50.remotesign" version "0.1.0"
+	id "com.gradleup.shadow" version "8.3.0"
+	id "com.diffplug.spotless" version "6.20.0"
+	id "de.undercouch.download" version "5.6.0"
+	id "me.modmuss50.remotesign" version "0.4.0"
 }
 
-sourceCompatibility = 1.8
 version = '1.0.1'
-archivesBaseName = "fabric-installer"
 
 def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
@@ -39,6 +37,14 @@ dependencies {
 	testImplementation 'junit:junit:4.13.2'
 }
 
+base {
+	archivesName = "fabric-installer"
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+}
+
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 
@@ -64,11 +70,12 @@ shadowJar {
 	exclude('icon.ico')
 }
 
-task serverJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+tasks.register('serverJar', ShadowJar) {
 	manifest {
 		attributes 'Implementation-Title': 'FabricInstaller',
-				'Implementation-Version': project.version,
-				'Main-Class': 'net.fabricmc.installer.ServerLauncher'
+			'Implementation-Version': project.version,
+			'Main-Class': 'net.fabricmc.installer.ServerLauncher'
 	}
 
 	minimize()
@@ -85,13 +92,16 @@ assemble.dependsOn serverJar
 def bootstrapVersion = "0.5.2"
 def bootstrapArch = "i686"
 
-task downloadBootstrap(type: Download) {
+tasks.register('downloadBootstrap', Download) {
 	src "https://maven.fabricmc.net/net/fabricmc/fabric-installer-native-bootstrap/windows-${bootstrapArch}/${bootstrapVersion}/windows-${bootstrapArch}-${bootstrapVersion}.exe"
-	dest project.buildDir
+	dest layout.buildDirectory
+	overwrite false
 }
 
-task nativeExe(dependsOn: [shadowJar, downloadBootstrap], type: FileOutput) {
-	output = file("${projectDir}/build/libs/${archivesBaseName}-${project.version}.exe")
+tasks.register('nativeExe', FileOutput) {
+	dependsOn shadowJar
+	dependsOn downloadBootstrap
+	output = file("${projectDir}/build/libs/${base.archivesName.get()}-${project.version}.exe")
 	outputs.upToDateWhen { false }
 
 	doFirst {
@@ -121,9 +131,9 @@ jar {
 
 if (ENV.SIGNING_SERVER) {
 	remoteSign {
-		requestUrl ENV.SIGNING_SERVER
-		pgpAuthKey ENV.SIGNING_PGP_KEY
-		jarAuthKey ENV.SIGNING_JAR_KEY
+		requestUrl = ENV.SIGNING_SERVER
+		pgpAuthKey = ENV.SIGNING_PGP_KEY
+		jarAuthKey = ENV.SIGNING_JAR_KEY
 
 		sign (shadowJar)
 
@@ -135,16 +145,17 @@ if (ENV.SIGNING_SERVER) {
 	nativeExe.dependsOn signShadowJar
 }
 
-license {
-	header rootProject.file("HEADER")
-	include "**/*.java"
+spotless {
+	java {
+		licenseHeaderFile(rootProject.file("HEADER"))
+	}
 }
 
 publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId project.group
-			artifactId project.archivesBaseName
+			artifactId base.archivesName.get()
 			version project.version
 
 			if (ENV.SIGNING_SERVER) {
@@ -179,10 +190,10 @@ publishing {
 }
 
 // A task to ensure that the version being released has not already been released.
-task checkVersion {
+tasks.register('checkVersion') {
 	doFirst {
 		def xml = new URL("https://maven.fabricmc.net/net/fabricmc/fabric-installer/maven-metadata.xml").text
-		def metadata = new XmlSlurper().parseText(xml)
+		def metadata = new groovy.xml.XmlSlurper().parseText(xml)
 		def versions = metadata.versioning.versions.version*.text();
 		if (versions.contains(version)) {
 			throw new RuntimeException("${version} has already been released!")
