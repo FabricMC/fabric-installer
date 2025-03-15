@@ -57,8 +57,8 @@ public class Main {
 			FabricService.setFixed(metaUrl, mavenUrl);
 		}
 
-		GAME_VERSION_META = new MetaHandler("v2/versions/game");
-		LOADER_META = new MetaHandler("v2/versions/loader");
+		GAME_VERSION_META = new MetaHandler("game", "v2/versions/game");
+		LOADER_META = new MetaHandler("loader", "v2/versions/loader");
 
 		//Default to the help command in a headless environment
 		if (GraphicsEnvironment.isHeadless() && command == null) {

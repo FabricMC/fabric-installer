@@ -24,11 +24,17 @@ import java.util.stream.Collectors;
 import mjson.Json;
 
 public class MetaHandler extends CompletableHandler<List<MetaHandler.GameVersion>> {
+	private final String name;
 	private final String metaPath;
 	private List<GameVersion> versions;
 
-	public MetaHandler(String path) {
+	public MetaHandler(String name, String path) {
+		this.name = name;
 		this.metaPath = path;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public void load() throws IOException {
@@ -60,9 +66,23 @@ public class MetaHandler extends CompletableHandler<List<MetaHandler.GameVersion
 		return versions.get(0);
 	}
 
-	public static class GameVersion {
-		String version;
-		boolean stable;
+	public GameVersion parseVersion(String value, boolean snapshot) {
+		if (value == null || value.isEmpty() || value.equalsIgnoreCase("latest")) {
+			return getLatestVersion(snapshot);
+		} else {
+			for (GameVersion version : versions) {
+				if (version.version.equals(value)) {
+					return version;
+				}
+			}
+
+			return null;
+		}
+	}
+
+	public static final class GameVersion {
+		final String version;
+		final boolean stable;
 
 		public GameVersion(Json json) {
 			version = json.at("version").asString();
