@@ -76,6 +76,7 @@ public class ServerPostInstallDialog extends JDialog {
 	private JLabel serverJarLabel;
 	private JButton downloadButton;
 	private JButton generateButton;
+	private JTextField textField;
 
 	private ServerPostInstallDialog(ServerHandler handler) throws HeadlessException {
 		super(InstallerGui.instance, true);
@@ -106,7 +107,7 @@ public class ServerPostInstallDialog extends JDialog {
 
 		addRow(panel, panel -> panel.add(fontSize(new JLabel(Utils.BUNDLE.getString("prompt.server.info.command")), 15)));
 		addRow(panel, panel -> {
-			JTextField textField = new JTextField(launchCommand);
+			textField = new JTextField(launchCommand);
 			textField.setHorizontalAlignment(JTextField.CENTER);
 			panel.add(textField);
 		});
@@ -219,8 +220,8 @@ public class ServerPostInstallDialog extends JDialog {
 
 	private void generateLaunchScripts() {
 		Map<Path, String> launchScripts = new HashMap<>();
-		launchScripts.put(installDir.resolve("start.bat"), launchCommand + "\npause");
-		launchScripts.put(installDir.resolve("start.sh"), "#!/usr/bin/env bash\n" + launchCommand);
+		launchScripts.put(installDir.resolve("start.bat"), textField.getText() + "\npause");
+		launchScripts.put(installDir.resolve("start.sh"), "#!/usr/bin/env bash\n" + textField.getText());
 
 		boolean exists = launchScripts.entrySet().stream().anyMatch(entry -> Files.exists(entry.getKey()));
 
