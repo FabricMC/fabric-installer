@@ -55,6 +55,8 @@ import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.Library;
 import net.fabricmc.installer.util.Utils;
 
+import javax.swing.JOptionPane;
+
 public class ServerInstaller {
 	private static final String servicesDir = "META-INF/services/";
 	private static final String manifestPath = "META-INF/MANIFEST.MF";
@@ -63,6 +65,10 @@ public class ServerInstaller {
 
 	public static void install(Path dir, LoaderVersion loaderVersion, String gameVersion, InstallerProgress progress) throws IOException {
 		Path launchJar = dir.resolve(DEFAULT_LAUNCH_JAR_NAME);
+		boolean RESPONSE_TO_OPTION = proceedWithSudoInstall();
+		if (isSudo() && !RESPONSE_TO_OPTION) {
+			return;
+		}
 		install(dir, loaderVersion, gameVersion, progress, launchJar);
 	}
 
@@ -247,5 +253,21 @@ public class ServerInstaller {
 		}
 
 		writer.flush();
+	}
+	private static boolean isSudo() {
+		String user = System.getProperty("user.name");
+		return "root".equals(user);
+	}
+	private static boolean proceedWithSudoInstall() {
+		int response = JOptionPane.showConfirmDialog(null,
+				"WARNING: Running this installer with sudo might cause issues with the application. Do you really want to continue?",
+				"Warning",
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.WARNING_MESSAGE);
+		if (response == JOptionPane.NO_OPTION) {
+			throw new RuntimeException("Installation aborted by the user.");
+		} else {
+			return response == JOptionPane.YES_OPTION;
+		}
 	}
 }
