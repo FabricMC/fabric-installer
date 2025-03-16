@@ -43,14 +43,14 @@ public class ArgumentTests {
 		ArgumentParser.create(new String[]{"-arg1", "Hello", "-arg1"});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testUnknownArg() {
-		ArgumentParser.create(new String[]{"-arg1", "Hello"}).get("arg2");
+		Assert.assertNull(ArgumentParser.create(new String[]{"-arg1", "Hello"}).get("arg2"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNullArg() {
-		ArgumentParser.create(new String[]{"-arg1"}).get("arg1");
+		Assert.assertNull(ArgumentParser.create(new String[]{"-arg1"}).get("arg1"));
 	}
 
 	@Test
