@@ -19,11 +19,10 @@ package net.fabricmc.installer.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ArgumentParser {
-	private String[] args;
+	private final String[] args;
 	private Map<String, String> argMap;
 	//The command will be the first argument passed, and if it doesnt start with -
 	private String command = null;
@@ -34,35 +33,21 @@ public class ArgumentParser {
 	}
 
 	public String get(String argument) {
-		if (!argMap.containsKey(argument)) {
-			throw new IllegalArgumentException(String.format("Could not find %s in the arguments", argument));
-		}
-
-		String arg = argMap.get(argument);
-
-		if (arg == null) {
-			throw new IllegalArgumentException(String.format("Could not value for %s", argument));
-		}
-
-		return arg;
+		return argMap.get(argument);
 	}
 
 	public String getOrDefault(String argument, Supplier<String> stringSuppler) {
-		if (!argMap.containsKey(argument)) {
-			return stringSuppler.get();
+		String ret = argMap.get(argument);
+
+		if (ret == null) {
+			ret = stringSuppler.get();
 		}
 
-		return argMap.get(argument);
+		return ret;
 	}
 
 	public boolean has(String argument) {
 		return argMap.containsKey(argument);
-	}
-
-	public void ifPresent(String argument, Consumer<String> consumer) {
-		if (has(argument)) {
-			consumer.accept(get(argument));
-		}
 	}
 
 	public Optional<String> getCommand() {
