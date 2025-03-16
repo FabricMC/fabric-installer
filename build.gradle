@@ -155,9 +155,12 @@ publishing {
 
 			artifact (signShadowJar.output) {
 				classifier null
+				builtBy shadowJar
 			}
 
-			artifact nativeExe.output
+			artifact (nativeExe.output) {
+				builtBy nativeExe
+			}
 
 			// No point in signing as it is designed to get modified
 			artifact (serverJar) {
