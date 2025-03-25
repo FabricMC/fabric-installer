@@ -22,6 +22,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,6 +64,62 @@ public class ClientHandler extends Handler {
 		}
 
 		doInstall();
+		doManualModInstall();
+	}
+
+	// pulls mods from modrinth
+	private void doModInstall() {
+	}
+
+	// exe has to be in a directory with a folder containing mods
+	private void doManualModInstall() {
+		new Thread(() -> {
+			// check if the mods directory exists
+			Path mcDir = Paths.get(installLocation.getText());
+			Path modsDir = mcDir.resolve("mods");
+
+			// check if a "mods" directory exists in the same directory as the exe
+			String exePath = System.getProperty("user.dir");
+			System.out.println(exePath);
+
+			Path exeDir = Paths.get(exePath);
+			Path exeModsDir = exeDir.resolve("mods");
+
+			if (Files.notExists(exeModsDir)) {
+				showFailedMessage(Utils.BUNDLE.getString("prompt.exception.missing"));
+				throw new RuntimeException(Utils.BUNDLE.getString("prompt.exception.missing"));
+			}
+
+			// if there are files in the mods directory, pause the thread and ask the user if they want to overwrite them
+			try {
+				if (Files.exists(modsDir) && Files.list(modsDir).count() > 0) {
+					int result = JOptionPane.showConfirmDialog(null, Utils.BUNDLE.getString("prompt.install.mods.overwrite"), Utils.BUNDLE.getString("prompt.install.mods.title"), JOptionPane.YES_NO_OPTION);
+
+					if (result != JOptionPane.YES_OPTION) {
+						return;
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+
+			// copy mods from the exe's mods directory to the minecraft mods directory
+			try {
+				Files.walk(exeModsDir).forEach(source -> {
+					Path destination = modsDir.resolve(exeModsDir.relativize(source));
+
+					try {
+						Files.copy(source, destination);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			showInstalledModsMessage();
+		}).start();
 	}
 
 	private void doInstall() {
@@ -121,6 +178,26 @@ public class ClientHandler extends Handler {
 		}).start();
 	}
 
+	private void showFailedMessage(String error) {
+		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + error + "</body></html>");
+		pane.setBackground(new Color(0, 0, 0, 0));
+		pane.setEditable(false);
+		pane.setCaret(new NoopCaret());
+
+		final Image iconImage = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
+		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.exception.occurrence"), JOptionPane.INFORMATION_MESSAGE, new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT)));
+	}
+
+	private void showInstalledModsMessage() {
+		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + Utils.BUNDLE.getString("prompt.install.mods.successful") + "</body></html>");
+		pane.setBackground(new Color(0, 0, 0, 0));
+		pane.setEditable(false);
+		pane.setCaret(new NoopCaret());
+
+		final Image iconImage = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
+		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.mods.successful"), JOptionPane.INFORMATION_MESSAGE, new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT)));
+	}
+
 	private void showInstalledMessage(String loaderVersion, String gameVersion, Path modsDirectory) {
 		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + new MessageFormat(Utils.BUNDLE.getString("prompt.install.successful")).format(new Object[]{loaderVersion, gameVersion, Reference.FABRIC_API_URL}) + "</body></html>");
 		pane.setBackground(new Color(0, 0, 0, 0));
@@ -144,27 +221,13 @@ public class ClientHandler extends Handler {
 		});
 
 		final Image iconImage = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
-		JOptionPane.showMessageDialog(
-				null,
-				pane,
-				Utils.BUNDLE.getString("prompt.install.successful.title"),
-				JOptionPane.INFORMATION_MESSAGE,
-				new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT))
-		);
+		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.successful.title"), JOptionPane.INFORMATION_MESSAGE, new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT)));
 	}
 
 	private ProfileInstaller.LauncherType showLauncherTypeSelection() {
-		Object[] options = { Utils.BUNDLE.getString("prompt.launcher.type.xbox"), Utils.BUNDLE.getString("prompt.launcher.type.win32")};
+		Object[] options = {Utils.BUNDLE.getString("prompt.launcher.type.xbox"), Utils.BUNDLE.getString("prompt.launcher.type.win32")};
 
-		int result = JOptionPane.showOptionDialog(null,
-				Utils.BUNDLE.getString("prompt.launcher.type.body"),
-				Utils.BUNDLE.getString("installer.title"),
-				JOptionPane.YES_NO_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE,
-				null,
-				options,
-				options[0]
-				);
+		int result = JOptionPane.showOptionDialog(null, Utils.BUNDLE.getString("prompt.launcher.type.body"), Utils.BUNDLE.getString("installer.title"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
 		if (result == JOptionPane.CLOSED_OPTION) {
 			return null;
@@ -229,8 +292,7 @@ public class ClientHandler extends Handler {
 
 	@Override
 	public void setupPane2(JPanel pane, GridBagConstraints c, InstallerGui installerGui) {
-		addRow(pane, c, null,
-				createProfile = new JCheckBox(Utils.BUNDLE.getString("option.create.profile"), true));
+		addRow(pane, c, null, createProfile = new JCheckBox(Utils.BUNDLE.getString("option.create.profile"), true));
 
 		installLocation.setText(Utils.findDefaultInstallDir().toString());
 	}

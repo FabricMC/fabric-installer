@@ -78,9 +78,11 @@ public abstract class Handler implements InstallerProgress {
 	public abstract String cliHelp();
 
 	//this isnt great, but works
-	public void setupPane1(JPanel pane, GridBagConstraints c, InstallerGui installerGui) { }
+	public void setupPane1(JPanel pane, GridBagConstraints c, InstallerGui installerGui) {
+	}
 
-	public void setupPane2(JPanel pane, GridBagConstraints c, InstallerGui installerGui) { }
+	public void setupPane2(JPanel pane, GridBagConstraints c, InstallerGui installerGui) {
+	}
 
 	public JPanel makePanel(InstallerGui installerGui) {
 		pane = new JPanel(new GridBagLayout());
@@ -92,10 +94,7 @@ public abstract class Handler implements InstallerProgress {
 
 		setupPane1(pane, c, installerGui);
 
-		addRow(pane, c, "prompt.game.version",
-				gameVersionComboBox = new JComboBox<>(),
-				createSpacer(),
-				snapshotCheckBox = new JCheckBox(Utils.BUNDLE.getString("option.show.snapshots")));
+		addRow(pane, c, "prompt.game.version", gameVersionComboBox = new JComboBox<>(), createSpacer(), snapshotCheckBox = new JCheckBox(Utils.BUNDLE.getString("option.show.snapshots")));
 		snapshotCheckBox.setSelected(false);
 		snapshotCheckBox.addActionListener(e -> {
 			if (Main.GAME_VERSION_META.isComplete()) {
@@ -105,26 +104,32 @@ public abstract class Handler implements InstallerProgress {
 
 		Main.GAME_VERSION_META.onComplete(versions -> {
 			updateGameVersions();
+
+			String requestedMCVersion = "1.20.6"; // this is the string that should be set in the setup launcher and will be static after the fact
+
+			for (int i = 0; i <= gameVersionComboBox.getItemCount(); i++) {
+				if (i == gameVersionComboBox.getItemCount()) {
+					throw new RuntimeException("Failed to find version " + requestedMCVersion + " in the list of versions");
+				} else if (gameVersionComboBox.getItemAt(i).equals(requestedMCVersion)) {
+					gameVersionComboBox.setSelectedIndex(i);
+					break;
+				}
+			}
 		});
 
-		addRow(pane, c, "prompt.loader.version",
-				loaderVersionComboBox = new JComboBox<>());
+		addRow(pane, c, "prompt.loader.version", loaderVersionComboBox = new JComboBox<>());
 
-		addRow(pane, c, "prompt.select.location",
-				installLocation = new JTextField(20),
-				selectFolderButton = new JButton());
+		addRow(pane, c, "prompt.select.location", installLocation = new JTextField(20), selectFolderButton = new JButton());
 		selectFolderButton.setText("...");
 		selectFolderButton.setPreferredSize(new Dimension(installLocation.getPreferredSize().height, installLocation.getPreferredSize().height));
 		selectFolderButton.addActionListener(e -> InstallerGui.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
 
 		setupPane2(pane, c, installerGui);
 
-		addRow(pane, c, null,
-				statusLabel = new JLabel());
+		addRow(pane, c, null, statusLabel = new JLabel());
 		statusLabel.setText(Utils.BUNDLE.getString("prompt.loading.versions"));
 
-		addLastRow(pane, c, null,
-				buttonInstall = new JButton(Utils.BUNDLE.getString("prompt.install")));
+		addLastRow(pane, c, null, buttonInstall = new JButton(Utils.BUNDLE.getString("prompt.install")));
 		buttonInstall.addActionListener(e -> {
 			buttonInstall.setEnabled(false);
 			install();
@@ -149,9 +154,28 @@ public abstract class Handler implements InstallerProgress {
 				stableIndex = 0;
 			}
 
+			// check if requestedFabricVersion is in the list and set stableIndex to it
+			String requestedFabricVersion = "0.16.10"; // this is the string that should be set in the setup launcher and will be static after the fact
+
+			for (int i = 0; i <= versions.size(); i++) {
+				if (i == versions.size()) {
+					throw new RuntimeException("Failed to find Fabric version " + requestedFabricVersion + " in the list of versions");
+				} else if (versions.get(i).getVersion().equals(requestedFabricVersion)) {
+					stableIndex = i;
+					break;
+				}
+			}
+
 			loaderVersionComboBox.setSelectedIndex(stableIndex);
 			statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
 		});
+
+		pane.remove(0);
+		pane.remove(1);
+		gameVersionComboBox.hide();
+		loaderVersionComboBox.hide();
+		snapshotCheckBox.hide();
+		pane.remove(4);
 
 		return pane;
 	}
@@ -213,10 +237,7 @@ public abstract class Handler implements InstallerProgress {
 		JLabel label = new JLabel();
 		Font font = label.getFont();
 		Color color = label.getBackground();
-		return String.format(Locale.ENGLISH,
-				"font-family:%s;font-weight:%s;font-size:%dpt;background-color: rgb(%d,%d,%d);",
-				font.getFamily(), (font.isBold() ? "bold" : "normal"), font.getSize(), color.getRed(), color.getGreen(), color.getBlue()
-				);
+		return String.format(Locale.ENGLISH, "font-family:%s;font-weight:%s;font-size:%dpt;background-color: rgb(%d,%d,%d);", font.getFamily(), (font.isBold() ? "bold" : "normal"), font.getSize(), color.getRed(), color.getGreen(), color.getBlue());
 	}
 
 	@Override
@@ -230,19 +251,14 @@ public abstract class Handler implements InstallerProgress {
 		String st = sw.toString().trim();
 		System.err.println(st);
 
-		String html = String.format("<html><body style=\"%s\">%s</body></html>",
-				buildEditorPaneStyle(),
-				st.replace(System.lineSeparator(), "<br>").replace("\t", "&ensp;"));
+		String html = String.format("<html><body style=\"%s\">%s</body></html>", buildEditorPaneStyle(), st.replace(System.lineSeparator(), "<br>").replace("\t", "&ensp;"));
 		JEditorPane textPane = new JEditorPane("text/html", html);
 		textPane.setEditable(false);
 
 		statusLabel.setText(throwable.getLocalizedMessage());
 		statusLabel.setForeground(Color.RED);
 
-		JOptionPane.showMessageDialog(pane,
-				textPane,
-				Utils.BUNDLE.getString("prompt.exception.occurrence"),
-				JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(pane, textPane, Utils.BUNDLE.getString("prompt.exception.occurrence"), JOptionPane.ERROR_MESSAGE);
 	}
 
 	protected void addRow(Container parent, GridBagConstraints c, String label, Component... components) {
@@ -299,7 +315,10 @@ public abstract class Handler implements InstallerProgress {
 
 	private static String getVersion(String name, boolean snapshot, MetaHandler meta) {
 		GameVersion ret = meta.parseVersion(name, snapshot);
-		if (ret == null) throw new IllegalArgumentException(String.format("unknown %s version: %s", meta.getName(), name));
+
+		if (ret == null) {
+			throw new IllegalArgumentException(String.format("unknown %s version: %s", meta.getName(), name));
+		}
 
 		return ret.getVersion();
 	}
