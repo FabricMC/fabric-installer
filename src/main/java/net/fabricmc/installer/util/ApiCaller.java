@@ -231,11 +231,11 @@ public class ApiCaller {
 		}
 	}
 
-	// Optional main method for quick testing
-	public static void main(String[] args) {
-		// Example usage: "itemlore" for game version "1.21.3" and "fabric"
-		apiGrabMod("itemlore", "1.21.3", "fabric", "./downloads");
-		apiGrabMod("https://modrinth.com/mod/xaeros-minimap", "1.21.3", "fabric", "./downloads");
-		apiGrabMod("https://modrinth.com/mod/xaeros-world-map", "1.21.3", "fabric", "./downloads");
-	}
+//	// Optional main method for quick testing
+//	public static void main(String[] args) {
+//		// Example usage: "itemlore" for game version "1.21.3" and "fabric"
+//		apiGrabMod("itemlore", "1.21.3", "fabric", "./downloads");
+//		apiGrabMod("https://modrinth.com/mod/xaeros-minimap", "1.21.3", "fabric", "./downloads");
+//		apiGrabMod("https://modrinth.com/mod/xaeros-world-map", "1.21.3", "fabric", "./downloads");
+//	}
 }
