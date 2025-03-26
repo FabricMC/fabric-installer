@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package net.fabricmc.installer.client;
+package net.fabricmc.installer;
 
 import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,15 +41,14 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.HyperlinkEvent;
 
-import net.fabricmc.installer.Handler;
-import net.fabricmc.installer.InstallerGui;
-import net.fabricmc.installer.LoaderVersion;
-import net.fabricmc.installer.Main;
+import com.google.gson.Gson;
+
+import net.fabricmc.installer.client.ClientInstaller;
+import net.fabricmc.installer.client.ProfileInstaller;
 import net.fabricmc.installer.launcher.MojangLauncherHelperWrapper;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
@@ -58,7 +57,7 @@ import net.fabricmc.installer.util.NoopCaret;
 import net.fabricmc.installer.util.Reference;
 import net.fabricmc.installer.util.Utils;
 
-public class ClientHandler extends Handler {
+public class SettingsHandler extends Handler {
 	private JCheckBox createProfile;
 
 	@Override
@@ -73,16 +72,19 @@ public class ClientHandler extends Handler {
 		setupPane1(pane, c, installerGui);
 
 		addRow(pane, c, "prompt.game.version", gameVersionComboBox = new JComboBox<>(), createSpacer(), snapshotCheckBox = new JCheckBox(Utils.BUNDLE.getString("option.show.snapshots")));
-		snapshotCheckBox.setSelected(true);
+		snapshotCheckBox.setSelected(SNAPSHOTS);
 		snapshotCheckBox.addActionListener(e -> {
 			if (Main.GAME_VERSION_META.isComplete()) {
 				updateGameVersions();
+				SNAPSHOTS = !SNAPSHOTS;
 			}
+		});
+		gameVersionComboBox.addActionListener(e -> {
+			buttonInstall.setEnabled(true);
 		});
 
 		Main.GAME_VERSION_META.onComplete(versions -> {
 			updateGameVersions();
-			//requestedMCVersion = "1.20.6"; // this is the string that should be set in the setup launcher and will be static after the fact
 
 			for (int i = 0; i <= gameVersionComboBox.getItemCount(); i++) {
 				if (i == gameVersionComboBox.getItemCount()) {
@@ -99,21 +101,48 @@ public class ClientHandler extends Handler {
 		});
 
 		addRow(pane, c, "prompt.loader.version", loaderVersionComboBox = new JComboBox<>());
-
-		addRow(pane, c, "prompt.select.location", installLocation = new JTextField(20), selectFolderButton = new JButton());
-		selectFolderButton.setText("...");
-		selectFolderButton.setPreferredSize(new Dimension(installLocation.getPreferredSize().height, installLocation.getPreferredSize().height));
-		selectFolderButton.addActionListener(e -> InstallerGui.selectInstallLocation(() -> installLocation.getText(), s -> installLocation.setText(s)));
-
-		setupPane2(pane, c, installerGui);
+		loaderVersionComboBox.addActionListener(e -> {
+			buttonInstall.setEnabled(true);
+		});
 
 		addRow(pane, c, null, statusLabel = new JLabel());
 		statusLabel.setText(Utils.BUNDLE.getString("prompt.loading.versions"));
 
-		addLastRow(pane, c, null, buttonInstall = new JButton(Utils.BUNDLE.getString("prompt.install")));
+		addLastRow(pane, c, null, buttonInstall = new JButton(Utils.BUNDLE.getString("prompt.save")));
 		buttonInstall.addActionListener(e -> {
+			String exePath = System.getProperty("user.dir");
+
+			if (exePath != null) {
+				Path path = Paths.get(exePath);
+
+				try {
+					if (Files.exists(path) && Files.list(path).count() > 1) {
+						int result = JOptionPane.showConfirmDialog(null, Utils.BUNDLE.getString("prompt.save.overwrite"), Utils.BUNDLE.getString("prompt.save.saving"), JOptionPane.YES_NO_OPTION);
+
+						if (result != JOptionPane.YES_OPTION) {
+							return;
+						}
+					}
+				} catch (IOException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+
+			requestedMCVersion = gameVersionComboBox.getSelectedItem().toString();
+			requestedFabricVersion = loaderVersionComboBox.getSelectedItem().toString();
+
+			Gson jsonObject = new Gson();
+			Settings settings = new Settings(requestedMCVersion, requestedFabricVersion, SNAPSHOTS);
+			String jsonString = jsonObject.toJson(settings);
+
+			try (FileWriter file = new FileWriter("config.json")) {
+				file.write(jsonString);
+				file.flush();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+
 			buttonInstall.setEnabled(false);
-			install();
 		});
 
 		Main.LOADER_META.onComplete(versions -> {
@@ -135,37 +164,28 @@ public class ClientHandler extends Handler {
 				stableIndex = 0;
 			}
 
-			//requestedFabricVersion = "0.16.10"; // this is the string that should be set in the setup launcher and will be static after the fact
-
 			for (int i = 0; i <= versions.size(); i++) {
 				if (i == versions.size()) {
 					throw new RuntimeException("Failed to find Fabric version " + requestedFabricVersion + " in the list of versions");
 				} else if (versions.get(i).getVersion().equals(requestedFabricVersion)) {
-					stableIndex = i;
+					loaderVersionComboBox.setSelectedIndex(i);
 					break;
 				} else if (requestedFabricVersion == null) {
-					requestedFabricVersion = versions.get(0).getVersion();
+					requestedFabricVersion = versions.get(stableIndex).getVersion();
+					loaderVersionComboBox.setSelectedIndex(stableIndex);
 					break;
 				}
 			}
 
-			loaderVersionComboBox.setSelectedIndex(stableIndex);
-			statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
+			statusLabel.setText("");
 		});
-
-		pane.remove(0);
-		pane.remove(1);
-		gameVersionComboBox.setVisible(false);
-		loaderVersionComboBox.setVisible(false);
-		snapshotCheckBox.setVisible(false);
-		pane.remove(4);
 
 		return pane;
 	}
 
 	@Override
 	public String name() {
-		return "Client";
+		return "Settings";
 	}
 
 	@Override
@@ -176,62 +196,6 @@ public class ClientHandler extends Handler {
 		}
 
 		doInstall();
-		doManualModInstall();
-	}
-
-	// pulls mods from modrinth
-	private void doModInstall() {
-	}
-
-	// exe has to be in a directory with a folder containing mods
-	private void doManualModInstall() {
-		new Thread(() -> {
-			// check if the mods directory exists
-			Path mcDir = Paths.get(installLocation.getText());
-			Path modsDir = mcDir.resolve("mods");
-
-			// check if a "mods" directory exists in the same directory as the exe
-			String exePath = System.getProperty("user.dir");
-
-			Path exeDir = Paths.get(exePath);
-			Path exeModsDir = exeDir.resolve("mods");
-
-			if (Files.notExists(exeModsDir)) {
-				showFailedMessage(Utils.BUNDLE.getString("prompt.exception.missing"));
-				throw new RuntimeException(Utils.BUNDLE.getString("prompt.exception.missing"));
-			}
-
-			// if there are files in the mods directory, pause the thread and ask the user if they want to overwrite them
-			try {
-				if (Files.exists(modsDir) && Files.list(modsDir).count() > 0) {
-					int result = JOptionPane.showConfirmDialog(null, Utils.BUNDLE.getString("prompt.install.mods.overwrite"), Utils.BUNDLE.getString("prompt.install.mods.title"), JOptionPane.YES_NO_OPTION);
-
-					if (result != JOptionPane.YES_OPTION) {
-						return;
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-
-			// copy mods from the exe's mods directory to the minecraft mods directory
-			try {
-				Files.walk(exeModsDir).forEach(source -> {
-					Path destination = modsDir.resolve(exeModsDir.relativize(source));
-
-					try {
-						Files.copy(source, destination);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				});
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			//showInstalledModsMessage();
-			SwingUtilities.invokeLater(this::showInstalledModsMessage);
-		}).start();
 	}
 
 	private void doInstall() {
@@ -288,26 +252,6 @@ public class ClientHandler extends Handler {
 				buttonInstall.setEnabled(true);
 			}
 		}).start();
-	}
-
-	private void showFailedMessage(String error) {
-		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + error + "</body></html>");
-		pane.setBackground(new Color(0, 0, 0, 0));
-		pane.setEditable(false);
-		pane.setCaret(new NoopCaret());
-
-		final Image iconImage = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
-		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.exception.occurrence"), JOptionPane.INFORMATION_MESSAGE, new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT)));
-	}
-
-	private void showInstalledModsMessage() {
-		JEditorPane pane = new JEditorPane("text/html", "<html><body style=\"" + buildEditorPaneStyle() + "\">" + Utils.BUNDLE.getString("prompt.install.mods.successful") + "</body></html>");
-		pane.setBackground(new Color(0, 0, 0, 0));
-		pane.setEditable(false);
-		pane.setCaret(new NoopCaret());
-
-		final Image iconImage = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemClassLoader().getResource("icon.png"));
-		JOptionPane.showMessageDialog(null, pane, Utils.BUNDLE.getString("prompt.install.mods.successful"), JOptionPane.INFORMATION_MESSAGE, new ImageIcon(iconImage.getScaledInstance(64, 64, Image.SCALE_DEFAULT)));
 	}
 
 	private void showInstalledMessage(String loaderVersion, String gameVersion, Path modsDirectory) {

@@ -28,6 +28,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 import javax.swing.Box;
@@ -45,6 +49,8 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.google.gson.Gson;
+
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.InstallerProgress;
 import net.fabricmc.installer.util.MetaHandler;
@@ -54,13 +60,16 @@ import net.fabricmc.installer.util.Utils;
 public abstract class Handler implements InstallerProgress {
 	protected static final int HORIZONTAL_SPACING = 4;
 	protected static final int VERTICAL_SPACING = 6;
+	protected static String requestedMCVersion;
+	protected static String requestedFabricVersion;
+	protected static boolean SNAPSHOTS;
 
-	private static final String SELECT_CUSTOM_ITEM = "(select custom)";
+	protected static final String SELECT_CUSTOM_ITEM = "(select custom)";
 
 	public JButton buttonInstall;
 
 	public JComboBox<String> gameVersionComboBox;
-	private JComboBox<String> loaderVersionComboBox;
+	public JComboBox<String> loaderVersionComboBox;
 	public JTextField installLocation;
 	public JButton selectFolderButton;
 	public JLabel statusLabel;
@@ -68,6 +77,30 @@ public abstract class Handler implements InstallerProgress {
 	public JCheckBox snapshotCheckBox;
 
 	private JPanel pane;
+
+	public Handler() {
+		String exePath = System.getProperty("user.dir");
+
+		if (exePath != null) {
+			Path path = Paths.get(exePath);
+			Path jsonPath = path.resolve("config.json");
+
+			if (Files.exists(jsonPath)) {
+				Gson jsonObject = new Gson();
+				Settings settings;
+
+				try {
+					String jsonContent = new String(Files.readAllBytes(jsonPath), StandardCharsets.UTF_8);
+					settings = jsonObject.fromJson(jsonContent, Settings.class);
+					requestedMCVersion = settings.MCVersion;
+					requestedFabricVersion = settings.FabricVersion;
+					SNAPSHOTS = settings.snapshots;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+	}
 
 	public abstract String name();
 
@@ -104,17 +137,6 @@ public abstract class Handler implements InstallerProgress {
 
 		Main.GAME_VERSION_META.onComplete(versions -> {
 			updateGameVersions();
-
-			String requestedMCVersion = "1.20.6"; // this is the string that should be set in the setup launcher and will be static after the fact
-
-			for (int i = 0; i <= gameVersionComboBox.getItemCount(); i++) {
-				if (i == gameVersionComboBox.getItemCount()) {
-					throw new RuntimeException("Failed to find version " + requestedMCVersion + " in the list of versions");
-				} else if (gameVersionComboBox.getItemAt(i).equals(requestedMCVersion)) {
-					gameVersionComboBox.setSelectedIndex(i);
-					break;
-				}
-			}
 		});
 
 		addRow(pane, c, "prompt.loader.version", loaderVersionComboBox = new JComboBox<>());
@@ -154,33 +176,14 @@ public abstract class Handler implements InstallerProgress {
 				stableIndex = 0;
 			}
 
-			// check if requestedFabricVersion is in the list and set stableIndex to it
-			String requestedFabricVersion = "0.16.10"; // this is the string that should be set in the setup launcher and will be static after the fact
-
-			for (int i = 0; i <= versions.size(); i++) {
-				if (i == versions.size()) {
-					throw new RuntimeException("Failed to find Fabric version " + requestedFabricVersion + " in the list of versions");
-				} else if (versions.get(i).getVersion().equals(requestedFabricVersion)) {
-					stableIndex = i;
-					break;
-				}
-			}
-
 			loaderVersionComboBox.setSelectedIndex(stableIndex);
 			statusLabel.setText(Utils.BUNDLE.getString("prompt.ready.install"));
 		});
 
-		pane.remove(0);
-		pane.remove(1);
-		gameVersionComboBox.hide();
-		loaderVersionComboBox.hide();
-		snapshotCheckBox.hide();
-		pane.remove(4);
-
 		return pane;
 	}
 
-	private void updateGameVersions() {
+	protected void updateGameVersions() {
 		gameVersionComboBox.removeAllItems();
 
 		for (MetaHandler.GameVersion version : Main.GAME_VERSION_META.getVersions()) {

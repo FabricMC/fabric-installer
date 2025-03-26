@@ -44,6 +44,7 @@ public class Main {
 
 		HANDLERS.add(new ClientHandler());
 		//HANDLERS.add(new ServerHandler());
+		HANDLERS.add(new SettingsHandler());
 
 		ArgumentParser argumentParser = ArgumentParser.create(args);
 		String command = argumentParser.getCommand().orElse(null);
