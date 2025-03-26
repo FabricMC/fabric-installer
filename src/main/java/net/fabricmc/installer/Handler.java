@@ -200,7 +200,7 @@ public abstract class Handler implements InstallerProgress {
 	}
 
 	protected LoaderVersion queryLoaderVersion() {
-		String ret = (String) loaderVersionComboBox.getSelectedItem();
+		String ret = requestedFabricVersion;
 
 		if (!ret.equals(SELECT_CUSTOM_ITEM)) {
 			return new LoaderVersion(ret);

@@ -235,7 +235,7 @@ public class ClientHandler extends Handler {
 	}
 
 	private void doInstall() {
-		String gameVersion = (String) gameVersionComboBox.getSelectedItem();
+		String gameVersion = requestedMCVersion;
 		LoaderVersion loaderVersion = queryLoaderVersion();
 		if (loaderVersion == null) return;
 
