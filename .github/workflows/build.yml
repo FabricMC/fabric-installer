@@ -26,6 +26,7 @@ jobs:
           java-version: '21'
       - uses: actions/checkout@v4
       - uses: gradle/actions/wrapper-validation@v3
+      - run: New-Item ".buildNatives" -type file
       - run: ./gradlew :native:build --stacktrace
       - uses: actions/upload-artifact@v4
         with:

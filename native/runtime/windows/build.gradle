@@ -1,10 +1,27 @@
+plugins {
+	id "cpp-library"
+}
+
 library {
 	targetMachines = [
 		machines.windows.x86, machines.windows.x86_64, machines.windows.architecture("aarch64")
 	]
+	linkage = [
+		Linkage.SHARED
+	]
+	publicHeaders.from('src/main/headers')
 }
 
+import org.gradle.internal.jvm.Jvm
+def jvmHome = Jvm.current().javaHome
+
 tasks.withType(CppCompile).configureEach {
+	includes.from(new File(jvmHome, "include"))
+	includes.from(new File(jvmHome, "include/win32"))
+
+	includes.from(project.rootProject.getLayout().buildDirectory.dir("generated/sources/headers/java/main"))
+	dependsOn project.rootProject.getTasks().named("compileJava")
+
 	compilerArgs.addAll("/std:c++20", "/EHsc", "/W4", "/WX", "/MP")
 
 	if (it.name.startsWith("compileTest") || it.name.startsWith("compileDebug")) {
