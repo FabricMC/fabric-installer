@@ -11,3 +11,19 @@ pluginManagement {
 
 rootProject.name = 'fabric-installer'
 
+if (!file(".buildNatives").exists()) {
+	return
+}
+
+def os = System.getProperty("os.name").toLowerCase()
+def isWindows = os.contains("win")
+def isMac = os.contains("mac")
+
+include "native"
+include "native:runtime"
+
+if (isWindows) {
+	include "native:runtime:windows"
+} else if (isMac) {
+	include "native:runtime:macos"
+}

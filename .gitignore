@@ -5,9 +5,11 @@
 !/gradle
 !/src
 !/.github
+!/native
 
 # Files
 !/.gitignore
+!/.gitattributes
 !/build.gradle
 !/gradle.properties
 !/gradlew

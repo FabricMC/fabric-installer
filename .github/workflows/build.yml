@@ -3,18 +3,31 @@ on: [push, pull_request]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        java: [21-jdk]
     runs-on: ubuntu-24.04
-    container:
-      image: eclipse-temurin:${{ matrix.java }}
-      options: --user root
     steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
       - uses: actions/checkout@v4
       - uses: gradle/actions/wrapper-validation@v3
       - run: ./gradlew build --stacktrace
       - uses: actions/upload-artifact@v4
         with:
-          name: Artifacts ${{ matrix.java }}
+          name: Artifacts 21-jdk
           path: build/libs/
+
+  build-natives-windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v3
+      - run: ./gradlew :native:build --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows Natives
+          path: ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/

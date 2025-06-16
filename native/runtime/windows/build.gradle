@@ -1,0 +1,64 @@
+library {
+	targetMachines = [
+		machines.windows.x86, machines.windows.x86_64, machines.windows.architecture("aarch64")
+	]
+}
+
+tasks.withType(CppCompile).configureEach {
+	compilerArgs.addAll("/std:c++20", "/EHsc", "/W4", "/WX", "/MP")
+
+	if (it.name.startsWith("compileTest") || it.name.startsWith("compileDebug")) {
+		compilerArgs.addAll("/D_DEBUG", "/MDd")
+		debuggable = true
+	} else {
+		compilerArgs.addAll("/Gm-", "/O2", "/Ob2", "/MD")
+	}
+}
+
+tasks.withType(LinkSharedLibrary) {
+	if (it.name.startsWith("linkTest") || it.name.startsWith("linkDebug")) {
+
+	} else {
+		linkerArgs.addAll("/OPT:REF", "/OPT:ICF", "/LTCG")
+	}
+}
+
+def architectures = [
+	"X86",
+	"X86-64",
+	"Aarch64"
+]
+
+def jar = tasks.register("jar", Jar) {
+	architectures.forEach { arch ->
+		from(tasks.named("linkRelease${arch}", LinkSharedLibrary).get().linkedFile) {
+			into "fabric-installer-natives/" + arch.toLowerCase()
+		}
+	}
+
+	rename { fileName ->
+		"fabric-loom-native.dll"
+	}
+}
+
+tasks.build.dependsOn(jar)
+
+afterEvaluate { // Seems the link tasks are not available until after evaluation
+	publishing {
+		publications {
+			named("maven", MavenPublication) {
+				artifact(tasks.named("jar").get())
+
+				// Include the PDB files in case someone wants to debug
+				architectures.forEach { arch ->
+					def dll = tasks.named("linkRelease${arch}").get().linkedFile
+					def pdb = dll.getAsFile().map { file -> new File(file.absolutePath.replace(".dll", ".pdb")) }
+					artifact(pdb) {
+						classifier arch.toLowerCase()
+						extension "pdb"
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,17 @@
+subprojects {
+	spotless {
+		lineEndings = com.diffplug.spotless.LineEnding.UNIX
+
+		cpp {
+			target 'src/main/cpp/**', 'src/main/headers/**', 'src/test/cpp/**'
+			licenseHeaderFile(rootProject.file("HEADER")).yearSeparator("-")
+			def clangVersion = (String) ("clang-format --version".execute().text =~ /\d+\.\d+\.\d+/)[0]
+			clangFormat(clangVersion)
+		}
+	}
+}
+
+// Build depends on all of the subprojects build tasks
+build {
+	dependsOn subprojects.collect { it.tasks.named("build") }
+}

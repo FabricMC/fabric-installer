@@ -1,0 +1,39 @@
+import org.gradle.internal.jvm.Jvm
+def jvmHome = Jvm.current().javaHome
+
+subprojects {
+	apply plugin: "cpp-library"
+	apply plugin: "maven-publish"
+
+	version = "0.2.0"
+
+	library {
+		linkage = [
+			Linkage.SHARED
+		]
+		publicHeaders.from('src/main/headers')
+	}
+
+	tasks.withType(CppCompile).configureEach {
+		includes.from(new File(jvmHome, "include"))
+		includes.from(new File(jvmHome, "include/win32"))
+
+		includes.from(project.rootProject.getLayout().buildDirectory.dir("generated/sources/headers/java/main"))
+		dependsOn project.rootProject.getTasks().named("compileJava")
+	}
+
+	tasks.withType(GenerateModuleMetadata) {
+		enabled = false
+	}
+
+	publishing {
+		publications {
+			create("maven", MavenPublication) {
+				groupId "net.fabricmc.fabric-installer-native-lib"
+				artifactId project.name
+				version project.version
+			}
+		}
+	}
+}
+

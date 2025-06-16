@@ -3,9 +3,13 @@ plugins {
 	id 'maven-publish'
 	id "checkstyle"
 	id "com.gradleup.shadow" version "8.3.0"
-	id "com.diffplug.spotless" version "6.20.0"
+	id "com.diffplug.spotless" version "6.20.0" apply false
 	id "de.undercouch.download" version "5.6.0"
 	id "me.modmuss50.remotesign" version "0.4.0"
+}
+
+allprojects {
+	apply plugin: 'com.diffplug.spotless'
 }
 
 version = '1.0.3'
@@ -148,7 +152,7 @@ spotless {
 
 publishing {
 	publications {
-		maven(MavenPublication) {
+		create("maven", MavenPublication) {
 			groupId project.group
 			artifactId base.archivesName.get()
 			version project.version
@@ -168,13 +172,18 @@ publishing {
 			}
 		}
 	}
-	repositories {
-		maven {
-			if (ENV.MAVEN_URL) {
-				url ENV.MAVEN_URL
-				credentials {
-					username ENV.MAVEN_USERNAME
-					password ENV.MAVEN_PASSWORD
+}
+
+allprojects {
+	publishing {
+		repositories {
+			maven {
+				if (ENV.MAVEN_URL) {
+					url ENV.MAVEN_URL
+					credentials {
+						username ENV.MAVEN_USERNAME
+						password ENV.MAVEN_PASSWORD
+					}
 				}
 			}
 		}
