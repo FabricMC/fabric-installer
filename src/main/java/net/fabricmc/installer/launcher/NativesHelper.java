@@ -41,12 +41,12 @@ public class NativesHelper {
 	private static Map<String, String> getNativesMap() {
 		Map<String, String> natives = new HashMap<>();
 
-		natives.put("windows-aarch64", "natives/windows-ARM64.dll");
-		natives.put("windows-win32", "natives/windows-Win32.dll");
-		natives.put("windows-amd64", "natives/windows-x64.dll");
+		natives.put("windows-aarch64", "natives/windows/aarch64/fabric-loom-native.dll");
+		natives.put("windows-win32", "natives/windows/x86/fabric-loom-native.dll");
+		natives.put("windows-amd64", "natives/windows/x86-64/fabric-loom-native.dll");
 
-		natives.put("macos-x86_64", "natives/macos-x86_64_arm64.dylib");
-		natives.put("macos-aarch64", "natives/macos-x86_64_arm64.dylib");
+		natives.put("macos-x86_64", "natives/macos/x86_64/fabric-loom-native.dylib");
+		natives.put("macos-aarch64", "natives/macos/arm64/fabric-loom-native.dylib");
 
 		return natives;
 	}

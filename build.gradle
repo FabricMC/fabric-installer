@@ -35,8 +35,6 @@ dependencies {
 	if (!localNatives) {
 		implementation "net.fabricmc.fabric-installer-native-lib:macos:${baseVersion}"
 		implementation "net.fabricmc.fabric-installer-native-lib:windows:${baseVersion}"
-	} else {
-		// TODO add a way to build with the natives from the same build.
 	}
 
 	testImplementation 'junit:junit:4.13.2'
@@ -68,6 +66,16 @@ shadowJar {
 		attributes 'Implementation-Title': 'FabricInstaller',
 				'Implementation-Version': project.version,
 				'Main-Class': 'net.fabricmc.installer.Main'
+	}
+
+	if (localNatives) {
+		def os = System.getProperty("os.name").toLowerCase()
+
+		if (os.contains("win")) {
+			from project.provider { project("native:runtime:windows").tasks.named("jar") }
+		} else if (os.contains("mac")) {
+			from project.provider { project("native:runtime:macos").tasks.named("jar") }
+		}
 	}
 
 	minimize()
