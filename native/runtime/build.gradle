@@ -1,8 +1,6 @@
 subprojects {
 	apply plugin: "maven-publish"
 
-	version = "0.2.0"
-
 	publishing {
 		publications {
 			create("maven", MavenPublication) {

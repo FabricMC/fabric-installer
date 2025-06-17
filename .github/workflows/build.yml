@@ -2,21 +2,6 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  build:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'microsoft'
-          java-version: '21'
-      - uses: actions/checkout@v4
-      - uses: gradle/actions/wrapper-validation@v4
-      - run: ./gradlew build --stacktrace --warning-mode fail
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Artifacts 21-jdk
-          path: build/libs/
-
   build-natives-windows:
     runs-on: windows-2025
     steps:
@@ -46,5 +31,31 @@ jobs:
       - run: ./gradlew :native:build :native:publishToMavenLocal --stacktrace --warning-mode fail
       - uses: actions/upload-artifact@v4
         with:
+          name: MacOS Natives
+          path: ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/macos/
+
+  build:
+    runs-on: ubuntu-24.04
+    needs: [ build-natives-windows, build-natives-macos]
+    steps:
+      - name: Copy Windows Natives
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows Natives
+          path: ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/windows/
+      - name: Copy MacOS Natives
+        uses: actions/download-artifact@v4
+        with:
           name: Windows Natives
           path: ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/macos/
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v4
+      - run: ./gradlew build --stacktrace --warning-mode fail
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts
+          path: build/libs/
