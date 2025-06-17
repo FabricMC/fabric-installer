@@ -8,3 +8,7 @@ subprojects {
 build {
 	dependsOn subprojects.collect { it.tasks.named("build") }
 }
+
+tasks.register("publishToMavenLocal") {
+	dependsOn subprojects.collect { it.tasks.named("publishToMavenLocal") }
+}

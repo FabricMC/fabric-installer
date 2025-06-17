@@ -6,11 +6,12 @@ subprojects {
 	publishing {
 		publications {
 			create("maven", MavenPublication) {
-				groupId "net.fabricmc.fabric-installer-native-lib"
-				artifactId project.name
-				version project.version
+				groupId = "net.fabricmc.fabric-installer-native-lib"
+				artifactId = project.name
+				version = project.version
 			}
 		}
 	}
 }
 
+tasks.register("publishToMavenLocal")

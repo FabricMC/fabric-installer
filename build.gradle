@@ -32,7 +32,7 @@ def nativeLibDistributions = [
 
 dependencies {
 	implementation ('org.sharegov:mjson:1.4.1') {
-		transitive false
+		transitive = false
 	}
 	nativeLibDistributions.each {
 		implementation "net.fabricmc.fabric-installer-native-lib:${it}:${nativeLibVersion}"
@@ -153,12 +153,12 @@ spotless {
 publishing {
 	publications {
 		create("maven", MavenPublication) {
-			groupId project.group
-			artifactId base.archivesName.get()
-			version project.version
+			groupId = project.group
+			artifactId = base.archivesName.get()
+			version = project.version
 
 			artifact (signShadowJar.output) {
-				classifier null
+				classifier = null
 				builtBy shadowJar
 			}
 
@@ -168,7 +168,7 @@ publishing {
 
 			// No point in signing as it is designed to get modified
 			artifact (serverJar) {
-				classifier "server"
+				classifier = "server"
 			}
 		}
 	}
@@ -179,10 +179,10 @@ allprojects {
 		repositories {
 			maven {
 				if (ENV.MAVEN_URL) {
-					url ENV.MAVEN_URL
+					url = ENV.MAVEN_URL
 					credentials {
-						username ENV.MAVEN_USERNAME
-						password ENV.MAVEN_PASSWORD
+						username = ENV.MAVEN_USERNAME
+						password = ENV.MAVEN_PASSWORD
 					}
 				}
 			}

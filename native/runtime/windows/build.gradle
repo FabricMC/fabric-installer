@@ -80,8 +80,8 @@ afterEvaluate { // Seems the link tasks are not available until after evaluation
 					def dll = tasks.named("linkRelease${arch}").get().linkedFile
 					def pdb = dll.getAsFile().map { file -> new File(file.absolutePath.replace(".dll", ".pdb")) }
 					artifact(pdb) {
-						classifier arch.toLowerCase()
-						extension "pdb"
+						classifier = arch.toLowerCase()
+						extension = "pdb"
 					}
 				}
 			}
