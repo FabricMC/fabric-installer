@@ -54,14 +54,13 @@ def jar  = tasks.register("jar", Jar) {
 
 tasks.build.dependsOn(jar)
 
-// This isn't ideal, swift-format seems to be be on the path on CI
-def swiftFormat = "xcrun --find swift-format".execute().text.trim()
-spotless {
-	format("swift") {
-		target 'src/**/*.swift'
-		nativeCmd("swift-format", swiftFormat, ["format", "-"])
-	}
-}
+//def swiftFormat = "xcrun --find swift-format".execute().text.trim()
+//spotless {
+//	format("swift") {
+//		target 'src/**/*.swift'
+//		nativeCmd("swift-format", swiftFormat, ["format", "-"])
+//	}
+//}
 
 publishing {
 	publications {
