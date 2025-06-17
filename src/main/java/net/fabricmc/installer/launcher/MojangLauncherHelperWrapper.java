@@ -24,4 +24,12 @@ public class MojangLauncherHelperWrapper {
 
 		return false;
 	}
+
+	public static boolean isLikelyOnline() {
+		if (NativesHelper.loadSafelyIfCompatible()) {
+			return MojangLauncherHelper.isLikelyOnline();
+		}
+
+		return true;
+	}
 }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.fabricmc.installer.client.ClientHandler;
+import net.fabricmc.installer.launcher.MojangLauncherHelperWrapper;
 import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.CrashDialog;
@@ -42,6 +43,8 @@ public class Main {
 		}
 
 		System.out.println("Loading Fabric Installer: " + Main.class.getPackage().getImplementationVersion());
+
+		System.out.println("Is likely online: " + MojangLauncherHelperWrapper.isLikelyOnline());
 
 		HANDLERS.add(new ClientHandler());
 		HANDLERS.add(new ServerHandler());

@@ -34,6 +34,9 @@ tasks.withType(CppCompile).configureEach {
 	} else {
 		compilerArgs.addAll("/Gm-", "/O2", "/Ob2", "/MD")
 	}
+
+	// TODO use vswhere.exe to find this
+	includes.from("C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\winrt")
 }
 
 tasks.withType(LinkSharedLibrary) {
@@ -42,6 +45,8 @@ tasks.withType(LinkSharedLibrary) {
 	} else {
 		linkerArgs.addAll("/OPT:REF", "/OPT:ICF", "/LTCG")
 	}
+
+	linkerArgs.addAll("WindowsApp.lib")
 }
 
 def architectures = [
