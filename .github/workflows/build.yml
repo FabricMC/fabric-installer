@@ -10,7 +10,7 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
       - uses: actions/checkout@v4
-      - uses: gradle/actions/wrapper-validation@v3
+      - uses: gradle/actions/wrapper-validation@v4
       - run: ./gradlew build --stacktrace
       - uses: actions/upload-artifact@v4
         with:
@@ -24,8 +24,9 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: '21'
+      - run: brew install clang-format@11.1.0
       - uses: actions/checkout@v4
-      - uses: gradle/actions/wrapper-validation@v3
+      - uses: gradle/actions/wrapper-validation@v4
       - run: New-Item ".buildNatives" -type file
       - run: ./gradlew :native:build --stacktrace
       - uses: actions/upload-artifact@v4
@@ -41,7 +42,7 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
       - uses: actions/checkout@v4
-      - uses: gradle/actions/wrapper-validation@v3
+      - uses: gradle/actions/wrapper-validation@v4
       - run: touch .buildNatives
       - run: ./gradlew :native:build --stacktrace
       - uses: actions/upload-artifact@v4
