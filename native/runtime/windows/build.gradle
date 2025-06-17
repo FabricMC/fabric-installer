@@ -49,7 +49,7 @@ def architectures = [
 def jar = tasks.register("jar", Jar) {
 	architectures.forEach { arch ->
 		from(tasks.named("linkRelease${arch}", LinkSharedLibrary).get().linkedFile) {
-			into "fabric-installer-natives/" + arch.toLowerCase()
+			into "natives/windows/" + arch.toLowerCase()
 		}
 	}
 
