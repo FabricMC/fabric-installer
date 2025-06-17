@@ -60,6 +60,15 @@ def jar = tasks.register("jar", Jar) {
 
 tasks.build.dependsOn(jar)
 
+spotless {
+	cpp {
+		target 'src/main/cpp/**', 'src/main/headers/**', 'src/test/cpp/**'
+		licenseHeaderFile(rootProject.file("HEADER")).yearSeparator("-")
+		def clangVersion = (String) ("clang-format --version".execute().text =~ /\d+\.\d+\.\d+/)[0]
+		clangFormat(clangVersion)
+	}
+}
+
 afterEvaluate { // Seems the link tasks are not available until after evaluation
 	publishing {
 		publications {

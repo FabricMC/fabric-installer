@@ -39,7 +39,7 @@ for (target in targets) {
 	}
 }
 
-tasks.register("jar", Jar) {
+def jar  = tasks.register("jar", Jar) {
 	for (target in targets) {
 		def arch = target.split("-")[0]
 		from(tasks.named("swiftBuild${arch}").get().outputs.files) {
@@ -52,6 +52,8 @@ tasks.register("jar", Jar) {
 	}
 }
 
+tasks.build.dependsOn(jar)
+
 def swiftFormat = "xcrun --find swift-format".execute().text.trim()
 spotless {
 	format("swift") {
@@ -63,7 +65,7 @@ spotless {
 publishing {
 	publications {
 		named("maven", MavenPublication) {
-			artifact(tasks.jar)
+			artifact(jar)
 		}
 	}
 }
