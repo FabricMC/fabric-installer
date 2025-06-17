@@ -46,7 +46,7 @@ jobs:
       - name: Copy MacOS Natives
         uses: actions/download-artifact@v4
         with:
-          name: Windows Natives
+          name: MacOS Natives
           path: ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/macos/
       - run: find ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/
       - uses: actions/setup-java@v4
