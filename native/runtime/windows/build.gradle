@@ -10,6 +10,10 @@ library {
 		Linkage.SHARED
 	]
 	publicHeaders.from('src/main/headers')
+
+	dependencies {
+		implementation project(':native:third-party:wil')
+	}
 }
 
 import org.gradle.internal.jvm.Jvm

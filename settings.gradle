@@ -21,6 +21,8 @@ def isMac = os.contains("mac")
 
 include "native"
 include "native:runtime"
+include "native:third-party"
+include "native:third-party:wil"
 
 if (isWindows) {
 	include "native:runtime:windows"

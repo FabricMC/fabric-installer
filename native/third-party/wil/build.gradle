@@ -1,0 +1,37 @@
+plugins {
+	id "cpp-library"
+	id "de.undercouch.download"
+}
+
+version = "1.0.250325.1"
+
+tasks.register("download", Download) {
+	src "https://github.com/microsoft/wil/archive/refs/tags/v${version}.zip"
+	dest layout.buildDirectory
+	overwrite false
+}
+
+tasks.register("extract", Sync) {
+	dependsOn tasks.download
+	from zipTree(tasks.download.getOutputs().files.singleFile)
+
+	include "*/include/**"
+
+	into layout.buildDirectory
+}
+
+library {
+	def dir = tasks.named("extract").map { it.outputs.files.singleFile }.map {new File(it, "wil-${version}") }
+
+	publicHeaders {
+		from dir.map { new File(it, "include") }
+	}
+
+	targetMachines = [
+		machines.windows.x86, machines.windows.x86_64, machines.windows.architecture("aarch64")
+	]
+
+	linkage = [
+		Linkage.STATIC
+	]
+}
