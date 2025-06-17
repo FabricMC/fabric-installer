@@ -48,6 +48,7 @@ jobs:
         with:
           name: Windows Natives
           path: ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/macos/
+      - run: ls ~/.m2/repository/net/fabricmc/fabric-installer-native-lib/macos/
       - uses: actions/setup-java@v4
         with:
           distribution: 'microsoft'
