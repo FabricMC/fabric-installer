@@ -6,7 +6,7 @@ subprojects {
 	publishing {
 		publications {
 			create("maven", MavenPublication) {
-				groupId "net.fabricmc.fabric-installer-native-lib.${project.name}"
+				groupId "net.fabricmc.fabric-installer-native-lib"
 				artifactId project.name
 				version project.version
 			}

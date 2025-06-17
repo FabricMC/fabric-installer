@@ -54,7 +54,8 @@ def jar  = tasks.register("jar", Jar) {
 
 tasks.build.dependsOn(jar)
 
-def swiftFormat = "xcrun --find swift-format".execute().text.trim()
+// This isn't ideal, swift-format seems to be be on the path on CI
+def swiftFormat = System.getenv().CI == null ? "xcrun --find swift-format".execute().text.trim() : "swift-format"
 spotless {
 	format("swift") {
 		target 'src/**/*.swift'
