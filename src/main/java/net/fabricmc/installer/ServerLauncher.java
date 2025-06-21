@@ -41,6 +41,7 @@ import java.util.zip.ZipError;
 import net.fabricmc.installer.server.MinecraftServerDownloader;
 import net.fabricmc.installer.server.ServerInstaller;
 import net.fabricmc.installer.util.InstallerProgress;
+import net.fabricmc.installer.util.Proxy;
 import net.fabricmc.installer.util.Utils;
 
 public final class ServerLauncher {
@@ -49,6 +50,8 @@ public final class ServerLauncher {
 
 	public static void main(String[] args) throws Throwable {
 		LaunchData launchData;
+
+		Proxy.setProxyFromEnv();
 
 		try {
 			launchData = initialise();

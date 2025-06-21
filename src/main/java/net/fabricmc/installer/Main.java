@@ -28,6 +28,7 @@ import net.fabricmc.installer.util.CrashDialog;
 import net.fabricmc.installer.util.FabricService;
 import net.fabricmc.installer.util.MetaHandler;
 import net.fabricmc.installer.util.OperatingSystem;
+import net.fabricmc.installer.util.Proxy;
 
 public class Main {
 	public static MetaHandler GAME_VERSION_META;
@@ -36,6 +37,8 @@ public class Main {
 	public static final List<Handler> HANDLERS = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
+		Proxy.setProxyFromEnv();
+
 		if (OperatingSystem.CURRENT == OperatingSystem.WINDOWS) {
 			// Use the operating system cert store
 			System.setProperty("javax.net.ssl.trustStoreType", "WINDOWS-ROOT");
