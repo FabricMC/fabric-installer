@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 
 public class Proxy {
 	public static void setProxyFromEnv() {
+		System.setProperty("java.net.useSystemProxies", "true");
 		setProxy("http", System.getenv("HTTP_PROXY"));
 		setProxy("https", System.getenv("HTTPS_PROXY"));
 	}
@@ -35,6 +36,7 @@ public class Proxy {
 			int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
 			System.setProperty(proto + ".proxyHost", url.getHost());
 			System.setProperty(proto + ".proxyPort", Integer.toString(port));
+			// FIXME: proxy authenication
 		} catch (MalformedURLException e) {
 			System.err.println("Failed to setup " + proto + " proxy:" + e.getMessage());
 		}
