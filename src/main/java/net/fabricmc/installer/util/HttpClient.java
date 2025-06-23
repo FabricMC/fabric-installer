@@ -35,15 +35,13 @@ import java.util.List;
 
 public final class HttpClient {
 	// When we successfully connect to a proxy, we store it here so that we can try it first for subsequent requests.
-	private static volatile SelectedProxy lastSuccessfulProxy;
+	private static volatile Proxy lastSuccessfulProxy;
 
 	private static final List<ProxySupplier> PROXIES = Arrays.asList(
 			uri -> Collections.singletonList(Proxy.NO_PROXY),   // Direct connect without proxy
 			uri -> ProxySelector.getDefault().select(uri),    	// Common Java proxy system properties See: sun.net.spi.DefaultProxySelector
 			HttpClient::getEnvironmentProxies                	// CURL environment variables
 			);
-	// TODO system proxy setting, (Windows/MacOS)
-	// TODO automatic proxy detection, (WPAD)
 
 	private static final int HTTP_TIMEOUT_MS = 8000;
 
@@ -134,14 +132,13 @@ public final class HttpClient {
 			throw new IOException(e.getMessage(), e);
 		}
 
+		final Proxy lastSuccessfulProxy = HttpClient.lastSuccessfulProxy;
 		IOException exception = null;
 
 		// try lastSuccessfulProxy first, if available
 
-		SelectedProxy lastSuccessfulProxy = HttpClient.lastSuccessfulProxy;
-
 		if (lastSuccessfulProxy != null) {
-			try (InputStream is = openUrl(url, lastSuccessfulProxy.proxy)) {
+			try (InputStream is = openUrl(url, lastSuccessfulProxy)) {
 				return handler.read(is);
 			} catch (IOException e) {
 				HttpClient.lastSuccessfulProxy = null; // failed, remove priority for the specific proxy
@@ -151,16 +148,16 @@ public final class HttpClient {
 
 		// try all other proxies
 
-		for (int i = 0; i < PROXIES.size(); i++) {
-			if (lastSuccessfulProxy != null && i == lastSuccessfulProxy.index) { // already tried this one
-				continue;
-			}
-
-			ProxySupplier proxySupplier = PROXIES.get(i);
+		for (ProxySupplier proxySupplier : PROXIES) {
 			List<Proxy> proxies = proxySupplier.getProxies(uri);
 
 			// Try each proxy in the list
 			for (Proxy proxy : proxies) {
+				// Don't retry the last proxy again as we know it failed
+				if (proxy != null && proxy.equals(lastSuccessfulProxy)) {
+					continue;
+				}
+
 				try {
 					T value;
 
@@ -168,7 +165,7 @@ public final class HttpClient {
 						value = handler.read(is);
 					}
 
-					HttpClient.lastSuccessfulProxy = new SelectedProxy(proxy, i); // Store the last used proxy so we can try it first next time
+					HttpClient.lastSuccessfulProxy = proxy; // Store the last used proxy so we can try it first next time
 
 					return value;
 				} catch (IOException e) {
@@ -193,16 +190,6 @@ public final class HttpClient {
 		// Returns a list of proxies for the given URI, or a null list if no proxy should be used.
 		// A null proxy entry in the list is skipped.
 		List<Proxy> getProxies(URI uri) throws IOException;
-	}
-
-	private static final class SelectedProxy {
-		final Proxy proxy;
-		final int index;
-
-		SelectedProxy(Proxy proxy, int index) {
-			this.proxy = proxy;
-			this.index = index;
-		}
 	}
 
 	private interface Handler<T> {
