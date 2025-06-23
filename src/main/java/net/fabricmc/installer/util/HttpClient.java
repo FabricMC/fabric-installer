@@ -41,7 +41,7 @@ public final class HttpClient {
 			uri -> lastUsedProxy != null
 					? Collections.singletonList(lastUsedProxy)  // First try the last used proxy if we have it from a previous request
 					: Collections.emptyList(),
-			uri -> null,                                    	// Direct connect without proxy
+			uri -> Collections.singletonList(Proxy.NO_PROXY),   // Direct connect without proxy
 			uri -> ProxySelector.getDefault().select(uri),    	// Common Java proxy system properties See: sun.net.spi.DefaultProxySelector
 			HttpClient::getEnvironmentProxies                	// CURL environment variables
 	);
@@ -76,7 +76,7 @@ public final class HttpClient {
 	}
 
 	private static InputStream openUrl(URL url, Proxy proxy) throws IOException {
-		HttpURLConnection conn = (HttpURLConnection) (proxy == null ? url.openConnection() : url.openConnection(proxy));
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection(proxy);
 
 		conn.setConnectTimeout(HTTP_TIMEOUT_MS);
 		conn.setReadTimeout(HTTP_TIMEOUT_MS);
@@ -141,10 +141,6 @@ public final class HttpClient {
 
 		for (ProxySupplier proxySupplier : PROXIES) {
 			List<Proxy> proxies = proxySupplier.getProxies(uri);
-
-			if (proxies == null) {
-				proxies = Collections.singletonList(null);
-			}
 
 			// Try each proxy in the list
 			for (Proxy proxy : proxies) {
