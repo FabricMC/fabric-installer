@@ -31,7 +31,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class HttpClient {
 	// When we successfully connect to a proxy, we store it here so that we can try it first for subsequent requests.
@@ -132,12 +134,13 @@ public final class HttpClient {
 			throw new IOException(e.getMessage(), e);
 		}
 
-		final Proxy lastSuccessfulProxy = HttpClient.lastSuccessfulProxy;
+		Set<Proxy> attemptedProxies = new HashSet<>();
 		IOException exception = null;
 
 		// try lastSuccessfulProxy first, if available
-
 		if (lastSuccessfulProxy != null) {
+			attemptedProxies.add(lastSuccessfulProxy);
+
 			try (InputStream is = openUrl(url, lastSuccessfulProxy)) {
 				return handler.read(is);
 			} catch (IOException e) {
@@ -153,10 +156,16 @@ public final class HttpClient {
 
 			// Try each proxy in the list
 			for (Proxy proxy : proxies) {
-				// Don't retry the last proxy again as we know it failed
-				if (proxy != null && proxy.equals(lastSuccessfulProxy)) {
+				if (proxy == null) {
 					continue;
 				}
+
+				// Don't attempt to use a proxy that we have already tried
+				if (attemptedProxies.contains(proxy)) {
+					continue;
+				}
+
+				attemptedProxies.add(proxy);
 
 				try {
 					T value;
