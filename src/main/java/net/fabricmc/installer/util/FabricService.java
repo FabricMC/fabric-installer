@@ -33,7 +33,7 @@ public final class FabricService {
 	 * Query Fabric Meta path and decode as JSON.
 	 */
 	public static Json queryMetaJson(String path) throws IOException {
-		return invokeWithFallbacks((service, arg) -> Json.read(Utils.readString(new URL(service.meta + arg))), path);
+		return invokeWithFallbacks((service, arg) -> Json.read(HttpClient.readString(new URL(service.meta + arg))), path);
 	}
 
 	/**
@@ -41,12 +41,12 @@ public final class FabricService {
 	 */
 	public static Json queryJsonSubstitutedMaven(String url) throws IOException {
 		if (!url.startsWith(Reference.DEFAULT_MAVEN_SERVER)) {
-			return Json.read(Utils.readString(new URL(url)));
+			return Json.read(HttpClient.readString(new URL(url)));
 		}
 
 		String path = url.substring(Reference.DEFAULT_MAVEN_SERVER.length());
 
-		return invokeWithFallbacks((service, arg) -> Json.read(Utils.readString(new URL(service.maven + arg))), path);
+		return invokeWithFallbacks((service, arg) -> Json.read(HttpClient.readString(new URL(service.maven + arg))), path);
 	}
 
 	/**
@@ -54,14 +54,14 @@ public final class FabricService {
 	 */
 	public static void downloadSubstitutedMaven(String url, Path out) throws IOException {
 		if (!url.startsWith(Reference.DEFAULT_MAVEN_SERVER)) {
-			Utils.downloadFile(new URL(url), out);
+			HttpClient.downloadFile(new URL(url), out);
 			return;
 		}
 
 		String path = url.substring(Reference.DEFAULT_MAVEN_SERVER.length());
 
 		invokeWithFallbacks((service, arg) -> {
-			Utils.downloadFile(new URL(service.maven + arg), out);
+			HttpClient.downloadFile(new URL(service.maven + arg), out);
 			return null;
 		}, path);
 	}
