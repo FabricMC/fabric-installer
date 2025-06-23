@@ -39,7 +39,7 @@ public final class HttpClient {
 
 	private static final List<ProxySupplier> PROXIES = Arrays.asList(
 			uri -> Collections.singletonList(Proxy.NO_PROXY),   // Direct connect without proxy
-			uri -> ProxySelector.getDefault().select(uri),    	// Common Java proxy system properties See: sun.net.spi.DefaultProxySelector
+			uri -> ProxySelector.getDefault().select(uri),    	// Common Java proxy system properties and system configured proxies See: sun.net.spi.DefaultProxySelector
 			HttpClient::getEnvironmentProxies                	// CURL environment variables
 			);
 
