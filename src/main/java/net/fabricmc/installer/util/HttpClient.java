@@ -161,11 +161,9 @@ public final class HttpClient {
 				}
 
 				// Don't attempt to use a proxy that we have already tried
-				if (attemptedProxies.contains(proxy)) {
+				if (!attemptedProxies.add(proxy)) {
 					continue;
 				}
-
-				attemptedProxies.add(proxy);
 
 				try {
 					T value;
@@ -178,10 +176,12 @@ public final class HttpClient {
 
 					return value;
 				} catch (IOException e) {
+					IOException ioe = new IOException(String.format("Request to %s using %s failed: %s", uri, proxy, e.getMessage()), e);
+
 					if (exception == null) {
-						exception = e;
+						exception = ioe;
 					} else {
-						exception.addSuppressed(e);
+						exception.addSuppressed(ioe);
 					}
 				}
 			}
