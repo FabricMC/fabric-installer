@@ -19,13 +19,10 @@ package net.fabricmc.installer.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -86,12 +83,6 @@ public class Utils {
 		return dir.toAbsolutePath().normalize();
 	}
 
-	public static String readString(URL url) throws IOException {
-		try (InputStream is = openUrl(url)) {
-			return readString(is);
-		}
-	}
-
 	public static String readString(Path path) throws IOException {
 		return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 	}
@@ -118,36 +109,6 @@ public class Utils {
 
 	public static void writeToFile(Path path, String string) throws IOException {
 		Files.write(path, string.getBytes(StandardCharsets.UTF_8));
-	}
-
-	public static void downloadFile(URL url, Path path) throws IOException {
-		try (InputStream in = openUrl(url)) {
-			Files.createDirectories(path.getParent());
-			Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
-		} catch (Throwable t) {
-			try {
-				Files.deleteIfExists(path);
-			} catch (Throwable t2) {
-				t.addSuppressed(t2);
-			}
-
-			throw t;
-		}
-	}
-
-	private static final int HTTP_TIMEOUT_MS = 8000;
-
-	private static InputStream openUrl(URL url) throws IOException {
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-		conn.setConnectTimeout(HTTP_TIMEOUT_MS);
-		conn.setReadTimeout(HTTP_TIMEOUT_MS);
-		conn.connect();
-
-		int responseCode = conn.getResponseCode();
-		if (responseCode < 200 || responseCode >= 300) throw new IOException("HTTP request to "+url+" failed: "+responseCode);
-
-		return conn.getInputStream();
 	}
 
 	public static String getProfileIcon() {

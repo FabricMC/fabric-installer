@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import net.fabricmc.installer.util.HttpClient;
 import net.fabricmc.installer.util.LauncherMeta;
 import net.fabricmc.installer.util.Utils;
 import net.fabricmc.installer.util.VersionMeta;
@@ -41,7 +42,7 @@ public class MinecraftServerDownloader {
 
 		Path serverJarTmp = serverJar.resolveSibling(serverJar.getFileName().toString() + ".tmp");
 		Files.deleteIfExists(serverJar);
-		Utils.downloadFile(new URL(getServerDownload().url), serverJarTmp);
+		HttpClient.downloadFile(new URL(getServerDownload().url), serverJarTmp);
 
 		if (!isServerJarValid(serverJarTmp)) {
 			throw new IOException("Failed to validate downloaded server jar");
