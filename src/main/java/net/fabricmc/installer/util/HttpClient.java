@@ -145,7 +145,7 @@ public final class HttpClient {
 				return handler.read(is);
 			} catch (IOException e) {
 				HttpClient.lastSuccessfulProxy = null; // failed, remove priority for the specific proxy
-				exception = e;
+				exception = new IOException(String.format("Request to %s failed: %s", uri, e.getMessage()), e);
 			}
 		}
 

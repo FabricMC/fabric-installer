@@ -19,6 +19,7 @@ package net.fabricmc.installer.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,16 +93,20 @@ public class Utils {
 		int offset = 0;
 		int len;
 
-		while ((len = is.read(data, offset, data.length - offset)) >= 0) {
-			offset += len;
+		try {
+			while ((len = is.read(data, offset, data.length - offset)) >= 0) {
+				offset += len;
 
-			if (offset == data.length) {
-				int next = is.read();
-				if (next < 0) break;
+				if (offset == data.length) {
+					int next = is.read();
+					if (next < 0) break;
 
-				data = Arrays.copyOf(data, data.length * 2);
-				data[offset++] = (byte) next;
+					data = Arrays.copyOf(data, data.length * 2);
+					data[offset++] = (byte) next;
+				}
 			}
+		} catch (SocketTimeoutException e) {
+			throw new IOException(String.format("Timed out after reading %d bytes", offset), e);
 		}
 
 		return new String(data, 0, offset, StandardCharsets.UTF_8);
