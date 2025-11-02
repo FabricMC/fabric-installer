@@ -24,13 +24,42 @@ public class Reference {
 	public static final String MINECRAFT_LAUNCHER_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json";
 	public static final String EXPERIMENTAL_LAUNCHER_MANIFEST = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
 
+	// regular meta and maven servers
+
 	static final String DEFAULT_META_SERVER = "https://meta.fabricmc.net/";
 	static final String DEFAULT_MAVEN_SERVER = "https://maven.fabricmc.net/";
 
-	static final FabricService[] FABRIC_SERVICES = {
-			new FabricService(DEFAULT_META_SERVER, DEFAULT_MAVEN_SERVER),
-			// Do not use these fallback servers to interact with our web services. They can and will be unavailable at times and only support limited throughput.
-			new FabricService("https://meta2.fabricmc.net/", "https://maven2.fabricmc.net/"),
-			new FabricService("https://meta3.fabricmc.net/", "https://maven3.fabricmc.net/")
+	// Do not use these fallback servers to interact with our web services. They can and will be unavailable at times and only support limited throughput.
+	// It is important that they only get used in order and after the regular servers.
+
+	private static final String[] FALLBACK_META_SERVERS = {
+			"https://meta2.fabricmc.net/",
+			"https://meta3.fabricmc.net/"
 	};
+	private static final String[] FALLBACK_MAVEN_SERVERS = {
+			"https://maven2.fabricmc.net/",
+			"https://maven3.fabricmc.net/"
+	};
+
+	static final FabricService[] FABRIC_SERVICES = getServices();
+
+	private static FabricService[] getServices() {
+		String customMeta = System.getProperty("fabric.metaUrl");
+		String customMaven = System.getProperty("fabric.mavenUrl");
+		String defaultMeta = customMeta != null ? customMeta : DEFAULT_META_SERVER;
+		String defaultMaven = customMaven != null ? customMaven : DEFAULT_MAVEN_SERVER;
+		int metaCount = customMeta != null ? 1 : 1 + FALLBACK_META_SERVERS.length; // only use fallbacks without custom url
+		int mavenCount = customMaven != null ? 1 : 1 + FALLBACK_MAVEN_SERVERS.length;
+
+		FabricService[] ret = new FabricService[Math.max(metaCount, mavenCount)];
+
+		for (int i = 0; i < ret.length; i++) {
+			String meta = i == 0 || i >= metaCount ? defaultMeta : FALLBACK_META_SERVERS[i - 1];
+			String maven = i == 0 || i >= mavenCount ? defaultMaven : FALLBACK_MAVEN_SERVERS[i - 1];
+
+			ret[i] = new FabricService(meta, maven);
+		}
+
+		return ret;
+	}
 }
