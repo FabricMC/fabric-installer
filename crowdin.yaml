@@ -3,3 +3,5 @@ files:
     translation: /src/main/resources/lang/installer_%locale_with_underscore%.properties
     escape_quotes: 0
     escape_special_characters: 0
+preserve_hierarchy: true
+project_id: "647524"

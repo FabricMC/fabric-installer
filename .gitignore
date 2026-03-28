@@ -18,4 +18,4 @@
 !/settings.gradle
 !/checkstyle.xml
 !/.editorconfig
-!/crowdin.yml
+!/crowdin.yaml
