@@ -22,11 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.fabricmc.installer.client.ClientHandler;
+import net.fabricmc.installer.launcher.MojangLauncherHelperWrapper;
 import net.fabricmc.installer.server.ServerHandler;
 import net.fabricmc.installer.util.ArgumentParser;
 import net.fabricmc.installer.util.CrashDialog;
 import net.fabricmc.installer.util.FabricService;
 import net.fabricmc.installer.util.MetaHandler;
+import net.fabricmc.installer.util.NoInternetDialog;
 import net.fabricmc.installer.util.OperatingSystem;
 
 public class Main {
@@ -72,6 +74,12 @@ public class Main {
 				InstallerGui.start();
 			} catch (Exception e) {
 				e.printStackTrace();
+
+				if (!MojangLauncherHelperWrapper.isLikelyOnline()) {
+					NoInternetDialog.show();
+					return;
+				}
+
 				new CrashDialog(e);
 			}
 		} else if (command.equals("help")) {

@@ -18,4 +18,5 @@ package net.fabricmc.installer.launcher;
 
 public class MojangLauncherHelper {
 	public static native boolean isMojangLauncherOpen();
+	public static native boolean isLikelyOnline();
 }
